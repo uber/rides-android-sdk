@@ -1,0 +1,1 @@
+uber:?action=setPickup&client_id=clientId&product_id=productId&pickup=my_location&dropoff%5Blatitude%5D=32.5678&dropoff%5Blongitude%5D=-122.6789&dropoff%5Bnickname%5D=pickupNick&dropoff%5Bformatted_address%5D=Dropoff%20Address
