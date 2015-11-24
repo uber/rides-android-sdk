@@ -69,11 +69,11 @@ To use the `uber` custom attribute be sure to add `xmlns:uber="http://schemas.an
 We suggest passing additional parameters to make the Uber experience even more seamless for your users. For example, dropoff location parameters can be used to automatically pass the user’s destination information over to the driver:
 ```java
 RequestButton requestButton = RequestButton(context);
-requestButton.setClientId(“your_client_id”);
+requestButton.setClientId("your_client_id");
 RideParameters rideParams = new RideParameters.Builder()
-  .setProductID(“abc123-productID”)
-  .setPickupLocation(latitude: “37.770”, longitude: “-122.466”, nickname: “California Academy of Sciences”)
-  .setDropoffLocation(latitude: “37.791”, longitude: “-122.405”, nickname: “Pier 39”)
+  .setProductID("abc123-productID")
+  .setPickupLocation(37.775304f, -122.417522f, "Uber HQ", "1455 Market Street, San Francisco")
+  .setDropoffLocation(37.795079f, -122.4397805f, "Embarcadero", "One Embarcadero Center, San Francisco")
   .build();
 requestButton.setRideParameters(rideParams);
 layout.addView(requestButton);
