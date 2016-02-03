@@ -30,7 +30,7 @@ In the `pom.xml` file:
 <dependency>
     <groupId>com.uber.sdk</groupId>
     <artifactId>rides-android</artifactId>
-    <version>0.1.0/version>
+    <version>0.2.0/version>
 </dependency>
 ```
 
@@ -101,7 +101,7 @@ For a button with a white background and black text:
 ## Sample Apps
 
 
-A sample app can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases/tag/v0.1.0).
+A sample app can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases/tag/v0.2.0).
 
 Don’t forget to configure the appropriate `res/values/strings.xml` file and add your client ID.
 

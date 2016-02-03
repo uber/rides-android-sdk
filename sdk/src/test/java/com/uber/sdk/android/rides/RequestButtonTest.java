@@ -57,7 +57,7 @@ public class RequestButtonTest {
     private static final String PICKUP_NICK = "pickupNick";
     private static final String PICKUP_ADDR = "Pickup Address";
     private static final String UBER_PACKAGE_NAME = "com.ubercab";
-    private static final String USER_AGENT_BUTTON = "rides-button-v0.1.0";
+    private static final String USER_AGENT_BUTTON = "rides-button-v0.2.0";
 
     @Rule public ExpectedException exception = ExpectedException.none();
 

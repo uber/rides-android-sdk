@@ -22,6 +22,5 @@
 -->
 
 <resources>
-    <string name="ride_with_uber">Ride there with Uber</string>
-    <string name="mobile_redirect">https://m.uber.com/sign-up?client_id=%1$s&amp;user-agent=%2$s</string>
+    <string name="ride_with_uber">搭乘优步前往</string>
 </resources>

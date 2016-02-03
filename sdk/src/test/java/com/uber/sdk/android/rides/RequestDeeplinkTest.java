@@ -61,7 +61,7 @@ public class RequestDeeplinkTest {
     private static final float DROPOFF_LONG = -122.6789f;
     private static final String DROPOFF_NICK = "pickupNick";
     private static final String DROPOFF_ADDR = "Dropoff Address";
-    private static final String USER_AGENT_DEEPLINK = "rides-deeplink-v0.1.0";
+    private static final String USER_AGENT_DEEPLINK = "rides-deeplink-v0.2.0";
 
     @Rule public ExpectedException exception = ExpectedException.none();
 

@@ -35,7 +35,7 @@ import android.view.View;
  */
 public class RequestButton extends UberButton {
 
-    private static final String USER_AGENT_BUTTON = "rides-button-v0.1.0";
+    private static final String USER_AGENT_BUTTON = "rides-button-v0.2.0";
 
     @NonNull
     private RideParameters mRideParameters = new RideParameters.Builder().build();
