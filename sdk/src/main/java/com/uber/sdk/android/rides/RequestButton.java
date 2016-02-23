@@ -33,14 +33,18 @@ import android.view.View;
  * An Uber styled button to request rides with specific {@link RideParameters}. Default {@link RideParameters} is
  * set to a pickup of the device's location. Requires a client ID to function.
  */
-public class RequestButton extends UberButton {
+public class RequestButton extends UberButton implements View.OnClickListener {
 
     private static final String USER_AGENT_BUTTON = "rides-button-v0.2.0";
 
     @NonNull
     private RideParameters mRideParameters = new RideParameters.Builder().build();
+
     @Nullable
     private String mClientId;
+
+    @Nullable
+    private View.OnClickListener mCustomPreOnClickListener;
 
     public RequestButton(Context context) {
         this(context, null);
@@ -72,6 +76,14 @@ public class RequestButton extends UberButton {
         this.mClientId = clientId;
     }
 
+    /**
+     * Set a custom OnClickListener that is called before a deep link request is made
+     * @param listener the listener
+     */
+    public void setCustomPreOnClickListener(View.OnClickListener listener) {
+        mCustomPreOnClickListener = listener;
+    }
+
     @Override
     protected void init(
             @NonNull Context context,
@@ -92,22 +104,26 @@ public class RequestButton extends UberButton {
 
         super.init(context, attributeSet, defStyleAttrs, defStyleRes);
 
-        setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mClientId == null) {
-                    throw new IllegalStateException("Client ID required to use RequestButton.");
-                }
+        setOnClickListener(this);
+    }
 
-                RequestDeeplink requestDeeplink = new RequestDeeplink.Builder()
-                        .setClientId(mClientId)
-                        .setRideParameters(mRideParameters)
-                        .setUserAgent(USER_AGENT_BUTTON)
-                        .build();
+    @Override
+    public void onClick(View v) {
+        if (mCustomPreOnClickListener != null) {
+            mCustomPreOnClickListener.onClick(v);
+        }
 
-                requestDeeplink.execute(getContext());
-            }
-        });
+        if (mClientId == null) {
+            throw new IllegalStateException("Client ID required to use RequestButton.");
+        }
+
+        RequestDeeplink requestDeeplink = new RequestDeeplink.Builder()
+                .setClientId(mClientId)
+                .setRideParameters(mRideParameters)
+                .setUserAgent(USER_AGENT_BUTTON)
+                .build();
+
+        requestDeeplink.execute(getContext());
     }
 
     /**
