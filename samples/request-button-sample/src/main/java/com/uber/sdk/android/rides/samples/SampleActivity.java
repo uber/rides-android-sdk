@@ -22,16 +22,19 @@
 
 package com.uber.sdk.android.rides.samples;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
 
-import com.uber.sdk.android.rides.RideParameters;
 import com.uber.sdk.android.rides.RequestButton;
+import com.uber.sdk.android.rides.RideParameters;
 
 /**
  * Activity that demonstrates how to use a {@link RequestButton}.
  */
 public class SampleActivity extends AppCompatActivity {
+    private static final String TAG = SampleActivity.class.getSimpleName();
 
     private static final String DROPOFF_ADDR = "One Embarcadero Center, San Francisco";
     private static final float DROPOFF_LAT = 37.795079f;
@@ -53,6 +56,25 @@ public class SampleActivity extends AppCompatActivity {
             throw new IllegalArgumentException("Please enter your client ID in client_id in res/values/strings.xml");
         }
 
+        rideRequestButton();
+    }
+
+    public void rideRequestButton() {
+        RequestButton uberButtonBlack = (RequestButton) findViewById(R.id.uber_button_black);
+        RequestButton uberButtonWhite = (RequestButton) findViewById(R.id.uber_button_white);
+
+        RideParameters rideParameters = new RideParameters.Builder()
+                .setProductId(UBERX_PRODUCT_ID)
+                .setPickupLocation(PICKUP_LAT, PICKUP_LONG, PICKUP_NICK, PICKUP_ADDR)
+                .setDropoffLocation(DROPOFF_LAT, DROPOFF_LONG, DROPOFF_NICK, DROPOFF_ADDR)
+                .build();
+
+
+        uberButtonBlack.setRideParameters(rideParameters);
+        uberButtonWhite.setRideParameters(rideParameters);
+    }
+
+    public void rideRequestButtonWithCustomPreOnClickListener() {
         RequestButton uberButtonBlack = (RequestButton) findViewById(R.id.uber_button_black);
         RequestButton uberButtonWhite = (RequestButton) findViewById(R.id.uber_button_white);
 
@@ -64,5 +86,68 @@ public class SampleActivity extends AppCompatActivity {
 
         uberButtonBlack.setRideParameters(rideParameters);
         uberButtonWhite.setRideParameters(rideParameters);
+
+        uberButtonBlack.setCustomPreOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Custom code for black button called before UberRequestButton's onClick() listener");
+            }
+        });
+
+        uberButtonWhite.setCustomPreOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Custom code for white button called before UberRequestButton's onClick() listener");
+            }
+        });
+    }
+
+
+    /**
+     * Please make sure you replace com.uber.sdk.android.rides.RequestButton
+     * with com.uber.sdk.android.rides.samples.CustomUberRequestButton inside
+     * the res/layout/activity_sample.xml file, otherwise you will get a ClassCastException.
+     */
+    public void rideRequestButtonWithCustomSubclassOnClickListener() {
+        CustomUberRequestButton uberButtonBlack = (CustomUberRequestButton) findViewById(R.id.uber_button_black);
+        CustomUberRequestButton uberButtonWhite = (CustomUberRequestButton) findViewById(R.id.uber_button_white);
+
+        RideParameters rideParameters = new RideParameters.Builder()
+                .setProductId(UBERX_PRODUCT_ID)
+                .setPickupLocation(PICKUP_LAT, PICKUP_LONG, PICKUP_NICK, PICKUP_ADDR)
+                .setDropoffLocation(DROPOFF_LAT, DROPOFF_LONG, DROPOFF_NICK, DROPOFF_ADDR)
+                .build();
+
+        uberButtonBlack.setRideParameters(rideParameters);
+        uberButtonWhite.setRideParameters(rideParameters);
+    }
+
+    /**
+     * Please make sure you replace com.uber.sdk.android.rides.RequestButton
+     * with com.uber.sdk.android.rides.samples.CustomUberRequestButton inside
+     * the res/layout/activity_sample.xml file, otherwise you will get a ClassCastException.
+     */
+    public void rideRequestButtonWithCustomSubclassAndPreOnClickListener() {
+        CustomUberRequestButton uberButtonBlack = (CustomUberRequestButton) findViewById(R.id.uber_button_black);
+        CustomUberRequestButton uberButtonWhite = (CustomUberRequestButton) findViewById(R.id.uber_button_white);
+
+        RideParameters rideParameters = new RideParameters.Builder()
+                .setProductId(UBERX_PRODUCT_ID)
+                .setPickupLocation(PICKUP_LAT, PICKUP_LONG, PICKUP_NICK, PICKUP_ADDR)
+                .setDropoffLocation(DROPOFF_LAT, DROPOFF_LONG, DROPOFF_NICK, DROPOFF_ADDR)
+                .build();
+
+        uberButtonBlack.setRideParameters(rideParameters);
+        uberButtonWhite.setRideParameters(rideParameters);
+
+        View.OnClickListener customListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Custom code called before UberRequestButton's onClick() listener");
+            }
+        };
+
+        uberButtonBlack.setCustomPreOnClickListener(customListener);
+        uberButtonWhite.setCustomPreOnClickListener(customListener);
     }
 }
