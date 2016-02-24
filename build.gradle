@@ -44,6 +44,11 @@ allprojects {
     }
 }
 
+task wrapper(type: Wrapper) {
+    description 'Creates the gradle wrapper.'
+    gradleVersion '2.11'
+}
+
 def generateReleaseNotes() {
     def changelogSnippet = generateChangelogSnippet()
     def model = [title: "Uber Rides Android SDK (Beta) v${unsnapshottedVersion}",
