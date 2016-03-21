@@ -23,7 +23,12 @@
 package android.net.http;
 
 /**
- *
+ * Since Apache HTTP Client was deprecated, it was no longer on the compile classpath. 
+ * However, Robolectric 3.0 still links to it. So we need to add no-op class for successful compiling.
+ * This workaround work only if we do not use AndroidHttpClient in our test cases. 
+ * 
+ * Link to Robolectric issue https://github.com/robolectric/robolectric/issues/1862
+ * 
  * Created by Antonenko Viacheslav on 24/02/16.
  */
 public class AndroidHttpClient {
