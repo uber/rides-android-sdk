@@ -21,7 +21,17 @@
     THE SOFTWARE.
 -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.uber.sdk.android.rides">
-    <application/>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.uber.sdk.android.rides">
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application>
+        <activity android:name=".RideRequestActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".auth.LoginActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+    </application>
 </manifest>

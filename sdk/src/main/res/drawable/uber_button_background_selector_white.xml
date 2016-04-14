@@ -22,6 +22,6 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/uber_button_background_white_100" android:state_pressed="false"/>
-    <item android:drawable="@drawable/uber_button_background_white_80" android:state_pressed="true"/>
+    <item android:drawable="@drawable/uber_button_background_white" android:state_pressed="false"/>
+    <item android:drawable="@drawable/uber_button_background_white_40" android:state_pressed="true"/>
 </selector>

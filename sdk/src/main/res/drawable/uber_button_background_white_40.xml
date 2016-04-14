@@ -23,5 +23,5 @@
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <corners android:radius="@dimen/corner_rounding" />
-    <solid android:color="@color/uber_white_80" />
+    <solid android:color="@color/uber_white_40" />
 </shape>

@@ -21,7 +21,9 @@
     THE SOFTWARE.
 -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <corners android:radius="@dimen/corner_rounding" />
-    <solid android:color="@color/uber_white_100" />
-</shape>
+<resources>
+    <string name="ride_request_activity_authentication_error">身份驗證發生問題。</string>
+    <string name="ride_request_activity_widget_error">乘客預約側邊欄出現問題。</string>
+    <string name="ride_with_uber">搭乘优步前往</string>
+    <string name="ride_error_try_again">再試</string>
+</resources>

@@ -22,5 +22,8 @@
 -->
 
 <resources>
+    <string name="ride_request_activity_authentication_error">There was a problem authenticating you.</string>
+    <string name="ride_request_activity_widget_error">The Ride Request Widget encountered a problem.</string>
     <string name="ride_with_uber">Ride there with Uber</string>
+    <string name="ride_error_try_again">Try Again</string>
 </resources>

@@ -26,7 +26,7 @@
         <item name="android:textSize">@dimen/text_size</item>
         <item name="android:padding">@dimen/button_padding</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:textColor">@color/uber_white_100</item>
+        <item name="android:textColor">@color/uber_white</item>
         <item name="android:gravity">center_vertical|left</item>
         <item name="android:background">@drawable/uber_button_background_selector_black</item>
     </style>
@@ -36,7 +36,7 @@
         <item name="android:drawablePadding">@dimen/button_padding</item>
     </style>
     <style name="UberButton.RideRequest.White" parent="UberButton.RideRequest">
-        <item name="android:textColor">@color/uber_black_100</item>
+        <item name="android:textColor">@color/uber_black</item>
         <item name="android:background">@drawable/uber_button_background_selector_white</item>
     </style>
 </resources>

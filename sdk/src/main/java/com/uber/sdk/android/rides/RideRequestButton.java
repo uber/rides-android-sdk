@@ -33,24 +33,22 @@ import android.view.View;
  * An Uber styled button to request rides with specific {@link RideParameters}. Default {@link RideParameters} is
  * set to a pickup of the device's location. Requires a client ID to function.
  */
-public class RequestButton extends UberButton {
+public class RideRequestButton extends UberButton {
 
-    private static final String USER_AGENT_BUTTON = "rides-button-v0.2.0";
+    private static final String USER_AGENT_BUTTON = "rides-android-v0.3.0-button";
 
-    @NonNull
-    private RideParameters mRideParameters = new RideParameters.Builder().build();
-    @Nullable
-    private String mClientId;
+    @NonNull private RideRequestBehavior mRequestBehavior = new RequestDeeplinkBehavior();
+    @NonNull private RideParameters mRideParameters = new RideParameters.Builder().build();
 
-    public RequestButton(Context context) {
+    public RideRequestButton(Context context) {
         this(context, null);
     }
 
-    public RequestButton(Context context, AttributeSet attrs) {
+    public RideRequestButton(Context context, AttributeSet attrs) {
         this(context, attrs, R.attr.uberButtonStyle);
     }
 
-    public RequestButton(Context context, AttributeSet attrs, int defStyleAttr) {
+    public RideRequestButton(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr, 0);
     }
 
@@ -66,10 +64,12 @@ public class RequestButton extends UberButton {
     }
 
     /**
-     * Sets the client ID that is used to power the ride request.
+     * Sets how the request button should act for button actions.
+     *
+     * @param requestBehavior an object that implements {@link RideRequestBehavior}
      */
-    public void setClientId(@NonNull String clientId) {
-        this.mClientId = clientId;
+    public void setRequestBehavior(@NonNull RideRequestBehavior requestBehavior) {
+        mRequestBehavior = requestBehavior;
     }
 
     @Override
@@ -81,9 +81,8 @@ public class RequestButton extends UberButton {
         Style style = Style.DEFAULT;
         if (attributeSet != null) {
             TypedArray typedArray = context.getTheme().obtainStyledAttributes(attributeSet,
-                    R.styleable.RequestButton, 0, 0);
-            mClientId = typedArray.getString(R.styleable.RequestButton_client_id);
-            style = Style.fromInt(typedArray.getInt(R.styleable.RequestButton_style,
+                    R.styleable.RideRequestButton, 0, 0);
+            style = Style.fromInt(typedArray.getInt(R.styleable.RideRequestButton_ub__style,
                     Style.DEFAULT.getValue()));
             typedArray.recycle();
         }
@@ -95,23 +94,14 @@ public class RequestButton extends UberButton {
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mClientId == null) {
-                    throw new IllegalStateException("Client ID required to use RequestButton.");
-                }
-
-                RequestDeeplink requestDeeplink = new RequestDeeplink.Builder()
-                        .setClientId(mClientId)
-                        .setRideParameters(mRideParameters)
-                        .setUserAgent(USER_AGENT_BUTTON)
-                        .build();
-
-                requestDeeplink.execute(getContext());
+                mRideParameters.setUserAgent(USER_AGENT_BUTTON);
+                mRequestBehavior.requestRide(getContext(), mRideParameters);
             }
         });
     }
 
     /**
-     * Encapsulates the valid values for the uber:color_scheme attribute for a {@link RequestButton}
+     * Encapsulates the valid values for the uber:color_scheme attribute for a {@link RideRequestButton}
      */
     private enum Style {
         /**

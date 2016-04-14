@@ -22,5 +22,8 @@
 -->
 
 <resources>
+    <string name="ride_request_activity_authentication_error">身份验证错误。</string>
+    <string name="ride_request_activity_widget_error">优步叫车插件错误。</string>
     <string name="ride_with_uber">搭乘优步前往</string>
+    <string name="ride_error_try_again">重试</string>
 </resources>

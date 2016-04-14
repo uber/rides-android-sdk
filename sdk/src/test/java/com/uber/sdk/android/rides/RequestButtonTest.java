@@ -23,118 +23,47 @@
 package com.uber.sdk.android.rides;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.support.annotation.NonNull;
+import android.content.Context;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.annotation.Config;
-import org.robolectric.res.builder.RobolectricPackageManager;
-import org.robolectric.shadows.ShadowActivity;
 
-import java.io.IOException;
-
-import static com.uber.sdk.android.rides.TestUtils.readUriResourceWithUserAgentParam;
 import static org.junit.Assert.assertEquals;
-import static org.robolectric.Shadows.shadowOf;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
- * Tests {@link RequestButton}
+ * Tests {@link RideRequestButton}
  */
-@RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21)
-public class RequestButtonTest {
-
-    private static final String CLIENT_ID = "clientId";
-    private static final float PICKUP_LAT = 32.1234f;
-    private static final float PICKUP_LONG = -122.3456f;
-    private static final String PICKUP_NICK = "pickupNick";
-    private static final String PICKUP_ADDR = "Pickup Address";
-    private static final String UBER_PACKAGE_NAME = "com.ubercab";
-    private static final String USER_AGENT_BUTTON = "rides-button-v0.2.0";
-
-    @Rule public ExpectedException exception = ExpectedException.none();
+public class RequestButtonTest extends RobolectricTestBase {
 
     private Activity mActivity;
-    private RequestButton mRequestButton;
+    private RideRequestButton mRequestButton;
+
+    @Captor
+    private ArgumentCaptor<Context> mContextArguementCaptor;
+    @Captor
+    private ArgumentCaptor<RideParameters> mRideParamsArguementCaptor;
 
     @Before
     public void setup() {
         mActivity = Robolectric.setupActivity(Activity.class);
-        mRequestButton = new RequestButton(mActivity);
+        mRequestButton = new RideRequestButton(mActivity);
     }
 
     @Test
-    public void onClick_whenNullClientId_shouldThrowException() {
-        exception.expect(RuntimeException.class);
-        exception.expectMessage("Client ID required to use RequestButton.");
-
-        mRequestButton.performClick();
-    }
-
-    @Test
-    public void onClick_whenClientIdProvidedAndNoUberApp_shouldStartMobileSite() throws IOException {
-        String expectedUri = readUriResourceWithUserAgentParam("src/test/resources/deeplinkuris/no_app_installed",
-                USER_AGENT_BUTTON);
-
-        ShadowActivity shadowActivity = setupShadowActivityWithUber(false);
-
-        mRequestButton.setClientId(CLIENT_ID);
-        mRequestButton.performClick();
-
-        Intent shadowedIntent = shadowActivity.getNextStartedActivity();
-        assertEquals(expectedUri, shadowedIntent.getData().toString());
-    }
-
-    @Test
-    public void onClick_whenClientIdProvidedAndUberAppInstalled_shouldStartUberApp() throws IOException {
-        String expectedUri = readUriResourceWithUserAgentParam("src/test/resources/deeplinkuris/just_client_provided",
-                USER_AGENT_BUTTON);
-
-        ShadowActivity shadowActivity = setupShadowActivityWithUber(true);
-
-        mRequestButton.setClientId(CLIENT_ID);
-        mRequestButton.performClick();
-
-        Intent shadowedIntent = shadowActivity.getNextStartedActivity();
-        assertEquals(expectedUri, shadowedIntent.getDataString());
-    }
-
-    @Test
-    public void onClick_whenClientIdAndPickupProvidedAndUberAppInstalled_shouldStartUberAppWithParams()
-            throws IOException {
-        String path = "src/test/resources/deeplinkuris/pickup_and_client_provided";
-        String expectedUri = readUriResourceWithUserAgentParam(path, USER_AGENT_BUTTON);
-
-        ShadowActivity shadowActivity = setupShadowActivityWithUber(true);
-
-        RideParameters rideParameters = new RideParameters.Builder()
-                .setPickupLocation(PICKUP_LAT, PICKUP_LONG, PICKUP_NICK, PICKUP_ADDR)
-                .build();
-        mRequestButton.setClientId(CLIENT_ID);
+    public void onClick_whenHasSetRequestBehaviorAndRideParams_shouldCallRequestRideAndAddUserAgent() {
+        RideParameters rideParameters = new RideParameters.Builder().build();
         mRequestButton.setRideParameters(rideParameters);
+        RideRequestBehavior rideRequestBehavior = mock(RideRequestBehavior.class);
+        mRequestButton.setRequestBehavior(rideRequestBehavior);
         mRequestButton.performClick();
 
-        Intent shadowedIntent = shadowActivity.getNextStartedActivity();
-        assertEquals(expectedUri, shadowedIntent.getData().toString());
-    }
-
-    @NonNull
-    private ShadowActivity setupShadowActivityWithUber(boolean isUberInstalled) {
-        ShadowActivity shadowActivity = shadowOf(mActivity);
-        if (isUberInstalled) {
-            RobolectricPackageManager packageManager = (RobolectricPackageManager) shadowActivity.getPackageManager();
-
-            PackageInfo uberPackage = new PackageInfo();
-            uberPackage.packageName = UBER_PACKAGE_NAME;
-            packageManager.addPackage(uberPackage);
-        }
-        return shadowActivity;
+        verify(rideRequestBehavior, times(1)).requestRide(mActivity, rideParameters);
+        assertEquals(rideParameters.getUserAgent(), "rides-android-v0.3.0-button");
     }
 }

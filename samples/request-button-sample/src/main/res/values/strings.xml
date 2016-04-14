@@ -23,5 +23,6 @@
 
 <resources>
     <string name="app_name">Uber SDK</string>
-    <string name="client_id">insert_your_client_id_here</string>
+    <string name="copy_access_token_to_clipboard">Copy Access Token to Clipboard</string>
+    <string name="clear_access_token">Clear Access Token</string>
 </resources>

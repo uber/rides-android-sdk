@@ -33,10 +33,7 @@ import android.util.AttributeSet;
 import org.apache.maven.artifact.ant.shaded.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 import org.robolectric.res.Attribute;
 import org.robolectric.shadows.CoreShadowsAdapter;
 import org.robolectric.shadows.RoboAttributeSet;
@@ -51,9 +48,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Tests {@link UberButton}
  */
-@RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21)
-public class UberButtonTest {
+public class UberButtonTest extends RobolectricTestBase {
 
     private static final String ANDROID_ATTR_BACKGROUND = "android:attr/background";
     private static final String ANDROID_ATTR_DRAWABLE_LEFT = "android:attr/drawableLeft";
@@ -199,7 +194,7 @@ public class UberButtonTest {
         assertEquals(padding, uberButton.getPaddingRight(), 0);
         assertEquals(padding, uberButton.getPaddingBottom(), 0);
 
-        assertEquals(resources.getColor(R.color.uber_white_100), uberButton.getCurrentTextColor());
+        assertEquals(resources.getColor(R.color.uber_white), uberButton.getCurrentTextColor());
         assertEquals(Typeface.NORMAL, uberButton.getTypeface().getStyle());
         assertEquals(resources.getDimension(R.dimen.text_size), uberButton.getTextSize(), 0);
         assertTrue(uberButton.getGravity() != 0);

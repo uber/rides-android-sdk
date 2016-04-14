@@ -22,6 +22,8 @@
 
 package com.uber.sdk.android.rides;
 
+import android.os.Parcel;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -32,15 +34,15 @@ import static org.junit.Assert.assertTrue;
 /**
  * Tests {@link RideParameters}
  */
-public class RideParametersTest {
+public class RideParametersTest extends RobolectricTestBase {
 
     public static final String PRODUCT_ID = "productId";
-    private static final float PICKUP_LAT = 32.1234f;
-    private static final float PICKUP_LONG = -122.3456f;
+    private static final Double PICKUP_LAT = 32.1234;
+    private static final Double PICKUP_LONG = -122.3456;
     private static final String PICKUP_NICK = "pickupNick";
     private static final String PICKUP_ADDR = "Pickup Address";
-    private static final float DROPOFF_LAT = 32.5678f;
-    private static final float DROPOFF_LONG = -122.6789f;
+    private static final Double DROPOFF_LAT = 32.5678;
+    private static final Double DROPOFF_LONG = -122.6789;
     private static final String DROPOFF_NICK = "pickupNick";
     private static final String DROPOFF_ADDR = "Dropoff Address";
 
@@ -62,15 +64,15 @@ public class RideParametersTest {
         assertFalse(rideParameters.isPickupMyLocation());
         assertEquals("Product ID does not match.", PRODUCT_ID, rideParameters.getProductId());
 
-        assertEquals("Pickup latitude does not match.", Float.valueOf(PICKUP_LAT), rideParameters.getPickupLatitude());
-        assertEquals("Pickup longitude does not match.", Float.valueOf(PICKUP_LONG),
+        assertEquals("Pickup latitude does not match.", Double.valueOf(PICKUP_LAT), rideParameters.getPickupLatitude());
+        assertEquals("Pickup longitude does not match.", Double.valueOf(PICKUP_LONG),
                 rideParameters.getPickupLongitude());
         assertEquals("Pickup nickname does not match.", PICKUP_NICK, rideParameters.getPickupNickname());
         assertEquals("Pickup address does not match.", PICKUP_ADDR, rideParameters.getPickupAddress());
 
-        assertEquals("Dropoff latitude does not match.", Float.valueOf(DROPOFF_LAT),
+        assertEquals("Dropoff latitude does not match.", Double.valueOf(DROPOFF_LAT),
                 rideParameters.getDropoffLatitude());
-        assertEquals("Dropoff longitude does not match.", Float.valueOf(DROPOFF_LONG),
+        assertEquals("Dropoff longitude does not match.", Double.valueOf(DROPOFF_LONG),
                 rideParameters.getDropoffLongitude());
         assertEquals("Dropoff nickname does not match.", DROPOFF_NICK, rideParameters.getDropoffNickname());
         assertEquals("Dropoff address does not match.", DROPOFF_ADDR, rideParameters.getDropoffAddress());
@@ -103,8 +105,8 @@ public class RideParametersTest {
         assertFalse(rideParameters.isPickupMyLocation());
         assertNull(rideParameters.getProductId());
 
-        assertEquals("Pickup latitude does not match.", Float.valueOf(PICKUP_LAT), rideParameters.getPickupLatitude());
-        assertEquals("Pickup longitude does not match.", Float.valueOf(PICKUP_LONG),
+        assertEquals("Pickup latitude does not match.", Double.valueOf(PICKUP_LAT), rideParameters.getPickupLatitude());
+        assertEquals("Pickup longitude does not match.", Double.valueOf(PICKUP_LONG),
                 rideParameters.getPickupLongitude());
         assertEquals("Pickup nickname does not match.", PICKUP_NICK, rideParameters.getPickupNickname());
         assertEquals("Pickup address does not match.", PICKUP_ADDR, rideParameters.getPickupAddress());
@@ -113,6 +115,58 @@ public class RideParametersTest {
         assertNull(rideParameters.getDropoffLongitude());
         assertNull(rideParameters.getDropoffNickname());
         assertNull(rideParameters.getDropoffAddress());
+    }
+
+    @Test
+    public void writeToParcelAndCreateFromParcel_withFullDetails_shouldWork() {
+        Parcel parcel = Parcel.obtain();
+        RideParameters rideParameters = new RideParameters.Builder()
+                .setProductId(PRODUCT_ID)
+                .setPickupLocation(PICKUP_LAT, PICKUP_LONG, PICKUP_NICK, PICKUP_ADDR)
+                .setDropoffLocation(DROPOFF_LAT, DROPOFF_LONG, DROPOFF_NICK, DROPOFF_ADDR)
+                .build();
+
+        rideParameters.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+
+        RideParameters rideParametersFromParcel = new RideParameters(parcel);
+        assertFalse(rideParametersFromParcel.isPickupMyLocation());
+        assertEquals("Product ID does not match.", PRODUCT_ID, rideParametersFromParcel.getProductId());
+
+        assertEquals("Pickup latitude does not match.", Double.valueOf(PICKUP_LAT),
+                rideParametersFromParcel.getPickupLatitude());
+        assertEquals("Pickup longitude does not match.", Double.valueOf(PICKUP_LONG),
+                rideParametersFromParcel.getPickupLongitude());
+        assertEquals("Pickup nickname does not match.", PICKUP_NICK, rideParametersFromParcel.getPickupNickname());
+        assertEquals("Pickup address does not match.", PICKUP_ADDR, rideParametersFromParcel.getPickupAddress());
+
+        assertEquals("Dropoff latitude does not match.", Double.valueOf(DROPOFF_LAT),
+                rideParametersFromParcel.getDropoffLatitude());
+        assertEquals("Dropoff longitude does not match.", Double.valueOf(DROPOFF_LONG),
+                rideParametersFromParcel.getDropoffLongitude());
+        assertEquals("Dropoff nickname does not match.", DROPOFF_NICK, rideParametersFromParcel.getDropoffNickname());
+        assertEquals("Dropoff address does not match.", DROPOFF_ADDR, rideParametersFromParcel.getDropoffAddress());
+    }
+
+    @Test
+    public void writeToParcelAndCreateFromParcel_withDefaults_shouldWork() {
+        Parcel parcel = Parcel.obtain();
+        RideParameters rideParameters = new RideParameters.Builder().build();
+
+        rideParameters.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+
+        RideParameters rideParametersFromParcel = new RideParameters(parcel);
+        assertDefaults(rideParametersFromParcel);
+    }
+
+    @Test
+    public void whenUserAgentIsPassedAfterBuild_userAgentIsSet() {
+        RideParameters rideParameters = new RideParameters.Builder().build();
+
+        String userAgent = "USER_AGENT";
+        rideParameters.setUserAgent(userAgent);
+        assertEquals(userAgent, rideParameters.getUserAgent());
     }
 
     private void assertDefaults(RideParameters rideParameters) {
@@ -128,5 +182,7 @@ public class RideParametersTest {
         assertNull(rideParameters.getDropoffLongitude());
         assertNull(rideParameters.getDropoffNickname());
         assertNull(rideParameters.getDropoffAddress());
+
+        assertNull(rideParameters.getUserAgent());
     }
 }

@@ -31,8 +31,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.google.common.base.Preconditions;
-
 
 /**
  * A deeplink for requesting rides in the Uber application.
@@ -43,7 +41,7 @@ public class RequestDeeplink {
 
     private static final String UBER_PACKAGE_NAME = "com.ubercab";
     private static final String UBER_SDK_LOG_TAG = "UberSDK";
-    private static final String USER_AGENT_DEEPLINK = "rides-deeplink-v0.2.0";
+    private static final String USER_AGENT_DEEPLINK = "rides-android-v0.3.0-deeplink";
 
     @NonNull private final Uri mUri;
 
@@ -97,17 +95,7 @@ public class RequestDeeplink {
         public static final String SCHEME = "uber";
         public static final String USER_AGENT = "user-agent";
 
-        private String mClientId;
-        private String mUserAgent = USER_AGENT_DEEPLINK;
         private RideParameters mRideParameters;
-
-        /**
-         * Sets the client ID for the app the deeplink is being started from.
-         */
-        public RequestDeeplink.Builder setClientId(@NonNull String cliendId) {
-            mClientId = cliendId;
-            return this;
-        }
 
         /**
          * Sets the {@link RideParameters} for the deeplink.
@@ -123,40 +111,34 @@ public class RequestDeeplink {
         @NonNull
         public RequestDeeplink build() {
             validate();
-
             Uri.Builder builder = new Uri.Builder();
             builder.scheme(SCHEME);
             builder.appendQueryParameter(ACTION, SET_PICKUP);
-            builder.appendQueryParameter(CLIENT_ID, mClientId);
+            builder.appendQueryParameter(CLIENT_ID, UberSdk.getClientId());
             if (mRideParameters.getProductId() != null) {
                 builder.appendQueryParameter(PRODUCT_ID, mRideParameters.getProductId());
             }
             if (mRideParameters.getPickupLatitude() != null && mRideParameters.getPickupLongitude() != null) {
-                addLocation(LocationType.PICKUP, Float.toString(mRideParameters.getPickupLatitude()),
-                        Float.toString(mRideParameters.getPickupLongitude()), mRideParameters.getPickupNickname(),
+                addLocation(LocationType.PICKUP, Double.toString(mRideParameters.getPickupLatitude()),
+                        Double.toString(mRideParameters.getPickupLongitude()), mRideParameters.getPickupNickname(),
                         mRideParameters.getPickupAddress(), builder);
             }
             if (mRideParameters.isPickupMyLocation()) {
                 builder.appendQueryParameter(LocationType.PICKUP.getUriQueryKey(), MY_LOCATION);
             }
             if (mRideParameters.getDropoffLatitude() != null && mRideParameters.getDropoffLongitude() != null) {
-                addLocation(LocationType.DROPOFF, Float.toString(mRideParameters.getDropoffLatitude()),
-                        Float.toString(mRideParameters.getDropoffLongitude()), mRideParameters.getDropoffNickname(),
+                addLocation(LocationType.DROPOFF, Double.toString(mRideParameters.getDropoffLatitude()),
+                        Double.toString(mRideParameters.getDropoffLongitude()), mRideParameters.getDropoffNickname(),
                         mRideParameters.getDropoffAddress(), builder);
             }
-            if (mUserAgent == null) {
-                mUserAgent = USER_AGENT_DEEPLINK;
-            }
-            builder.appendQueryParameter(USER_AGENT, mUserAgent);
-            return new RequestDeeplink(builder.build());
-        }
 
-        /**
-         * Sets the user agent, describing where this {@link RequestDeeplink} came from for analytics.
-         */
-        RequestDeeplink.Builder setUserAgent(@NonNull String userAgent) {
-            mUserAgent = userAgent;
-            return this;
+            String userAgent = mRideParameters.getUserAgent();
+            if (userAgent == null) {
+                userAgent = USER_AGENT_DEEPLINK;
+            }
+            builder.appendQueryParameter(USER_AGENT, userAgent);
+
+            return new RequestDeeplink(builder.build());
         }
 
         private void addLocation(@NonNull LocationType locationType, @NonNull String latitude,
@@ -173,8 +155,9 @@ public class RequestDeeplink {
         }
 
         private void validate() {
-            Preconditions.checkState(mClientId != null, "Must supply a client ID.");
-            Preconditions.checkState(mRideParameters != null, "Must supply ride parameters.");
+            if (mRideParameters == null) {
+                throw new IllegalStateException("Must supply ride parameters.");
+            }
         }
 
         private enum LocationType {

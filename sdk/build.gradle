@@ -2,6 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'cobertura'
 
 buildscript {
     repositories {
@@ -104,12 +105,25 @@ uploadArchives {
     }
 }
 
+cobertura {
+    coverageFormats = ['html', 'xml']
+    coverageIgnoreTrivial = true
+    coverageExcludes += [
+    '.*android\\.support\\.v7\\.appcompat\\.R\\.*',
+    '.*com\\.uber\\.sdk\\.android\\.rides\\.R\\.*',
+    '.*android\\.support\\.v7\\.appcompat\\.R\\$.*\\.*',
+    '.*com\\.uber\\.sdk\\.android\\.rides\\.R\\$.*\\.*',
+    '.*BuildConfig.*']
+}
+
 dependencies {
     compile 'com.android.support:appcompat-v7:23.0.1'
-    compile 'com.google.guava:guava:18.0'
-    compile 'com.google.http-client:google-http-client-jackson2:1.19.0'
 
     testCompile 'junit:junit:4.12'
-    testCompile "org.mockito:mockito-core:1.9.5"
-    testCompile "org.robolectric:robolectric:3.0"
+    testCompile 'com.google.guava:guava:18.0'
+    testCompile 'com.google.http-client:google-http-client-jackson2:1.19.0'
+    testCompile 'org.mockito:mockito-core:1.9.5'
+    testCompile 'org.robolectric:robolectric:3.0'
+
+    cobertura 'com.google.android:android:4.1.1.4'
 }

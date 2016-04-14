@@ -22,32 +22,82 @@
 
 package com.uber.sdk.android.rides;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 /**
  * Represents the parameters for an Uber ride.
  */
-public class RideParameters {
+public class RideParameters implements Parcelable {
 
     private final boolean mIsPickupMyLocation;
-    private final String mProductId;
-    private final Float mPickupLatitude;
-    private final Float mPickupLongitude;
-    private final String mPickupNickname;
-    private final String mPickupAddress;
-    private final Float mDropoffLatitude;
-    private final Float mDropoffLongitude;
-    private final String mDropoffNickname;
-    private final String mDropoffAddress;
+    @Nullable private final String mProductId;
+    @Nullable private final Double mPickupLatitude;
+    @Nullable private final Double mPickupLongitude;
+    @Nullable private final String mPickupNickname;
+    @Nullable private final String mPickupAddress;
+    @Nullable private final Double mDropoffLatitude;
+    @Nullable private final Double mDropoffLongitude;
+    @Nullable private final String mDropoffNickname;
+    @Nullable private final String mDropoffAddress;
+    @Nullable private String mUserAgent;
+
+    public static final Creator<RideParameters> CREATOR = new Creator<RideParameters>() {
+        @Override
+        public RideParameters createFromParcel(Parcel in) {
+            return new RideParameters(in);
+        }
+
+        @Override
+        public RideParameters[] newArray(int size) {
+            return new RideParameters[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByte((byte) (mIsPickupMyLocation ? 1 : 0));
+        dest.writeString(mProductId);
+        dest.writeSerializable(mPickupLatitude);
+        dest.writeSerializable(mPickupLongitude);
+        dest.writeString(mPickupNickname);
+        dest.writeString(mPickupAddress);
+        dest.writeSerializable(mDropoffLatitude);
+        dest.writeSerializable(mDropoffLongitude);
+        dest.writeString(mDropoffNickname);
+        dest.writeString(mDropoffAddress);
+        dest.writeString(mUserAgent);
+    }
+
+    protected RideParameters(Parcel in) {
+        mIsPickupMyLocation = in.readByte() != 0;
+        mProductId = in.readString();
+        mPickupLatitude = (Double) in.readSerializable();
+        mPickupLongitude = (Double) in.readSerializable();
+        mPickupNickname = in.readString();
+        mPickupAddress = in.readString();
+        mDropoffLatitude = (Double) in.readSerializable();
+        mDropoffLongitude = (Double) in.readSerializable();
+        mDropoffNickname = in.readString();
+        mDropoffAddress = in.readString();
+        mUserAgent = in.readString();
+    }
 
     private RideParameters(boolean isPickupMyLocation,
             @Nullable String productId,
-            @Nullable Float pickupLatitude,
-            @Nullable Float pickupLongitude,
+            @Nullable Double pickupLatitude,
+            @Nullable Double pickupLongitude,
             @Nullable String pickupNickname,
             @Nullable String pickupAddress,
-            @Nullable Float dropoffLatitude,
-            @Nullable Float dropoffLongitude,
+            @Nullable Double dropoffLatitude,
+            @Nullable Double dropoffLongitude,
             @Nullable String dropoffNickname,
             @Nullable String dropoffAddress) {
         mIsPickupMyLocation = isPickupMyLocation;
@@ -82,7 +132,7 @@ public class RideParameters {
      * Gets the latitude of the pickup location of the ride. Null if no pickup location specified.
      */
     @Nullable
-    public Float getPickupLatitude() {
+    public Double getPickupLatitude() {
         return mPickupLatitude;
     }
 
@@ -90,7 +140,7 @@ public class RideParameters {
      * Gets the longitude of the pickup location of the ride. Null if no pickup location specified.
      */
     @Nullable
-    public Float getPickupLongitude() {
+    public Double getPickupLongitude() {
         return mPickupLongitude;
     }
 
@@ -114,7 +164,7 @@ public class RideParameters {
      * Gets the latitude of the dropoff location of the ride. Null if no dropoff location specified.
      */
     @Nullable
-    public Float getDropoffLatitude() {
+    public Double getDropoffLatitude() {
         return mDropoffLatitude;
     }
 
@@ -122,7 +172,7 @@ public class RideParameters {
      * Gets the longitude of the dropoff location of the ride. Null if no dropoff location specified.
      */
     @Nullable
-    public Float getDropoffLongitude() {
+    public Double getDropoffLongitude() {
         return mDropoffLongitude;
     }
 
@@ -143,25 +193,41 @@ public class RideParameters {
     }
 
     /**
+     * Gets the user agent.
+     */
+    @Nullable
+    String getUserAgent() {
+        return mUserAgent; 
+    }
+
+    /**
+     * Sets the user agent, describing where this {@link RequestDeeplink} came from for analytics.
+     */
+    void setUserAgent(@NonNull String userAgent) {
+        mUserAgent = userAgent;
+    }
+
+    /**
      * Builder for {@link RideParameters} objects.
      */
     public static class Builder {
 
-        private boolean mIsPickupMyLocation = true;
-        private String mProductId;
-        private Float mPickupLatitude;
-        private Float mPickupLongitude;
-        private String mPickupNickname;
-        private String mPickupAddress;
-        private Float mDropoffLatitude;
-        private Float mDropoffLongitude;
-        private String mDropoffNickname;
-        private String mDropoffAddress;
+        boolean mIsPickupMyLocation = true;
+        @Nullable private String mProductId;
+        @Nullable private Double mPickupLatitude;
+        @Nullable private Double mPickupLongitude;
+        @Nullable private String mPickupNickname;
+        @Nullable private String mPickupAddress;
+        @Nullable private Double mDropoffLatitude;
+        @Nullable private Double mDropoffLongitude;
+        @Nullable private String mDropoffNickname;
+        @Nullable private String mDropoffAddress;
+        @Nullable private String mUserAgent;
 
         /**
          * Sets the product ID for the ride.
          */
-        public RideParameters.Builder setProductId(String productId) {
+        public RideParameters.Builder setProductId(@NonNull String productId) {
             mProductId = productId;
             return this;
         }
@@ -175,7 +241,7 @@ public class RideParameters {
          * supplied will just show address.
          * @param address The address of the pickup location.  If not supplied the bar will read 'Go to pin'.
          */
-        public RideParameters.Builder setPickupLocation(float latitude, float longitude, @Nullable String nickname,
+        public RideParameters.Builder setPickupLocation(Double latitude, Double longitude, @Nullable String nickname,
                 @Nullable String address) {
             mPickupLatitude = latitude;
             mPickupLongitude = longitude;
@@ -194,7 +260,7 @@ public class RideParameters {
          * supplied will just show address.
          * @param address The address of the dropoff location.  If not supplied will read 'Destination'.
          */
-        public RideParameters.Builder setDropoffLocation(float latitude, float longitude, @Nullable String nickname,
+        public RideParameters.Builder setDropoffLocation(Double latitude, Double longitude, @Nullable String nickname,
                 @Nullable String address) {
             mDropoffLatitude = latitude;
             mDropoffLongitude = longitude;

@@ -22,9 +22,9 @@
 -->
 
 <resources>
-    <color name="uber_black_100">#09091A</color>
-    <color name="uber_black_90">#222231</color>
+    <color name="uber_black">#000000</color>
+    <color name="uber_black_90">#282727</color>
 
-    <color name="uber_white_100">#C0C0C8</color>
-    <color name="uber_white_80">#CDCDD3</color>
+    <color name="uber_white">#FFFFFF</color>
+    <color name="uber_white_40">#E5E5E4</color>
 </resources>

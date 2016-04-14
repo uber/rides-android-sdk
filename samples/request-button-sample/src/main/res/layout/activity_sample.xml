@@ -37,13 +37,12 @@
         android:background="@android:color/white"
         android:padding="@dimen/button_container_padding">
 
-        <com.uber.sdk.android.rides.RequestButton
+        <com.uber.sdk.android.rides.RideRequestButton
             android:id="@+id/uber_button_black"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            uber:client_id="@string/client_id"
-            uber:style="black"/>
+            uber:ub__style="black"/>
 
     </RelativeLayout>
 
@@ -54,13 +53,12 @@
         android:background="@android:color/black"
         android:padding="@dimen/button_container_padding">
 
-        <com.uber.sdk.android.rides.RequestButton
+        <com.uber.sdk.android.rides.RideRequestButton
             android:id="@+id/uber_button_white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            uber:client_id="@string/client_id"
-            uber:style="white"/>
+            uber:ub__style="white"/>
 
     </RelativeLayout>
 

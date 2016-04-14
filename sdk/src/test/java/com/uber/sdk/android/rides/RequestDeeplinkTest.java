@@ -26,14 +26,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 
-
-import org.junit.Rule;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.annotation.Config;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.res.builder.RobolectricPackageManager;
 import org.robolectric.shadows.ShadowActivity;
 
@@ -46,24 +43,25 @@ import static org.robolectric.Shadows.shadowOf;
 /**
  * Tests {@link RequestDeeplink}
  */
-@RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21)
-public class RequestDeeplinkTest {
+public class RequestDeeplinkTest extends RobolectricTestBase {
 
     private static final String UBER_PACKAGE_NAME = "com.ubercab";
     private static final String CLIENT_ID = "clientId";
     private static final String PRODUCT_ID = "productId";
-    private static final float PICKUP_LAT = 32.1234f;
-    private static final float PICKUP_LONG = -122.3456f;
+    private static final Double PICKUP_LAT = 32.1234;
+    private static final Double PICKUP_LONG = -122.3456;
     private static final String PICKUP_NICK = "pickupNick";
     private static final String PICKUP_ADDR = "Pickup Address";
-    private static final float DROPOFF_LAT = 32.5678f;
-    private static final float DROPOFF_LONG = -122.6789f;
+    private static final Double DROPOFF_LAT = 32.5678;
+    private static final Double DROPOFF_LONG = -122.6789;
     private static final String DROPOFF_NICK = "pickupNick";
     private static final String DROPOFF_ADDR = "Dropoff Address";
-    private static final String USER_AGENT_DEEPLINK = "rides-deeplink-v0.2.0";
+    private static final String USER_AGENT_DEEPLINK = "rides-android-v0.3.0-deeplink";
 
-    @Rule public ExpectedException exception = ExpectedException.none();
+    @Before
+    public void setup() {
+        UberSdk.initialize(RuntimeEnvironment.application, CLIENT_ID);
+    }
 
     @Test
     public void onBuildDeeplink_whenClientIdAndDefaultRideParamsProvided_shouldHaveDefaults() throws IOException {
@@ -73,7 +71,6 @@ public class RequestDeeplinkTest {
         RideParameters rideParameters = new RideParameters.Builder().build();
         RequestDeeplink deeplink = new RequestDeeplink.Builder()
                 .setRideParameters(rideParameters)
-                .setClientId(CLIENT_ID)
                 .build();
 
         assertEquals("URI does not match.", expectedUri, deeplink.getUri().toString());
@@ -91,7 +88,6 @@ public class RequestDeeplinkTest {
                 .build();
         RequestDeeplink deeplink = new RequestDeeplink.Builder()
                 .setRideParameters(rideParameters)
-                .setClientId(CLIENT_ID)
                 .build();
 
         assertEquals("URI does not match.", expectedUri, deeplink.getUri().toString());
@@ -108,7 +104,6 @@ public class RequestDeeplinkTest {
                 .build();
         RequestDeeplink deeplink = new RequestDeeplink.Builder()
                 .setRideParameters(rideParameters)
-                .setClientId(CLIENT_ID)
                 .build();
 
         assertEquals("URI does not match.", expectedUri, deeplink.getUri().toString());
@@ -126,7 +121,6 @@ public class RequestDeeplinkTest {
                 .build();
         RequestDeeplink deeplink = new RequestDeeplink.Builder()
                 .setRideParameters(rideParameters)
-                .setClientId(CLIENT_ID)
                 .build();
 
         assertEquals("URI does not match.", expectedUri, deeplink.getUri().toString());
@@ -145,27 +139,14 @@ public class RequestDeeplinkTest {
                 .build();
         RequestDeeplink deeplink = new RequestDeeplink.Builder()
                 .setRideParameters(rideParameters)
-                .setClientId(CLIENT_ID)
                 .build();
 
         assertEquals("URI does not match.", expectedUri, deeplink.getUri().toString());
     }
 
-    @Test
-    public void onBuildDeeplink_whenNoClientId_shouldNotBuild() {
-        exception.expect(IllegalStateException.class);
-        exception.expectMessage("Must supply a client ID.");
-
-        RideParameters rideParameters = new RideParameters.Builder().build();
-        new RequestDeeplink.Builder().setRideParameters(rideParameters).build();
-    }
-
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void onBuildDeeplink_whenNoRideParams_shouldNotBuild() {
-        exception.expect(IllegalStateException.class);
-        exception.expectMessage("Must supply ride parameters.");
-
-        new RequestDeeplink.Builder().setClientId(CLIENT_ID).build();
+        new RequestDeeplink.Builder().build();
     }
 
     @Test
@@ -179,7 +160,6 @@ public class RequestDeeplinkTest {
         RideParameters rideParameters = new RideParameters.Builder().build();
 
         RequestDeeplink requestDeeplink = new RequestDeeplink.Builder()
-                .setClientId(CLIENT_ID)
                 .setRideParameters(rideParameters)
                 .build();
         requestDeeplink.execute(activity);
@@ -205,7 +185,6 @@ public class RequestDeeplinkTest {
         RideParameters rideParameters = new RideParameters.Builder().build();
 
         RequestDeeplink requestDeeplink = new RequestDeeplink.Builder()
-                .setClientId(CLIENT_ID)
                 .setRideParameters(rideParameters)
                 .build();
 
@@ -213,5 +192,10 @@ public class RequestDeeplinkTest {
 
         Intent startedIntent = shadowActivity.getNextStartedActivity();
         assertEquals(expectedUri, startedIntent.getData().toString());
+    }
+
+    @After
+    public void teardown() {
+        UberSdkAccessor.clearPrefs();
     }
 }

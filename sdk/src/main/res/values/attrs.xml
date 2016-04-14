@@ -24,9 +24,8 @@
 <resources>
     <attr name="uberButtonStyle" format="reference"/>
 
-    <declare-styleable name="RequestButton">
-        <attr name="client_id" format="string"/>
-        <attr name="style" format="enum">
+    <declare-styleable name="RideRequestButton">
+        <attr name="ub__style" format="enum">
             <enum name="black" value="0"/>
             <enum name="white" value="1"/>
         </attr>
