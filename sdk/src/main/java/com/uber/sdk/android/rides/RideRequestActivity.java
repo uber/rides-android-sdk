@@ -65,7 +65,7 @@ public class RideRequestActivity extends Activity implements LoginCallback, Ride
     public static final String RIDE_REQUEST_ERROR = "ride_request_error";
 
     private static final int REQUEST_FINE_LOCATION_PERMISSION_CODE = 1002;
-    private static final String USER_AGENT_RIDE_WIDGET = "rides-android-v0.3.0-ride_request_widget";
+    private static final String USER_AGENT_RIDE_WIDGET = "rides-android-v0.3.1-ride_request_widget";
 
     @VisibleForTesting static final String RIDE_PARAMETERS = "ride_parameters";
 

@@ -114,12 +114,12 @@ public class RideRequestActivityTest extends RobolectricTestBase {
         AccessToken accessToken = new AccessToken(expirationDate, ImmutableList.of(Scope.RIDE_WIDGETS), tokenString);
         mActivity.onLoginSuccess(accessToken);
 
-        assertEquals("rides-android-v0.3.0-ride_request_widget", mActivity.mRideRequestView.mRideParameters.getUserAgent());
+        assertEquals("rides-android-v0.3.1-ride_request_widget", mActivity.mRideRequestView.mRideParameters.getUserAgent());
     }
 
     @Test
     public void onLoad_withUserAgentInRideParametersButton_shouldNotGetOverridden() {
-        String userAgent = "rides-android-v0.3.0-button";
+        String userAgent = "rides-android-v0.3.1-button";
         RideParameters rideParameters = new RideParameters.Builder().build();
         rideParameters.setUserAgent(userAgent);
         Intent data = RideRequestActivity.newIntent(Robolectric.setupActivity(Activity.class), rideParameters);

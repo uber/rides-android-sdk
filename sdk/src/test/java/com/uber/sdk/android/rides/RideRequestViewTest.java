@@ -23,6 +23,7 @@
 package com.uber.sdk.android.rides;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -37,6 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.shadows.ShadowActivity;
 
 import java.io.IOException;
 import java.util.Date;
@@ -44,18 +46,19 @@ import java.util.Map;
 
 import static com.uber.sdk.android.rides.TestUtils.readUriResourceWithUserAgentParam;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.robolectric.Shadows.shadowOf;
 
 /**
  * Tests {@link RideRequestView}
  */
 public class RideRequestViewTest extends RobolectricTestBase {
-
-    boolean[] callbackSuccess = new boolean[1];
 
     private static final String CLIENT_ID = "clientId";
     private static final String PRODUCT_ID = "productId";
@@ -68,15 +71,20 @@ public class RideRequestViewTest extends RobolectricTestBase {
     private static final String DROPOFF_NICK = "pickupNick";
     private static final String DROPOFF_ADDR = "Dropoff Address";
     private static final String TOKEN_STRING = "thisIsAnAccessToken";
-    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.3.0-ride_request_view";
+    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.3.1-ride_request_view";
+
     private AccessToken mAccessToken;
     private RideRequestView mRideRequestView;
+    private RideRequestView.RideRequestWebViewClient mClient;
+    private RideRequestView.RideRequestWebViewClientCallback mCallback;
 
     @Before
     public void setup() {
         UberSdk.initialize(RuntimeEnvironment.application, CLIENT_ID);
         mAccessToken = new AccessToken(new Date(1458770906206l), ImmutableList.of(Scope.RIDE_WIDGETS), TOKEN_STRING);
         mRideRequestView = new RideRequestView(Robolectric.setupActivity(Activity.class));
+        mCallback = mock(RideRequestView.RideRequestWebViewClientCallback.class);
+        mClient = mRideRequestView.new RideRequestWebViewClient(mCallback);
     }
 
     @Test
@@ -124,7 +132,7 @@ public class RideRequestViewTest extends RobolectricTestBase {
 
     @Test
     public void onBuildUrl_withUserAgentNonNull_shouldNotOverride() throws IOException {
-        String widgetUserAgent = "rides-android-v0.3.0-ride_request_widget";
+        String widgetUserAgent = "rides-android-v0.3.1-ride_request_widget";
         String path = "src/test/resources/riderequestviewuris/default_uri";
         String expectedUri = readUriResourceWithUserAgentParam(path, widgetUserAgent);
 
@@ -162,52 +170,66 @@ public class RideRequestViewTest extends RobolectricTestBase {
 
     @Test
     public void whileRideRequestViewRunning_whenAccessTokenExpires_shouldReceiveUnauthorizedError() {
-        RideRequestView.RideRequestWebViewClientCallback callback = mock(RideRequestView.RideRequestWebViewClientCallback.class);
-        RideRequestView.RideRequestWebViewClient client = new RideRequestView.RideRequestWebViewClient(callback);
-        boolean shouldOverrideUrlLoading = client.shouldOverrideUrlLoading(mock(WebView.class),
+        boolean shouldOverrideUrlLoading = mClient.shouldOverrideUrlLoading(mock(WebView.class),
                 "uberconnect://oauth#error=unauthorized");
-        verify(callback, times(1)).onErrorParsed(RideRequestViewError.UNAUTHORIZED);
+        verify(mCallback, times(1)).onErrorParsed(RideRequestViewError.UNAUTHORIZED);
         assertTrue(shouldOverrideUrlLoading);
     }
 
     @Test
     public void whileRideRequestViewRunning_whenWebResourceErrorOccurs_shouldReceiveWebError() {
-        RideRequestView.RideRequestWebViewClientCallback callback = mock(RideRequestView
-                .RideRequestWebViewClientCallback.class);
-        RideRequestView.RideRequestWebViewClient client = new RideRequestView.RideRequestWebViewClient(callback);
-        client.onReceivedError(mock(WebView.class), mock(WebResourceRequest.class), mock(WebResourceError.class));
-        verify(callback, times(1)).onErrorParsed(RideRequestViewError.CONNECTIVITY_ISSUE);
+        mClient.onReceivedError(mock(WebView.class), mock(WebResourceRequest.class), mock(WebResourceError.class));
+        verify(mCallback, times(1)).onErrorParsed(RideRequestViewError.CONNECTIVITY_ISSUE);
     }
 
     @Test
     public void whileRideRequestViewRunning_whenWebHTTPErrorOccurs_shouldReceiveWebError() {
-        RideRequestView.RideRequestWebViewClientCallback callback = mock(RideRequestView
-                .RideRequestWebViewClientCallback.class);
-        RideRequestView.RideRequestWebViewClient client = new RideRequestView.RideRequestWebViewClient(callback);
-        client.onReceivedHttpError(mock(WebView.class), mock(WebResourceRequest.class), mock(WebResourceResponse.class));
-        verify(callback, times(1)).onErrorParsed(RideRequestViewError.CONNECTIVITY_ISSUE);
+        mClient.onReceivedHttpError(mock(WebView.class), mock(WebResourceRequest.class),
+                mock(WebResourceResponse.class));
+        verify(mCallback, times(1)).onErrorParsed(RideRequestViewError.CONNECTIVITY_ISSUE);
     }
 
     @Test
     public void whileRideRequestViewRunning_whenUnknownErrorOccurs_shouldReceiveUnknownError() {
-        RideRequestView.RideRequestWebViewClientCallback callback = mock(RideRequestView
-                .RideRequestWebViewClientCallback.class);
-        RideRequestView.RideRequestWebViewClient client = new RideRequestView.RideRequestWebViewClient(callback);
-        boolean shouldOverrideUrlLoading = client.shouldOverrideUrlLoading(mock(WebView.class),
+        boolean shouldOverrideUrlLoading = mClient.shouldOverrideUrlLoading(mock(WebView.class),
                 "uberconnect://oauth#error=on_fire");
-        verify(callback, times(1)).onErrorParsed(RideRequestViewError.UNKNOWN);
+        verify(mCallback, times(1)).onErrorParsed(RideRequestViewError.UNKNOWN);
         assertTrue(shouldOverrideUrlLoading);
     }
 
     @Test
     public void whileRideRequestViewRunning_whenRegionErrorOccurs_shouldReceiveRegionError() {
-        RideRequestView.RideRequestWebViewClientCallback callback = mock(RideRequestView
-                .RideRequestWebViewClientCallback.class);
-        RideRequestView.RideRequestWebViewClient client = new RideRequestView.RideRequestWebViewClient(callback);
-        boolean shouldOverrideUrlLoading = client.shouldOverrideUrlLoading(mock(WebView.class),
+        boolean shouldOverrideUrlLoading = mClient.shouldOverrideUrlLoading(mock(WebView.class),
                 "uberconnect://oauth#error=wrong_region");
-        verify(callback, times(1)).onErrorParsed(RideRequestViewError.WRONG_REGION);
+        verify(mCallback, times(1)).onErrorParsed(RideRequestViewError.WRONG_REGION);
         assertTrue(shouldOverrideUrlLoading);
+    }
+
+    @Test
+    public void shouldOverrideUrlLoading_whenHttpUrl_shouldNotOverride() {
+        assertFalse(mClient.shouldOverrideUrlLoading(mock(WebView.class), "http://uber.com"));
+        verifyZeroInteractions(mCallback);
+    }
+
+    @Test
+    public void shouldOverrideUrlLoading_whenHttpsUrl_shouldNotOverride() {
+        assertFalse(mClient.shouldOverrideUrlLoading(mock(WebView.class), "https://uber.com"));
+        verifyZeroInteractions(mCallback);
+    }
+
+    @Test
+    public void shouldOverrideUrlLoading_whenNonHttpOrRedirect_shouldOverrideAndLaunchActivity() {
+        Activity activity = Robolectric.setupActivity(Activity.class);
+        ShadowActivity shadowActivity = shadowOf(activity);
+        RideRequestView rideRequestView = new RideRequestView(activity);
+
+        mClient = rideRequestView.new RideRequestWebViewClient(mCallback);
+
+        assertTrue(mClient.shouldOverrideUrlLoading(mock(WebView.class), "tel:+91555555555"));
+        verifyZeroInteractions(mCallback);
+        Intent startedIntent = shadowActivity.getNextStartedActivity();
+        assertEquals(Intent.ACTION_VIEW, startedIntent.getAction());
+        assertEquals("tel:+91555555555#Intent;end", startedIntent.toUri(0));
     }
 
     @After

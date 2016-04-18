@@ -23,6 +23,7 @@
 package com.uber.sdk.android.rides;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -51,7 +52,7 @@ import java.util.Map;
  */
 public class RideRequestView extends LinearLayout {
 
-    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.3.0-ride_request_view";
+    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.3.1-ride_request_view";
     @Nullable private AccessToken mAccessToken;
     @NonNull @VisibleForTesting RideParameters mRideParameters = new RideParameters.Builder().build();
     @Nullable private RideRequestViewCallback mRideRequestViewCallback;
@@ -216,7 +217,7 @@ public class RideRequestView extends LinearLayout {
      * The {@link WebViewClient} that listens for errors in the URL of the {@link WebView}.
      */
     @VisibleForTesting
-    static class RideRequestWebViewClient extends WebViewClient {
+    class RideRequestWebViewClient extends WebViewClient {
 
         private static final String ERROR_KEY = "error";
         private static final String REDIRECT_URL = "uberconnect://oauth";
@@ -247,7 +248,7 @@ public class RideRequestView extends LinearLayout {
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            if (url.toLowerCase().contains(REDIRECT_URL)) {
+            if (url.toLowerCase().startsWith(REDIRECT_URL)) {
                 Uri uri = Uri.parse(url);
 
                 Uri fragmentUri = new Uri.Builder().encodedQuery(uri.getFragment()).build();
@@ -262,8 +263,13 @@ public class RideRequestView extends LinearLayout {
                 }
                 mRideRequestWebViewClientCallback.onErrorParsed(error);
                 return true;
+            } else if (url.startsWith("http:") || url.startsWith("https:")) {
+                return false;
+            } else {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                RideRequestView.this.getContext().startActivity(intent);
+                return true;
             }
-            return super.shouldOverrideUrlLoading(view, url);
         }
     }
 

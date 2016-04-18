@@ -19,7 +19,7 @@ To use the Uber Rides Android SDK, add the compile dependency with the latest ve
 Add the Uber Rides Android SDK to your `build.gradle`:
 ```gradle
 dependencies {
-    compile 'com.uber.sdk:rides-android:0.3.0'
+    compile 'com.uber.sdk:rides-android:0.3.1'
 }
 ```
 
@@ -30,7 +30,7 @@ In the `pom.xml` file:
 <dependency>
     <groupId>com.uber.sdk</groupId>
     <artifactId>rides-android</artifactId>
-    <version>0.3.0/version>
+    <version>0.3.1</version>
 </dependency>
 ```
 
@@ -209,7 +209,7 @@ rideRequestView.load();
 
 ## Sample Apps
 
-A sample app can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases/tag/v0.3.0).
+A sample app can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases/tag/v0.3.1).
 
 Don’t forget to configure the client ID in the `SampleActivity` file.
 

@@ -64,6 +64,6 @@ public class RequestButtonTest extends RobolectricTestBase {
         mRequestButton.performClick();
 
         verify(rideRequestBehavior, times(1)).requestRide(mActivity, rideParameters);
-        assertEquals(rideParameters.getUserAgent(), "rides-android-v0.3.0-button");
+        assertEquals(rideParameters.getUserAgent(), "rides-android-v0.3.1-button");
     }
 }

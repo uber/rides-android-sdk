@@ -56,7 +56,7 @@ public class RequestDeeplinkTest extends RobolectricTestBase {
     private static final Double DROPOFF_LONG = -122.6789;
     private static final String DROPOFF_NICK = "pickupNick";
     private static final String DROPOFF_ADDR = "Dropoff Address";
-    private static final String USER_AGENT_DEEPLINK = "rides-android-v0.3.0-deeplink";
+    private static final String USER_AGENT_DEEPLINK = "rides-android-v0.3.1-deeplink";
 
     @Before
     public void setup() {

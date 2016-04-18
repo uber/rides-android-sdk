@@ -1,3 +1,10 @@
+v0.3.1 - 4/18/2016
+------------------
+### Fixed
+
+- [Issue #15] (https://github.com/uber/rides-android-sdk/issues/15) RideRequestView correctly handles redirecting to
+call or message the driver
+
 v0.3.0 - 4/11/2016
 ------------------
 ### Added
