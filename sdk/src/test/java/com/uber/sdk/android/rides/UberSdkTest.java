@@ -22,22 +22,22 @@ public class UberSdkTest extends RobolectricTestBase {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void getClientId_whenNotInitialized_shouldThrowExceptoin() {
+    public void getClientId_whenNotInitialized_shouldThrowException() {
         UberSdk.getClientId();
     }
 
     @Test(expected = IllegalStateException.class)
-    public void getServerToken_whenNotInitialized_shouldThrowExceptoin() {
+    public void getServerToken_whenNotInitialized_shouldThrowException() {
         UberSdk.getServerToken();
     }
 
     @Test(expected = IllegalStateException.class)
-    public void getRedirectUri_whenNotInitialized_shouldThrowExceptoin() {
+    public void getRedirectUri_whenNotInitialized_shouldThrowException() {
         UberSdk.getRedirectUri();
     }
 
     @Test(expected = IllegalStateException.class)
-    public void getRegion_whenNotInitialized_shouldThrowExceptoin() {
+    public void getRegion_whenNotInitialized_shouldThrowException() {
         UberSdk.getRegion();
     }
 
@@ -47,12 +47,12 @@ public class UberSdkTest extends RobolectricTestBase {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void setRedirectUri_whenNotInitialized_shouldThrowExceptoin() {
+    public void setRedirectUri_whenNotInitialized_shouldThrowException() {
         UberSdk.setRedirectUri("redirectUri");
     }
 
     @Test(expected = IllegalStateException.class)
-    public void setRegion_whenNotInitialized_shouldThrowExceptoin() {
+    public void setRegion_whenNotInitialized_shouldThrowException() {
         UberSdk.setRegion(WORLD);
     }
 
