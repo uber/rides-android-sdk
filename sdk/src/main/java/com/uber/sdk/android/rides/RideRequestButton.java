@@ -26,6 +26,8 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StyleRes;
+import android.support.annotation.VisibleForTesting;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -35,7 +37,7 @@ import android.view.View;
  */
 public class RideRequestButton extends UberButton {
 
-    private static final String USER_AGENT_BUTTON = "rides-android-v0.3.1-button";
+    private static final String USER_AGENT_BUTTON = "rides-android-v0.3.2-button";
 
     @NonNull private RideRequestBehavior mRequestBehavior = new RequestDeeplinkBehavior();
     @NonNull private RideParameters mRideParameters = new RideParameters.Builder().build();
@@ -45,11 +47,11 @@ public class RideRequestButton extends UberButton {
     }
 
     public RideRequestButton(Context context, AttributeSet attrs) {
-        this(context, attrs, R.attr.uberButtonStyle);
+        this(context, attrs, 0);
     }
 
     public RideRequestButton(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr, 0);
+        super(context, attrs, defStyleAttr, R.style.UberButton_RideRequest);
     }
 
     /**
@@ -78,18 +80,9 @@ public class RideRequestButton extends UberButton {
             @Nullable AttributeSet attributeSet,
             int defStyleAttrs,
             int defStyleRes) {
-        Style style = Style.DEFAULT;
-        if (attributeSet != null) {
-            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attributeSet,
-                    R.styleable.RideRequestButton, 0, 0);
-            style = Style.fromInt(typedArray.getInt(R.styleable.RideRequestButton_ub__style,
-                    Style.DEFAULT.getValue()));
-            typedArray.recycle();
-        }
-        // If no style specified, or just the default UberButton style, use the style attribute
-        defStyleRes = defStyleRes == 0 || defStyleRes == R.style.UberButton ? style.getStyleId() : defStyleRes;
 
-        super.init(context, attributeSet, defStyleAttrs, defStyleRes);
+        super.init(context, attributeSet, defStyleAttrs,
+                getStyleWithDefault(context, attributeSet, defStyleRes));
 
         setOnClickListener(new OnClickListener() {
             @Override
@@ -100,10 +93,27 @@ public class RideRequestButton extends UberButton {
         });
     }
 
+    @VisibleForTesting
+    @StyleRes
+    int getStyleWithDefault(@NonNull Context context,
+                                      @Nullable AttributeSet attributeSet,
+                                      @StyleRes int defStyleRes) {
+
+        TypedArray typedArray = context.getTheme().obtainStyledAttributes(attributeSet,
+                R.styleable.RideRequestButton, 0, defStyleRes);
+        try {
+            return Style.fromInt(typedArray.getInt(R.styleable.RideRequestButton_ub__style,
+                    Style.DEFAULT.getValue())).getStyleId();
+        } finally {
+            typedArray.recycle();
+        }
+    }
+
     /**
      * Encapsulates the valid values for the uber:color_scheme attribute for a {@link RideRequestButton}
      */
-    private enum Style {
+    @VisibleForTesting
+    enum Style {
         /**
          * Black background, white text. This is the default.
          */
@@ -114,7 +124,8 @@ public class RideRequestButton extends UberButton {
          */
         WHITE(1, R.style.UberButton_RideRequest_White);
 
-        private static Style DEFAULT = BLACK;
+        @VisibleForTesting
+        static Style DEFAULT = BLACK;
 
         private int mIntValue;
         private int mStyleId;
@@ -138,11 +149,13 @@ public class RideRequestButton extends UberButton {
             return DEFAULT;
         }
 
-        private int getValue() {
+        @VisibleForTesting
+        int getValue() {
             return mIntValue;
         }
 
-        private int getStyleId() {
+        @VisibleForTesting
+        int getStyleId() {
             return mStyleId;
         }
     }

@@ -36,7 +36,6 @@ import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 
 import com.uber.sdk.android.rides.R;
-import com.uber.sdk.android.rides.RideRequestViewError;
 import com.uber.sdk.android.rides.UberSdk;
 
 import java.util.Collection;
@@ -97,6 +96,9 @@ public class LoginView extends LinearLayout {
             return;
         }
 
+        mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.getSettings().setAppCacheEnabled(true);
+        mWebView.getSettings().setDomStorageEnabled(true);
         mWebView.setWebViewClient(new OAuthWebViewClient(redirectUri, mLoginCallback));
         mWebView.loadUrl(LoginView.buildUrl(redirectUri, mScopes));
     }

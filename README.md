@@ -19,7 +19,7 @@ To use the Uber Rides Android SDK, add the compile dependency with the latest ve
 Add the Uber Rides Android SDK to your `build.gradle`:
 ```gradle
 dependencies {
-    compile 'com.uber.sdk:rides-android:0.3.1'
+    compile 'com.uber.sdk:rides-android:0.3.2'
 }
 ```
 
@@ -30,7 +30,7 @@ In the `pom.xml` file:
 <dependency>
     <groupId>com.uber.sdk</groupId>
     <artifactId>rides-android</artifactId>
-    <version>0.3.1</version>
+    <version>0.3.2</version>
 </dependency>
 ```
 
@@ -66,7 +66,7 @@ You can also add your button through XML:
    android:layout_width="match_parent"
    android:layout_height="match_parent">
 
-   <com.uber.sdk.android.rides.RequestButton
+   <com.uber.sdk.android.rides.RideRequestButton
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       uber:ub__style="black"/>
@@ -79,13 +79,13 @@ To use the `uber` custom attribute be sure to add `xmlns:uber="http://schemas.an
 
 The default color has a black background with white text:
 ```xml
-<com.uber.sdk.android.rides.RequestButton
+<com.uber.sdk.android.rides.RideRequestButton
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"/>
 ```
 For a button with a white background and black text:
 ```xml
-<com.uber.sdk.android.rides.RequestButton
+<com.uber.sdk.android.rides.RideRequestButton
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       uber:ub__style="white"/>
@@ -154,7 +154,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data){
             }
         }
 
-    loginManager.onActivityResult(requestCode, resultCode, data, 
+    loginManager.onActivityResult(requestCode, resultCode, data,
     loginCallback);
 }
 ```
@@ -209,7 +209,7 @@ rideRequestView.load();
 
 ## Sample Apps
 
-A sample app can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases/tag/v0.3.1).
+A sample app can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases/tag/v0.3.2).
 
 Don’t forget to configure the client ID in the `SampleActivity` file.
 

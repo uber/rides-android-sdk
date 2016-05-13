@@ -56,7 +56,7 @@ public class UberButton extends Button {
      * @param attrs attributes for the view.
      */
     public UberButton(Context context, AttributeSet attrs) {
-        this(context, attrs, R.attr.uberButtonStyle);
+        this(context, attrs, 0);
     }
 
     /**
@@ -67,7 +67,7 @@ public class UberButton extends Button {
      * @param defStyleAttr the default attribute to use for a style if none is specified.
      */
     public UberButton(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
+        this(context, attrs, defStyleAttr, R.style.UberButton);
     }
 
     /**
@@ -80,8 +80,7 @@ public class UberButton extends Button {
      */
     public UberButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr);
-        defStyleRes = defStyleRes == 0 ? R.style.UberButton : defStyleRes;
-        init(context, attrs, defStyleAttr, defStyleRes);
+        init(context, attrs, defStyleAttr, defStyleRes == 0 ? R.style.UberButton : defStyleRes);
     }
 
     protected void init(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {

@@ -71,7 +71,7 @@ public class RideRequestViewTest extends RobolectricTestBase {
     private static final String DROPOFF_NICK = "pickupNick";
     private static final String DROPOFF_ADDR = "Dropoff Address";
     private static final String TOKEN_STRING = "thisIsAnAccessToken";
-    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.3.1-ride_request_view";
+    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.3.2-ride_request_view";
 
     private AccessToken mAccessToken;
     private RideRequestView mRideRequestView;
@@ -132,7 +132,7 @@ public class RideRequestViewTest extends RobolectricTestBase {
 
     @Test
     public void onBuildUrl_withUserAgentNonNull_shouldNotOverride() throws IOException {
-        String widgetUserAgent = "rides-android-v0.3.1-ride_request_widget";
+        String widgetUserAgent = "rides-android-v0.3.2-ride_request_widget";
         String path = "src/test/resources/riderequestviewuris/default_uri";
         String expectedUri = readUriResourceWithUserAgentParam(path, widgetUserAgent);
 

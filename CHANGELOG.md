@@ -1,3 +1,10 @@
+v0.3.2 - 5/12/2016
+------------------
+### Fixed
+
+- [Issue #18] (https://github.com/uber/rides-android-sdk/issues/18) Unable to signup in widget
+- [Issue #13] (https://github.com/uber/rides-android-sdk/issues/13) Android Studio preview not working
+
 v0.3.1 - 4/18/2016
 ------------------
 ### Fixed

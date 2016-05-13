@@ -41,7 +41,7 @@ public class RequestDeeplink {
 
     private static final String UBER_PACKAGE_NAME = "com.ubercab";
     private static final String UBER_SDK_LOG_TAG = "UberSDK";
-    private static final String USER_AGENT_DEEPLINK = "rides-android-v0.3.1-deeplink";
+    private static final String USER_AGENT_DEEPLINK = "rides-android-v0.3.2-deeplink";
 
     @NonNull private final Uri mUri;
 
