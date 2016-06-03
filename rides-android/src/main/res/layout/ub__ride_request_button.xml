@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2016 Uber Technologies, Inc.
+  ~
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy
+  ~ of this software and associated documentation files (the "Software"), to deal
+  ~ in the Software without restriction, including without limitation the rights
+  ~ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is
+  ~ furnished to do so, subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in
+  ~ all copies or substantial portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  ~ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  ~ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  ~ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  ~ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  ~ THE SOFTWARE.
+  -->
+
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.uber.sdk.android.core.UberButton
+        android:id="@+id/request_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center_vertical|start"
+        android:drawableLeft="@drawable/uber_badge"
+        android:drawablePadding="@dimen/ub__small_padding"
+        android:gravity="center_vertical|start"
+        android:minHeight="@dimen/ub__ride_request_button_height"
+        android:minWidth="@dimen/ub__ride_request_button_width"
+        android:padding="@dimen/ub__small_padding"
+        android:text="@string/ub__ride_with_uber"
+        android:textSize="@dimen/ub__text_size" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical|end"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/time_estimate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_weight="1"
+            android:gravity="center_vertical|end"
+            android:paddingEnd="@dimen/ub__small_padding"
+            android:paddingRight="@dimen/ub__small_padding"
+            android:textSize="@dimen/ub__secondary_text_size"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/price_estimate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical|end"
+            android:paddingEnd="@dimen/ub__small_padding"
+            android:paddingRight="@dimen/ub__small_padding"
+            android:textSize="@dimen/ub__secondary_text_size"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</merge>

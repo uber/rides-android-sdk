@@ -10,7 +10,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.0.0'
+        classpath 'com.android.tools.build:gradle:2.1.0'
         classpath 'net.researchgate:gradle-release:2.3.5'
         classpath 'co.riiid:gradle-github-plugin:0.4.2'
         classpath 'net.saliman:gradle-cobertura-plugin:2.3.1'
@@ -22,10 +22,12 @@ allprojects {
     apply plugin: 'maven'
 
     ["githubToken", "ossrhUsername", "ossrhPassword",
-     "signing.keyId", "signing.password", "signing.secretKeyRingFile",].each {checkAndDefaultProperty(it)}
+     "signing.keyId", "signing.password", "signing.secretKeyRingFile",].each {
+        checkAndDefaultProperty(it)
+    }
 
     ext.set("unsnapshottedVersion", version.replaceAll("-SNAPSHOT", ""))
-    ext.set("samples", project(":samples").subprojects.collect {it.path})
+    ext.set("samples", project(":samples").subprojects.collect { it.path })
     ext.set("isReleaseVersion", !version.endsWith("SNAPSHOT"))
 
     repositories {
@@ -47,15 +49,17 @@ allprojects {
 
 def generateReleaseNotes() {
     def changelogSnippet = generateChangelogSnippet()
-    def model = [title: "Uber Rides Android SDK (Beta) v${unsnapshottedVersion}",
-                 date: DateGroovyMethods.format(new Date(), 'MM/dd/yyyy'),
+    def model = [title  : "Uber Rides Android SDK (Beta) v${unsnapshottedVersion}",
+                 date   : DateGroovyMethods.format(new Date(), 'MM/dd/yyyy'),
                  snippet: changelogSnippet,
-                 assets: project.samples.collect {[
-                         title: project(it).name,
-                         download: githubDownloadPrefix + "v${unsnapshottedVersion}/"
-                                 + project(it).name + "-v${unsnapshottedVersion}.zip",
-                         description: project(it).description,
-                 ]}]
+                 assets : project.samples.collect {
+                     [
+                             title      : project(it).name,
+                             download   : githubDownloadPrefix + "v${unsnapshottedVersion}/"
+                                     + project(it).name + "-v${unsnapshottedVersion}.zip",
+                             description: project(it).description,
+                     ]
+                 }]
     def engine = new GStringTemplateEngine()
     def template = engine.createTemplate(rootProject.file('releasenotes.gtpl')).make(model)
     return template.toString()
@@ -65,7 +69,7 @@ def generateChangelogSnippet() {
     def changelog = rootProject.file('CHANGELOG.md').text
     def snippet = ""
     def stop = false
-    changelog.eachLine {line, count ->
+    changelog.eachLine { line, count ->
         if (count >= 2) {
             stop = stop || line.startsWith("v");
             if (!stop) {
@@ -106,9 +110,11 @@ gradle.taskGraph.beforeTask { Task task ->
     }
 }
 
-afterReleaseBuild.dependsOn ":sdk:uploadArchives"
+task uploadSdks(dependsOn: [":core-android:uploadArchives", ":rides-android:uploadArchives"])
+
+afterReleaseBuild.dependsOn uploadSdks
 updateVersion.dependsOn ":githubRelease"
-githubRelease.dependsOn project(":samples").subprojects.collect {it.path + ":githubReleaseZip"}
+githubRelease.dependsOn project(":samples").subprojects.collect { it.path + ":githubReleaseZip" }
 
 release {
     failOnCommitNeeded = false
@@ -146,16 +152,18 @@ distributions {
                 include 'releasenotes.gtpl'
                 include 'settings.gradle'
                 include 'gradle/'
+                include 'config'
+                include 'test-shared/'
             }
 
             from(rootDir) {
                 include 'README.md'
                 filter { String line ->
-                        line.replaceAll("_version_", unsnapshottedVersion)
+                    line.replaceAll("_version_", unsnapshottedVersion)
                 }
             }
 
-            from('sdk') {
+            from('core-android') {
                 filesNotMatching("**/*.png") {
                     filter { String line ->
                         line.replaceAll("_version_", unsnapshottedVersion)
@@ -163,7 +171,18 @@ distributions {
                 }
                 exclude 'build'
                 exclude '*.iml'
-                into 'sdk'
+                into 'core-android'
+            }
+
+            from('rides-android') {
+                filesNotMatching("**/*.png") {
+                    filter { String line ->
+                        line.replaceAll("_version_", unsnapshottedVersion)
+                    }
+                }
+                exclude 'build'
+                exclude '*.iml'
+                into 'rides-android'
             }
 
             from('samples') {

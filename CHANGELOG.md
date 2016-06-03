@@ -1,3 +1,42 @@
+v0.5.0 - 6/2/2016
+------------
+### Added
+
+#### Single Sign On
+
+Introducing **SSO**. Allows a user to login & authorize your application via the native Uber app. Users no longer have to remember their username & password as long as they are signed into the Uber app.
+
+- Added Uber Application Single Sign On using `LoginManager.login(activity)`
+- Added `LoginButton` to ease signing in using Uber account.
+- Added `PRIVILEGED` scopes to `Scope`.
+
+#### Support all REST API Endpoints
+
+- Added dependency on [Uber Rides Java SDK](https://github.com/uber/rides-java-sdk) to access the Uber API.
+
+### Changed
+
+#### Split Libraries
+
+Now split into the `core-android` and `rides-android` libraries.
+
+- `core-android` contains common classes and auth related functionality.
+- `rides-android` contains only rides related features.
+
+#### RideRequestButton
+
+The RideRequestButton has been updated to show information about your Uber ride.
+
+- Added ETA and Price estimate to `RideRequestButton` if a product ID is set in the RideParameters.
+
+### Breaking
+
+- Moved core functionality and authentication related classes to `core-android` and the Java SDK. Imports require updating.
+- Removed `UberSdk.initialize(context, clientId)` and all `UberSdk` setters in favor of `UberSdk.initialize(sessionConfiguration)`
+- Removed `LoginManager.loginWithScopes(activity, scopes)` in favor of `LoginManager.login(activity)` after using `new LoginManager(accessTokenManager, callback)`
+- Removed `AccessTokenManager.getAccessToken(key)` and `AccessTokenManager.setAccessToken(key, token)` in favor of `new AccessTokenManager(context, key)`
+- Removed `LoginManager.onActivityResult(requestCode, resultCode, data, callback)` in favor of `LoginManager.onActivityResult(activity, requestCode, resultCode, data)`
+
 v0.3.2 - 5/12/2016
 ------------------
 ### Fixed

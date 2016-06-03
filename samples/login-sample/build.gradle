@@ -1,0 +1,51 @@
+apply plugin: 'com.android.application'
+
+repositories {
+    jcenter()
+    mavenLocal()
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.1.0'
+    }
+}
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.1"
+
+    defaultConfig {
+        applicationId "com.uber.sdk.android.login.sample"
+        minSdkVersion 14
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+        buildConfigField "String", "CLIENT_ID", "\"${loadSecret("UBER_CLIENT_ID")}\"" //Add your client id to gradle.properties
+        buildConfigField "String", "REDIRECT_URI", "\"${loadSecret("UBER_REDIRECT_URI")}\"" //Add your redirect uri to gradle.properties
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:23.0.1'
+    compile project(':core-android')
+}
+
+/**
+ * Loads property from gradle.properties and ~/.gradle/gradle.properties
+ * Use to look up confidential information like keys that shoudln't be stored publicly
+ * @param name to lookup
+ * @return the value of the property or "MISSING"
+ */
+def loadSecret(String name) {
+    return hasProperty(name) ? getProperty(name) : "MISSING"
+}
