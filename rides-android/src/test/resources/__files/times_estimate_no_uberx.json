@@ -1,0 +1,46 @@
+{
+  "times": [
+    {
+      "localized_display_name": "uberPOOL",
+      "estimate": 100,
+      "display_name": "uberPOOL",
+      "product_id": "26546650-e557-4a7b-86e7-6a3942445247"
+    },
+    {
+      "localized_display_name": "uberXL",
+      "estimate": 480,
+      "display_name": "uberXL",
+      "product_id": "821415d8-3bd5-4e27-9604-194e4359a449"
+    },
+    {
+      "localized_display_name": "UberSELECT",
+      "estimate": 240,
+      "display_name": "UberSELECT",
+      "product_id": "57c0ff4e-1493-4ef9-a4df-6b961525cf92"
+    },
+    {
+      "localized_display_name": "UberBLACK",
+      "estimate": 180,
+      "display_name": "UberBLACK",
+      "product_id": "d4abaae7-f4d6-4152-91cc-77523e8165a4"
+    },
+    {
+      "localized_display_name": "UberSUV",
+      "estimate": 180,
+      "display_name": "UberSUV",
+      "product_id": "8920cb5e-51a4-4fa4-acdf-dd86c5e18ae0"
+    },
+    {
+      "localized_display_name": "ASSIST",
+      "estimate": 660,
+      "display_name": "ASSIST",
+      "product_id": "ff5ed8fe-6585-4803-be13-3ca541235de3"
+    },
+    {
+      "localized_display_name": "uberTAXI",
+      "estimate": 240,
+      "display_name": "uberTAXI",
+      "product_id": "3ab64887-4842-4c8e-9780-ccecd3a0391d"
+    }
+  ]
+}

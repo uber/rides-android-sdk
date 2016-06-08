@@ -12,11 +12,15 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.robolectric.Robolectric;
 
+import java.security.NoSuchAlgorithmException;
+
 import static junit.framework.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +40,8 @@ public class AppProtocolTest extends RobolectricTestBase {
                     "5990608c47d90955ce9cc71f93199a5f3c7624cca8fac70ff70b1e4cf9eb887a92f358aa21ba42e0e86bbecf7d030d8" +
                     "1a383b716f22ac98746f2956e90b96e8f35d298498e55cdbe4d42a762";
 
+    private static final String GOOD_HASH = "QRxAsx9tAdrGjXEd+Ztur+7I5zs=";
+
     private static final String BAD_SIGNATURE =
             "3082022730820190a00302010202044cb88a8e300d06092a864886f70d01010505003057311330110603550408130a43616c696" +
                     "66f726e6961311630140603550407130d53616e204672616e636973636f3110300e060355040a130755626572436162" +
@@ -52,6 +58,8 @@ public class AppProtocolTest extends RobolectricTestBase {
 
     @Mock
     PackageManager packageManager;
+    @Mock
+    PackageInfo packageInfo;
 
     Activity activity;
     AppProtocol appProtocol;
@@ -80,9 +88,52 @@ public class AppProtocolTest extends RobolectricTestBase {
         assertFalse(appProtocol.validateSignature(activity, AppProtocol.UBER_PACKAGE_NAME));
     }
 
+    @Test
+    public void getApplicationSignature_whenValidPackageSignature_shouldSucceed() throws Exception {
+        stubAppSignature(GOOD_SIGNATURE);
+        assertThat(appProtocol.getAppSignature(activity)).isEqualTo(GOOD_HASH);
+    }
+
+    @Test
+    public void getPackageSignature_whenNameNotFoundException_shouldReturnNull() throws Exception {
+        stubAppSignature(GOOD_SIGNATURE);
+        final Throwable throwable = new PackageManager.NameNotFoundException();
+        doThrow(throwable).when(packageManager).getPackageInfo(AppProtocol.UBER_PACKAGE_NAME, PackageManager.GET_SIGNATURES);
+
+        assertThat(appProtocol.getAppSignature(activity)).isNull();
+    }
+
+    @Test
+    public void getPackageSignature_whenNullPackageInfo_shouldReturnNull() throws Exception {
+        stubAppSignature(GOOD_SIGNATURE);
+        when(packageManager.getPackageInfo(AppProtocol.UBER_PACKAGE_NAME, PackageManager.GET_SIGNATURES))
+                .thenReturn(null);
+
+        assertThat(appProtocol.getAppSignature(activity)).isNull();
+    }
+
+    @Test
+    public void getPackageSignature_whenEmptyPackageInfo_shouldReturnNull() throws Exception {
+        stubAppSignature(GOOD_SIGNATURE);
+        packageInfo.signatures = new Signature[] {};
+
+        assertThat(appProtocol.getAppSignature(activity)).isNull();
+    }
+
+    @Test
+    public void getPackageSignature_whenNoSuchAlgorithmException_shouldReturnNull() throws Exception {
+        stubAppSignature(GOOD_SIGNATURE);
+
+        final Throwable throwable = new NoSuchAlgorithmException();
+        appProtocol = spy(appProtocol);
+        doThrow(throwable).when(appProtocol).getSha1MessageDigest();
+
+        assertThat(appProtocol.getAppSignature(activity)).isNull();
+    }
+
     private void stubAppSignature(String... sig) throws Exception {
+        when(activity.getPackageName()).thenReturn(AppProtocol.UBER_PACKAGE_NAME);
         when(activity.getPackageManager()).thenReturn(packageManager);
-        final PackageInfo packageInfo = new PackageInfo();
 
         Signature[] signatures = new Signature[sig.length];
         for (int i = 0; i < sig.length; i++) {
@@ -98,5 +149,4 @@ public class AppProtocolTest extends RobolectricTestBase {
             fail("Unable to mock Package Manager");
         }
     }
-
 }

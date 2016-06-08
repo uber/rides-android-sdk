@@ -56,11 +56,12 @@ import static com.uber.sdk.android.core.utils.Preconditions.checkNotNull;
  * set to a pickup of the device's location. Requires a client ID to function.
  */
 public class RideRequestButton extends FrameLayout implements RideRequestButtonView {
+
     private static final
     @StyleRes
     int[] STYLES = {R.style.UberButton, R.style.UberButton_White};
 
-    private static final String USER_AGENT_BUTTON = "rides-android-v0.5.0-button";
+    private static final String USER_AGENT_BUTTON = "rides-android-v0.5.1-button";
 
     private RideRequestBehavior rideRequestBehavior;
 
@@ -305,6 +306,7 @@ public class RideRequestButton extends FrameLayout implements RideRequestButtonV
     private synchronized RideRequestButtonController getOrCreateController() {
         if (controller == null) {
             checkNotNull(session, "Must set session using setSession.");
+
             controller = new RideRequestButtonController(this, session, callback);
         }
         return controller;
@@ -318,37 +320,31 @@ public class RideRequestButton extends FrameLayout implements RideRequestButtonV
         }
     }
 
-    private void showDefaultView() {
+    @Override
+    public void showDefaultView() {
         requestButton.setText(R.string.ub__ride_with_uber);
-        clearPriceEstimate();
-        clearTimeEstimate();
+        priceEstimateView.setText("");
+        priceEstimateView.setVisibility(GONE);
+
+        timeEstimateView.setText("");
+        timeEstimateView.setVisibility(GONE);
     }
 
     @Override
-    public void showPriceEstimate(@NonNull PriceEstimate priceEstimate) {
+    public void showEstimate(@NonNull TimeEstimate timeEstimate) {
         requestButton.setText(R.string.ub__get_ride);
-        priceEstimateView.setText(getResources().getString(R.string.ub__price_estimate,
-                priceEstimate.getEstimate(), priceEstimate.getDisplayName()));
-        priceEstimateView.setVisibility(VISIBLE);
-    }
 
-    @Override
-    public void showTimeEstimate(@NonNull TimeEstimate timeEstimate) {
-        requestButton.setText(R.string.ub__get_ride);
         timeEstimateView.setText(getResources().getString(R.string.ub__time_estimate,
                 TimeUnit.SECONDS.toMinutes(timeEstimate.getEstimate())));
         timeEstimateView.setVisibility(VISIBLE);
     }
 
     @Override
-    public void clearPriceEstimate() {
-        priceEstimateView.setText("");
-        priceEstimateView.setVisibility(GONE);
-    }
+    public void showEstimate(@NonNull TimeEstimate timeEstimate, @NonNull PriceEstimate priceEstimate) {
+        showEstimate(timeEstimate);
 
-    @Override
-    public void clearTimeEstimate() {
-        timeEstimateView.setText("");
-        timeEstimateView.setVisibility(GONE);
+        priceEstimateView.setText(getResources().getString(R.string.ub__price_estimate,
+                priceEstimate.getEstimate(), priceEstimate.getDisplayName()));
+        priceEstimateView.setVisibility(VISIBLE);
     }
 }

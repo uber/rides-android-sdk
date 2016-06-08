@@ -26,9 +26,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.install.SignupDeeplink;
+import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.Scope;
 import com.uber.sdk.rides.client.AccessTokenSession;
@@ -82,7 +84,7 @@ public class LoginManager {
 
     static final int REQUEST_CODE_LOGIN_DEFAULT = 1001;
 
-    private static final String USER_AGENT = "core-android-v0.5.0-login_manager";
+    private static final String USER_AGENT = "core-android-v0.5.1-login_manager";
 
     private final AccessTokenManager accessTokenManager;
     private final LoginCallback callback;
@@ -309,6 +311,18 @@ public class LoginManager {
         } else if (authenticationError.equals(AuthenticationError.UNAVAILABLE)
                 && redirectForAuthorizationCode) {
             loginForAuthorizationCode(activity);
+        } else if (AuthenticationError.INVALID_APP_SIGNATURE.equals(authenticationError)) {
+            AppProtocol appProtocol = new AppProtocol();
+            String appSignature = appProtocol.getAppSignature(activity);
+            if (appSignature == null) {
+                Log.e(UberSdk.UBER_SDK_LOG_TAG, "There was an error obtaining your Application Signature. Please check "
+                        + "your Application Signature and add it to the developer dashboard at https://developer.uber"
+                        + ".com/dashboard");
+            } else {
+                Log.e(UberSdk.UBER_SDK_LOG_TAG, "Your Application Signature, " + appSignature
+                        + ", does not match one of the registered Application Signatures on the developer dashboard. "
+                        + "Check your settings at https://developer.uber.com/dashboard");
+            }
         }
         callback.onLoginError(authenticationError);
     }

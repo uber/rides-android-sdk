@@ -72,13 +72,14 @@ public class SampleActivity extends AppCompatActivity implements RideRequestButt
     private static final String SERVER_TOKEN = BuildConfig.SERVER_TOKEN;
 
     private RideRequestButton blackButton;
+    private SessionConfiguration configuration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
 
-        SessionConfiguration configuration = new SessionConfiguration.Builder()
+        configuration = new SessionConfiguration.Builder()
                 .setRedirectUri(REDIRECT_URI)
                 .setClientId(CLIENT_ID)
                 .setServerToken(SERVER_TOKEN)
@@ -91,7 +92,7 @@ public class SampleActivity extends AppCompatActivity implements RideRequestButt
         validateConfiguration(configuration);
         ServerTokenSession session = new ServerTokenSession(configuration);
 
-        RideParameters rideParameters = new RideParameters.Builder()
+        RideParameters rideParametersForProduct = new RideParameters.Builder()
                 .setProductId(UBERX_PRODUCT_ID)
                 .setPickupLocation(PICKUP_LAT, PICKUP_LONG, PICKUP_NICK, PICKUP_ADDR)
                 .setDropoffLocation(DROPOFF_LAT, DROPOFF_LONG, DROPOFF_NICK, DROPOFF_ADDR)
@@ -99,9 +100,15 @@ public class SampleActivity extends AppCompatActivity implements RideRequestButt
 
         // This button demonstrates deep-linking to the Uber app (default button behavior).
         blackButton = (RideRequestButton) findViewById(R.id.uber_button_black);
-        blackButton.setRideParameters(rideParameters);
+        blackButton.setRideParameters(rideParametersForProduct);
         blackButton.setSession(session);
         blackButton.setCallback(this);
+        blackButton.loadRideInformation();
+
+        RideParameters rideParametersCheapestProduct = new RideParameters.Builder()
+                .setPickupLocation(PICKUP_LAT, PICKUP_LONG, PICKUP_NICK, PICKUP_ADDR)
+                .setDropoffLocation(DROPOFF_LAT, DROPOFF_LONG, DROPOFF_NICK, DROPOFF_ADDR)
+                .build();
 
         // This button demonstrates launching the RideRequestActivity (customized button behavior).
         // You can optionally setRideParameters for pre-filled pickup and dropoff locations.
@@ -109,8 +116,10 @@ public class SampleActivity extends AppCompatActivity implements RideRequestButt
         RideRequestActivityBehavior rideRequestActivityBehavior = new RideRequestActivityBehavior(this,
                 WIDGET_REQUEST_CODE, configuration);
         uberButtonWhite.setRequestBehavior(rideRequestActivityBehavior);
+        uberButtonWhite.setRideParameters(rideParametersForProduct);
+        uberButtonWhite.setSession(session);
+        uberButtonWhite.loadRideInformation();
     }
-
 
     @Override
     public void onRideInformationLoaded() {

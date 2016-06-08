@@ -20,7 +20,7 @@ To use the Uber Rides Android SDK, add the compile dependency with the latest ve
 Add the Uber Rides Android SDK to your `build.gradle`:
 ```gradle
 dependencies {
-    compile 'com.uber.sdk:rides-android:0.5.0'
+    compile 'com.uber.sdk:rides-android:0.5.1'
 }
 ```
 
@@ -31,7 +31,7 @@ In the `pom.xml` file:
 <dependency>
     <groupId>com.uber.sdk</groupId>
     <artifactId>rides-android</artifactId>
-    <version>0.5.0</version>
+    <version>0.5.1</version>
 </dependency>
 ```
 
@@ -119,24 +119,23 @@ requestButton.setRequestBehavior(new RideRequestActivityBehavior(this, REQUEST_C
 That's it! With this configuration, when a user clicks on the request button, an activity will be launched that contains a login view (on first launch) where the user can authorize your app. After authorization, this activity will contain the Ride Request View. If any unexpected errors occur that the SDK can't handle, the activity will finish with an error in the result Intent using either the key `RideRequestActivity.AUTHENTICATION_ERROR` or `RideRequestActivity.RIDE_REQUEST_ERROR` depending on where the error occurred.
 
 ## Ride Request Button with ETA and price
-To further enhance the button with destination and price information, add a Session to it.
+To further enhance the button with destination and price information, add a Session to it and call `loadRideInformation()` function.
 
 ```java
 
 RideParameters rideParams = new RideParameters.Builder()
-  .setProductID("a1111c8c-c720-46c3-8534-2fcdd730040d")
   .setPickupLocation(37.775304f, -122.417522f, "Uber HQ", "1455 Market Street, San Francisco")
-  .setDropoffLocation(37.795079f, -122.4397805f, "Embarcadero", "One Embarcadero Center, San Francisco")
+  .setDropoffLocation(37.795079f, -122.4397805f, "Embarcadero", "One Embarcadero Center, San Francisco") // Price estimate will only be provided if this is provided.
+  .setProductID("a1111c8c-c720-46c3-8534-2fcdd730040d") // Optional. If not provided, the cheapest product will be used.
   .build();
   
 SessionConfiguration config = new SessionConfiguration.Builder().setServerToken("YOUR_SERVER_TOKEN").build();
 ServerTokenSession session = new ServerTokenSession(config);
 
-
 RideRequestButtonCallback callback = new RideRequestButtonCallback() {
 
     @Override
-    public void onMetadataRefreshed() {
+    public void onRideInformationLoaded() {
         
     }
 
@@ -154,7 +153,7 @@ RideRequestButtonCallback callback = new RideRequestButtonCallback() {
 requestButton.setRideParameters(rideParams);
 requestButton.setSession(session);  
 requestButton.setCallback(callback));
-requestButton.refreshMetaData();
+requestButton.loadRideInformation();
 ```
 
 ## Custom Integration
@@ -315,7 +314,7 @@ service.getUserProfile().enqueue(new Callback<UserProfile>() {
 
 ## Sample Apps
 
-Sample apps can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases/tag/v0.5.0).
+Sample apps can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases/tag/v0.5.1).
 
 The Sample apps require configuration parameters to interact with the Uber API, these include the client id, redirect uri, and server token. They are provided on the [Uber developer dashboard](https://developer.uber.com/dashboard).
 

@@ -21,6 +21,6 @@
   -->
 
 <resources>
-    <dimen name="ub__ride_request_button_width">300dp</dimen>
+    <dimen name="ub__ride_request_button_width">320dp</dimen>
     <dimen name="ub__ride_request_button_height">40dp</dimen>
 </resources>

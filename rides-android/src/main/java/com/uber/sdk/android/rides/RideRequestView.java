@@ -55,7 +55,7 @@ import java.util.Map;
  */
 public class RideRequestView extends LinearLayout {
 
-    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.5.0-ride_request_view";
+    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.5.1-ride_request_view";
     @Nullable private AccessTokenSession accessTokenSession;
     @NonNull @VisibleForTesting RideParameters rideParameters = new RideParameters.Builder().build();
     @Nullable private RideRequestViewCallback rideRequestViewCallback;
@@ -96,7 +96,7 @@ public class RideRequestView extends LinearLayout {
         final SessionConfiguration config;
         final AccessTokenStorage storage;
 
-        if(accessTokenSession == null && UberSdk.isInitialized()) {
+        if (accessTokenSession == null && UberSdk.isInitialized()) {
             config = UberSdk.getDefaultSessionConfiguration();
             storage = new AccessTokenManager(getContext());
             accessTokenSession = new AccessTokenSession(config, storage);

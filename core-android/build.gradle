@@ -155,7 +155,7 @@ cobertura {
 }
 
 dependencies {
-    compile ('com.uber.sdk:rides:0.5.0') {
+    compile ('com.uber.sdk:rides:0.5.1') {
         //Do not need Google OAuth based logic in Android
         exclude module: 'slf4j-log4j12'
         exclude module: 'google-oauth-client'

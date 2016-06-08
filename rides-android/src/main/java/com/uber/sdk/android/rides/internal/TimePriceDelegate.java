@@ -24,14 +24,44 @@ package com.uber.sdk.android.rides.internal;
 
 import android.support.annotation.NonNull;
 
+import com.uber.sdk.android.rides.RideRequestButtonCallback;
 import com.uber.sdk.rides.client.model.PriceEstimate;
 import com.uber.sdk.rides.client.model.TimeEstimate;
 
-public interface RideRequestButtonView {
+class TimePriceDelegate extends TimeDelegate {
 
-    void showEstimate(@NonNull TimeEstimate timeEstimate);
+    private TimeEstimate timeEstimate = null;
+    private PriceEstimate priceEstimate = null;
 
-    void showEstimate(@NonNull TimeEstimate timeEstimate, @NonNull PriceEstimate priceEstimate);
+    public TimePriceDelegate(RideRequestButtonView view, RideRequestButtonCallback callback) {
+        super(view, callback);
+    }
 
-    void showDefaultView();
+    @Override
+    void onTimeReceived(@NonNull TimeEstimate timeEstimate) {
+        if (priceEstimate != null) {
+            showEstimate(timeEstimate, priceEstimate);
+        } else {
+            this.timeEstimate = timeEstimate;
+        }
+    }
+
+    void onPriceReceived(@NonNull PriceEstimate priceEstimate) {
+        if (timeEstimate != null) {
+            showEstimate(timeEstimate, priceEstimate);
+        } else {
+            this.priceEstimate = priceEstimate;
+        }
+    }
+
+    private void showEstimate(@NonNull TimeEstimate timeEstimate, @NonNull PriceEstimate priceEstimate) {
+        if (view != null) {
+            view.showEstimate(timeEstimate, priceEstimate);
+        }
+
+        if (callback != null) {
+            callback.onRideInformationLoaded();
+        }
+        finish();
+    }
 }

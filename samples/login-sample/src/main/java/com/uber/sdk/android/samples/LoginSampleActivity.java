@@ -36,6 +36,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.auth.AccessTokenManager;
 import com.uber.sdk.android.core.auth.AuthenticationError;
 import com.uber.sdk.android.core.auth.LoginButton;
@@ -74,7 +75,8 @@ public class LoginSampleActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = "LoginSampleActivity";
 
-    private static final int CUSTOM_BUTTON_REQUEST_CODE = 1112;
+    private static final int LOGIN_BUTTON_CUSTOM_REQUEST_CODE = 1112;
+    private static final int CUSTOM_BUTTON_REQUEST_CODE = 1113;
 
 
     private LoginButton blackButton;
@@ -108,8 +110,9 @@ public class LoginSampleActivity extends AppCompatActivity {
         //Custom Scopes are set using XML for this button as well in R.layout.activity_sample
         blackButton = (LoginButton) findViewById(R.id.uber_button_black);
         blackButton.setAccessTokenManager(accessTokenManager)
+                    .setCallback(new SampleLoginCallback())
                     .setSessionConfiguration(configuration)
-                    .setCallback(new SampleLoginCallback());
+                    .setRequestCode(LOGIN_BUTTON_CUSTOM_REQUEST_CODE);
 
 
         //Use a custom button with an onClickListener to call the LoginManager directly
@@ -130,7 +133,7 @@ public class LoginSampleActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(loginManager.isAuthenticated()) {
+        if (loginManager.isAuthenticated()) {
             loadProfileInfo();
         }
     }

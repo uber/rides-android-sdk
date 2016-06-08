@@ -1,5 +1,13 @@
+v0.5.1 - 6/7/2016
+-----------------
+### Fixed
+
+- [Issue #21] (https://github.com/uber/rides-android-sdk/issues/21) Remove sdk folder
+- [Issue #23] (https://github.com/uber/rides-android-sdk/issues/23) Add additional error logging when invalid app signature is returned.
+- [Issue #24] (https://github.com/uber/rides-android-sdk/issues/24) Remove product Id requirement for Ride Request Button
+
 v0.5.0 - 6/2/2016
-------------
+-----------------
 ### Added
 
 #### Single Sign On
