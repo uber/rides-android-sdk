@@ -1,4 +1,4 @@
-# Uber Rides Android SDK (beta)
+# Uber Rides Android SDK (beta) [![Build Status](https://travis-ci.org/uber/rides-android-sdk.svg?branch=master)](https://travis-ci.org/uber/rides-android-sdk)
 
 Official Android SDK (beta) to support:
  - Ride Request Button
@@ -128,7 +128,7 @@ RideParameters rideParams = new RideParameters.Builder()
   .setDropoffLocation(37.795079f, -122.4397805f, "Embarcadero", "One Embarcadero Center, San Francisco") // Price estimate will only be provided if this is provided.
   .setProductID("a1111c8c-c720-46c3-8534-2fcdd730040d") // Optional. If not provided, the cheapest product will be used.
   .build();
-  
+
 SessionConfiguration config = new SessionConfiguration.Builder().setServerToken("YOUR_SERVER_TOKEN").build();
 ServerTokenSession session = new ServerTokenSession(config);
 
@@ -136,7 +136,7 @@ RideRequestButtonCallback callback = new RideRequestButtonCallback() {
 
     @Override
     public void onRideInformationLoaded() {
-        
+
     }
 
     @Override
@@ -246,7 +246,7 @@ The `RideRequestView` is like any other view you'd add to your app. Create a new
 RideRequestView rideRequestView = new RideRequestView(context);
 
 //Optionally set Session, will use default session from UberSDK otherwise
-//rideRequestView.setSession(session); 
+//rideRequestView.setSession(session);
 
 rideRequestView.setRideParameters(rideParameters)
 rideRequestView.setRideRequestViewCallback(new RideRequestViewErrorCallback() {
@@ -272,7 +272,7 @@ Session session = loginManager.getSession();
 Now create an instance of the `RidesService` using the `Session`
 
 ```java
-RidesService service = UberRidesApi.with(session).createService(); 
+RidesService service = UberRidesApi.with(session).createService();
 ```
 
 ### Sync vs. Async Calls
@@ -314,11 +314,11 @@ service.getUserProfile().enqueue(new Callback<UserProfile>() {
 
 ## Sample Apps
 
-Sample apps can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases/tag/v0.5.1).
+Sample apps can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases/tag/v0.5.2).
 
 The Sample apps require configuration parameters to interact with the Uber API, these include the client id, redirect uri, and server token. They are provided on the [Uber developer dashboard](https://developer.uber.com/dashboard).
 
-Specify your configuration parameters in the sample's gradle.properties file, where examples can be found adhering to the format `UBER_CLIENT_ID=insert_your_client_id_here`. These are generated into the BuildConfig during compilation. 
+Specify your configuration parameters in the sample's gradle.properties file, where examples can be found adhering to the format `UBER_CLIENT_ID=insert_your_client_id_here`. These are generated into the BuildConfig during compilation.
 
 For a more idiomatic storage approach, define these in your home gradle.properties file to keep them out of the git repo.
 

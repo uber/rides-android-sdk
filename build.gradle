@@ -110,10 +110,22 @@ gradle.taskGraph.beforeTask { Task task ->
     }
 }
 
-task uploadSdks(dependsOn: [":core-android:uploadArchives", ":rides-android:uploadArchives"])
+task updateChangelog() << {
+    def newVersion = findProperty("version").replaceAll('-SNAPSHOT', '')
+    def changelog = rootProject.file('CHANGELOG.md')
+    def changelogText = changelog.text
+    if (!changelogText.startsWith("v${newVersion} -")) {
+        def updatedChangelog = "v${newVersion} - TBD\n"
+        def dashesCount = updatedChangelog.length()-1
+        updatedChangelog += "-"*dashesCount + "\n\n"
 
-afterReleaseBuild.dependsOn uploadSdks
+        changelog.write(updatedChangelog + changelogText)
+    }
+}
+
+afterReleaseBuild.dependsOn(":core-android:uploadArchives", ":rides-android:uploadArchives")
 updateVersion.dependsOn ":githubRelease"
+commitNewVersion.dependsOn ':updateChangelog'
 githubRelease.dependsOn project(":samples").subprojects.collect { it.path + ":githubReleaseZip" }
 
 release {
@@ -154,6 +166,7 @@ distributions {
                 include 'gradle/'
                 include 'config'
                 include 'test-shared/'
+                include '.travis.yml'
             }
 
             from(rootDir) {
