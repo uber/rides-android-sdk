@@ -55,7 +55,7 @@ import java.util.Map;
  */
 public class RideRequestView extends LinearLayout {
 
-    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.5.1-ride_request_view";
+    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.5.2-ride_request_view";
     @Nullable private AccessTokenSession accessTokenSession;
     @NonNull @VisibleForTesting RideParameters rideParameters = new RideParameters.Builder().build();
     @Nullable private RideRequestViewCallback rideRequestViewCallback;

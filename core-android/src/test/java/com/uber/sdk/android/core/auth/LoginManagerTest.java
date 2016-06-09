@@ -95,7 +95,7 @@ public class LoginManagerTest extends RobolectricTestBase {
             "uber://connect?client_id=Client1234&scope=profile%20request_receipt&login_type=WORLD&sdk=android&sdk_version="
                     + BuildConfig.VERSION_NAME;
 
-    private static final String INSTALL = "https://m.uber.com/sign-up?client_id=Client1234&user-agent=core-android-v0.5.1-login_manager";
+    private static final String INSTALL = "https://m.uber.com/sign-up?client_id=Client1234&user-agent=core-android-v0.5.2-login_manager";
     private static final String AUTHORIZATION_CODE = "Auth123Code";
 
     @Mock
