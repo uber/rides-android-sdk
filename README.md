@@ -276,7 +276,7 @@ RidesService service = UberRidesApi.with(session).createService();
 ```
 
 ### Sync vs. Async Calls
-Both synchronous and asynchronous calls work with the Uber Rides Java SDK. The networking stack for the Uber SDK is powered by [Retrofit 2](https://github.com/square/retrofit) and the same model of threading is available.
+Both synchronous and asynchronous calls work with the [Uber Rides Java SDK](https://github.com/uber/rides-java-sdk). The networking stack for the Uber SDK is powered by [Retrofit 2](https://github.com/square/retrofit) and the same model of threading is available.
 
 #### Sync
 ```java
