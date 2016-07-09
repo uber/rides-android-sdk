@@ -25,5 +25,7 @@
 
     <declare-styleable name="RideRequestButton">
         <attr name="ub__style" />
+        <attr name="ub__primary_text_size" format="dimension" />
+        <attr name="ub__secondary_text_size" format="dimension" />
     </declare-styleable>
 </resources>
