@@ -32,7 +32,6 @@ import com.squareup.moshi.Moshi;
 import com.uber.sdk.android.rides.RideParameters;
 import com.uber.sdk.android.rides.RideRequestButtonCallback;
 import com.uber.sdk.rides.client.error.ApiError;
-import com.uber.sdk.rides.client.internal.PrimitiveAdapter;
 import com.uber.sdk.rides.client.model.PriceEstimate;
 import com.uber.sdk.rides.client.model.PriceEstimatesResponse;
 import com.uber.sdk.rides.client.model.TimeEstimate;
@@ -136,7 +135,6 @@ public class RideRequestButtonControllerTest {
                 .build();
 
         Moshi moshi = new Moshi.Builder()
-                .add(new PrimitiveAdapter())
                 .build();
 
         okHttpClient = new OkHttpClient.Builder()

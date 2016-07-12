@@ -27,10 +27,11 @@ android {
         buildConfigField "String", "REDIRECT_URI", "\"${loadSecret("UBER_REDIRECT_URI")}\"" //Add your redirect uri to gradle.properties
         buildConfigField "String", "SERVER_TOKEN", "\"${loadSecret("UBER_SERVER_TOKEN")}\"" //Add your server token to gradle.properties
     }
+
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt')
         }
     }
 }

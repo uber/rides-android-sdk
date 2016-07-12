@@ -27,13 +27,16 @@ android {
         buildConfigField "String", "CLIENT_ID", "\"${loadSecret("UBER_CLIENT_ID")}\"" //Add your client id to gradle.properties
         buildConfigField "String", "REDIRECT_URI", "\"${loadSecret("UBER_REDIRECT_URI")}\"" //Add your redirect uri to gradle.properties
     }
+
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt')
+
         }
     }
 }
+
 
 dependencies {
     compile 'com.android.support:appcompat-v7:23.0.1'
