@@ -99,9 +99,9 @@ Without any extra configuration, the `RideRequestButton` will deeplink to the Ub
 
 ```java
 RideParameters rideParams = new RideParameters.Builder()
-  .setProductID("a1111c8c-c720-46c3-8534-2fcdd730040d")
-  .setPickupLocation(37.775304f, -122.417522f, "Uber HQ", "1455 Market Street, San Francisco")
-  .setDropoffLocation(37.795079f, -122.4397805f, "Embarcadero", "One Embarcadero Center, San Francisco")
+  .setProductId("a1111c8c-c720-46c3-8534-2fcdd730040d")
+  .setPickupLocation(37.775304, -122.417522, "Uber HQ", "1455 Market Street, San Francisco")
+  .setDropoffLocation(37.795079, -122.4397805, "Embarcadero", "One Embarcadero Center, San Francisco")
   .build();
 requestButton.setRideParameters(rideParams);
 ```
@@ -124,9 +124,9 @@ To further enhance the button with destination and price information, add a Sess
 ```java
 
 RideParameters rideParams = new RideParameters.Builder()
-  .setPickupLocation(37.775304f, -122.417522f, "Uber HQ", "1455 Market Street, San Francisco")
-  .setDropoffLocation(37.795079f, -122.4397805f, "Embarcadero", "One Embarcadero Center, San Francisco") // Price estimate will only be provided if this is provided.
-  .setProductID("a1111c8c-c720-46c3-8534-2fcdd730040d") // Optional. If not provided, the cheapest product will be used.
+  .setPickupLocation(37.775304, -122.417522, "Uber HQ", "1455 Market Street, San Francisco")
+  .setDropoffLocation(37.795079, -122.4397805, "Embarcadero", "One Embarcadero Center, San Francisco") // Price estimate will only be provided if this is provided.
+  .setProductId("a1111c8c-c720-46c3-8534-2fcdd730040d") // Optional. If not provided, the cheapest product will be used.
   .build();
   
 SessionConfiguration config = new SessionConfiguration.Builder().setServerToken("YOUR_SERVER_TOKEN").build();
