@@ -129,7 +129,10 @@ RideParameters rideParams = new RideParameters.Builder()
   .setProductId("a1111c8c-c720-46c3-8534-2fcdd730040d") // Optional. If not provided, the cheapest product will be used.
   .build();
   
-SessionConfiguration config = new SessionConfiguration.Builder().setServerToken("YOUR_SERVER_TOKEN").build();
+SessionConfiguration config = new SessionConfiguration.Builder()
+  .setClientId("YOUR_CLIENT_ID")
+  .setServerToken("YOUR_SERVER_TOKEN")
+  .build();
 ServerTokenSession session = new ServerTokenSession(config);
 
 RideRequestButtonCallback callback = new RideRequestButtonCallback() {
