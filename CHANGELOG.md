@@ -1,5 +1,12 @@
-v0.5.2 - TBD
+v0.5.3 - TBD
 ------------
+
+v0.5.2 - 7/11/2016
+------------------
+### Fixed
+
+- [Issue #31](https://github.com/uber/rides-android-sdk/issues/31) Multiple warnings "Ignoring InnerClasses attribute for an anonymous inner class" when building project
+
 
 v0.5.1 - 6/7/2016
 -----------------
