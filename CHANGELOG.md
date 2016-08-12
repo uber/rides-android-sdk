@@ -1,5 +1,9 @@
-v0.5.3 - TBD
-------------
+v0.5.3 - 8/12/2016
+------------------
+### Fixed
+
+- [Pull #42](https://github.com/uber/rides-android-sdk/pull/42) Fix Ride Request Button example in README
+- [Issue #46](https://github.com/uber/rides-android-sdk/issues/46) Fix Ride Request Widget incorrectly displaying connectivity errors
 
 v0.5.2 - 7/11/2016
 ------------------

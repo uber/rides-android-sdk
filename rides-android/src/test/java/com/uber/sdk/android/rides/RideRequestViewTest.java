@@ -50,7 +50,9 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -72,7 +74,7 @@ public class RideRequestViewTest extends RobolectricTestBase {
     private static final String DROPOFF_NICK = "pickupNick";
     private static final String DROPOFF_ADDR = "Dropoff Address";
     private static final String TOKEN_STRING = "thisIsAnAccessToken";
-    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.5.2-ride_request_view";
+    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.5.3-ride_request_view";
 
     private AccessToken accessToken;
     private RideRequestView rideRequestView;
@@ -159,7 +161,7 @@ public class RideRequestViewTest extends RobolectricTestBase {
 
     @Test
     public void onBuildUrl_withUserAgentNonNull_shouldNotOverride() throws IOException {
-        String widgetUserAgent = "rides-android-v0.5.2-ride_request_widget";
+        String widgetUserAgent = "rides-android-v0.5.3-ride_request_widget";
         String path = "src/test/resources/riderequestviewuris/default_uri";
         String expectedUri = readUriResourceWithUserAgentParam(path, widgetUserAgent);
 
@@ -218,10 +220,9 @@ public class RideRequestViewTest extends RobolectricTestBase {
     }
 
     @Test
-    public void whileRideRequestViewRunning_whenWebHTTPErrorOccurs_shouldReceiveWebError() {
-        client.onReceivedHttpError(mock(WebView.class), mock(WebResourceRequest.class),
-                mock(WebResourceResponse.class));
-        verify(callback, times(1)).onErrorParsed(RideRequestViewError.CONNECTIVITY_ISSUE);
+    public void whileRideRequestViewRunning_whenWebHTTPErrorOccurs_shouldDoNothing() {
+        client.onReceivedHttpError(mock(WebView.class), mock(WebResourceRequest.class), mock(WebResourceResponse.class));
+        verify(callback, never()).onErrorParsed(any(RideRequestViewError.class));
     }
 
     @Test

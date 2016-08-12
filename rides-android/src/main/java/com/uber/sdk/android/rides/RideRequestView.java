@@ -55,7 +55,7 @@ import java.util.Map;
  */
 public class RideRequestView extends LinearLayout {
 
-    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.5.2-ride_request_view";
+    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.5.3-ride_request_view";
     @Nullable private AccessTokenSession accessTokenSession;
     @NonNull @VisibleForTesting RideParameters rideParameters = new RideParameters.Builder().build();
     @Nullable private RideRequestViewCallback rideRequestViewCallback;
@@ -267,9 +267,9 @@ public class RideRequestView extends LinearLayout {
         }
 
         @Override
-        public void onReceivedHttpError(
-                WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
-            rideRequestWebViewClientCallback.onErrorParsed(RideRequestViewError.CONNECTIVITY_ISSUE);
+        public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
+            // This is a no-op necessary for testing as robolectric only supports up
+            // to API 21 and this call was added in API 23
         }
 
         @Override
