@@ -118,6 +118,8 @@ requestButton.setRequestBehavior(new RideRequestActivityBehavior(this, REQUEST_C
 
 That's it! With this configuration, when a user clicks on the request button, an activity will be launched that contains a login view (on first launch) where the user can authorize your app. After authorization, this activity will contain the Ride Request View. If any unexpected errors occur that the SDK can't handle, the activity will finish with an error in the result Intent using either the key `RideRequestActivity.AUTHENTICATION_ERROR` or `RideRequestActivity.RIDE_REQUEST_ERROR` depending on where the error occurred.
 
+> **Note:** The environment ([sandbox](https://developer.uber.com/docs/rides/sandbox) or production) is considered by the Ride Request Widget. If you use the sample source code from above, your calls will be issued to the Sandbox. The widget will display a `sandbox` badge to indicate that. To change the mode, set environment to `Environment.PRODUCTION`.
+
 ## Ride Request Button with ETA and price
 To further enhance the button with destination and price information, add a Session to it and call `loadRideInformation()` function.
 
