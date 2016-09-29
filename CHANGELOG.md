@@ -1,5 +1,14 @@
-v0.5.4 - TBD
-------------
+v0.5.4 - 9/29/2016
+------------------
+### Added
+
+- [Pull #51](https://github.com/uber/rides-android-sdk/pull/51) Adding sandbox hint for widget
+
+### Fixed
+
+- [Issue #44](https://github.com/uber/rides-android-sdk/issues/44) Null pointer exception when selected setPickupToMyLocation
+- [Issue #48](https://github.com/uber/rides-android-sdk/issues/48) Typo in Readme.md
+- [Issue #54](https://github.com/uber/rides-android-sdk/issues/54) log4j lib still exists in 0.5.3 causing Proguard failing
 
 v0.5.3 - 8/12/2016
 ------------------
@@ -13,7 +22,6 @@ v0.5.2 - 7/11/2016
 ### Fixed
 
 - [Issue #31](https://github.com/uber/rides-android-sdk/issues/31) Multiple warnings "Ignoring InnerClasses attribute for an anonymous inner class" when building project
-
 
 v0.5.1 - 6/7/2016
 -----------------

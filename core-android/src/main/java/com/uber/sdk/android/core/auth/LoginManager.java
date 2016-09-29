@@ -84,7 +84,7 @@ public class LoginManager {
 
     static final int REQUEST_CODE_LOGIN_DEFAULT = 1001;
 
-    private static final String USER_AGENT = "core-android-v0.5.3-login_manager";
+    private static final String USER_AGENT = "core-android-v0.5.4-login_manager";
 
     private final AccessTokenManager accessTokenManager;
     private final LoginCallback callback;

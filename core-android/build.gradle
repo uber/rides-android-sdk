@@ -18,8 +18,6 @@ android {
     compileSdkVersion 23
     buildToolsVersion "23.0.1"
 
-    useLibrary 'org.apache.http.legacy'
-
     defaultConfig {
         minSdkVersion 14
         versionName version
@@ -157,9 +155,9 @@ cobertura {
 dependencies {
     compile ('com.uber.sdk:rides:0.5.2') {
         //Do not need Google OAuth based logic in Android
-        exclude module: 'slf4j-log4j12'
-        exclude module: 'google-oauth-client'
-        exclude module: 'google-http-client-jackson2'
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+        exclude group: 'com.google.oauth-client', module: 'google-oauth-client'
+        exclude group: 'com.google.http-client', module: 'google-http-client-jackson2'
     }
 
     compile 'com.android.support:appcompat-v7:23.0.1'

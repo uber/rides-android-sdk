@@ -87,11 +87,15 @@ public class RideRequestButtonController {
     }
 
     public void loadRideInformation(@NonNull RideParameters rideParameters) {
-        checkNotNull(rideParameters.getPickupLatitude(), "Must set pick up point latitude in " +
-                "RideParameters.");
+        if (rideParameters.getPickupLatitude() != null) {
+            checkNotNull(rideParameters.getPickupLongitude(), "Pickup point latitude is set in " +
+                    "RideParameters but not the longitude.");
+        }
 
-        checkNotNull(rideParameters.getPickupLongitude(), "Must set pick up point longitude in " +
-                "RideParameters.");
+        if (rideParameters.getPickupLongitude() != null) {
+            checkNotNull(rideParameters.getPickupLatitude(), "Pickup point longitude is set in " +
+                    "RideParameters but not the latitude.");
+        }
 
         if (rideParameters.getDropoffLatitude() != null) {
             checkNotNull(rideParameters.getDropoffLongitude(), "Dropoff point latitude is set in " +
@@ -105,34 +109,38 @@ public class RideRequestButtonController {
 
         cancelAllPending();
 
-        if (rideParameters.getDropoffLatitude() != null) {
-            TimePriceDelegate pendingDelegate = new TimePriceDelegate(rideRequestButtonView, rideRequestButtonCallback);
+        if (rideParameters.getPickupLatitude() != null) {
+            if (rideParameters.getDropoffLatitude() != null) {
+                TimePriceDelegate pendingDelegate = new TimePriceDelegate(rideRequestButtonView, rideRequestButtonCallback);
 
-            loadPriceEstimate(
+                loadPriceEstimate(
+                        rideParameters.getPickupLatitude().floatValue(),
+                        rideParameters.getPickupLongitude().floatValue(),
+                        rideParameters.getDropoffLatitude().floatValue(),
+                        rideParameters.getDropoffLongitude().floatValue(),
+                        rideParameters.getProductId(),
+                        pendingDelegate);
+
+                this.pendingDelegate = pendingDelegate;
+            } else {
+                pendingDelegate = new TimeDelegate(rideRequestButtonView, rideRequestButtonCallback);
+            }
+
+            loadTimeEstimate(
+                    pendingDelegate,
                     rideParameters.getPickupLatitude().floatValue(),
                     rideParameters.getPickupLongitude().floatValue(),
-                    rideParameters.getDropoffLatitude().floatValue(),
-                    rideParameters.getDropoffLongitude().floatValue(),
-                    rideParameters.getProductId(),
-                    pendingDelegate);
-
-            this.pendingDelegate = pendingDelegate;
+                    rideParameters.getProductId());
         } else {
-            pendingDelegate = new TimeDelegate(rideRequestButtonView, rideRequestButtonCallback);
+            rideRequestButtonView.showDefaultView();
         }
-
-        loadTimeEstimate(
-                pendingDelegate,
-                rideParameters.getPickupLatitude().floatValue(),
-                rideParameters.getPickupLongitude().floatValue(),
-                rideParameters.getProductId());
     }
 
     private void loadTimeEstimate(
             @NonNull final TimeDelegate delegate,
             final float latitude,
             final float longitude,
-            final @Nullable String productId) {
+            @Nullable final String productId) {
 
         timeEstimateCall = ridesService.getPickupTimeEstimate(latitude, longitude, productId);
 

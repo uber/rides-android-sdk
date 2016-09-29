@@ -529,10 +529,11 @@ public class RideRequestButtonControllerTest {
                         valueOf(DROP_OFF_LONGITUDE), DROP_OFF_NICKNAME, DROP_OFF_ADDRESS)
                 .build();
 
-        expectedException.expect(NullPointerException.class);
-        expectedException.expectMessage("Must set pick up point latitude in RideParameters.");
-
         controller.loadRideInformation(rideParameters);
+
+        verify(view).showDefaultView();
+        verify(view, never()).showEstimate(any(TimeEstimate.class));
+        verify(view, never()).showEstimate(any(TimeEstimate.class), any(PriceEstimate.class));
     }
 
     @Test
@@ -545,7 +546,8 @@ public class RideRequestButtonControllerTest {
                 .build();
 
         expectedException.expect(NullPointerException.class);
-        expectedException.expectMessage("Must set pick up point longitude in RideParameters.");
+        expectedException.expectMessage("Pickup point latitude is set in " +
+                "RideParameters but not the longitude.");
 
         controller.loadRideInformation(rideParameters);
     }
@@ -559,7 +561,8 @@ public class RideRequestButtonControllerTest {
                 .build();
 
         expectedException.expect(NullPointerException.class);
-        expectedException.expectMessage("Must set pick up point latitude in RideParameters.");
+        expectedException.expectMessage("Pickup point longitude is set in " +
+                "RideParameters but not the latitude.");
 
         controller.loadRideInformation(rideParameters);
     }

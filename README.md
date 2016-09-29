@@ -20,7 +20,7 @@ To use the Uber Rides Android SDK, add the compile dependency with the latest ve
 Add the Uber Rides Android SDK to your `build.gradle`:
 ```gradle
 dependencies {
-    compile 'com.uber.sdk:rides-android:0.5.3'
+    compile 'com.uber.sdk:rides-android:0.5.4'
 }
 ```
 
@@ -31,7 +31,7 @@ In the `pom.xml` file:
 <dependency>
     <groupId>com.uber.sdk</groupId>
     <artifactId>rides-android</artifactId>
-    <version>0.5.3</version>
+    <version>0.5.4</version>
 </dependency>
 ```
 
@@ -157,7 +157,7 @@ RideRequestButtonCallback callback = new RideRequestButtonCallback() {
 
 requestButton.setRideParameters(rideParams);
 requestButton.setSession(session);
-requestButton.setCallback(callback));
+requestButton.setCallback(callback);
 requestButton.loadRideInformation();
 ```
 
@@ -319,7 +319,7 @@ service.getUserProfile().enqueue(new Callback<UserProfile>() {
 
 ## Sample Apps
 
-Sample apps can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases/tag/v0.5.3).
+Sample apps can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases/tag/v0.5.4).
 
 The Sample apps require configuration parameters to interact with the Uber API, these include the client id, redirect uri, and server token. They are provided on the [Uber developer dashboard](https://developer.uber.com/dashboard).
 
