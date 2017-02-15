@@ -35,14 +35,12 @@ import com.uber.sdk.android.core.Deeplink;
 import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.android.core.utils.PackageManagers;
 import com.uber.sdk.core.auth.Scope;
-import com.uber.sdk.rides.client.SessionConfiguration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
 import static com.uber.sdk.android.core.UberSdk.UBER_SDK_LOG_TAG;
-import static com.uber.sdk.android.core.utils.AppProtocol.UBER_PACKAGE_NAME;
 import static com.uber.sdk.android.core.utils.Preconditions.checkNotEmpty;
 import static com.uber.sdk.android.core.utils.Preconditions.checkNotNull;
 import static com.uber.sdk.android.core.utils.Preconditions.checkState;
@@ -56,11 +54,10 @@ public class SsoDeeplink implements Deeplink {
     public static final int DEFAULT_REQUEST_CODE = LoginManager.REQUEST_CODE_LOGIN_DEFAULT;
 
     @VisibleForTesting
-    static final int MIN_VERSION_SUPPORTED = 31256;
+    static final int MIN_VERSION_SUPPORTED = 31302;
 
     private static final String URI_QUERY_CLIENT_ID = "client_id";
     private static final String URI_QUERY_SCOPE = "scope";
-    private static final String URI_QUERY_LOGIN_TYPE = "login_type";
     private static final String URI_QUERY_PLATFORM = "sdk";
     private static final String URI_QUERY_SDK_VERSION = "sdk_version";
     private static final String URI_HOST = "connect";
@@ -69,7 +66,6 @@ public class SsoDeeplink implements Deeplink {
     private final String clientId;
     private final Collection<Scope> requestedScopes;
     private final Collection<String> requestedCustomScopes;
-    private final SessionConfiguration.EndpointRegion region;
     private final int requestCode;
 
     AppProtocol appProtocol;
@@ -77,11 +73,9 @@ public class SsoDeeplink implements Deeplink {
     SsoDeeplink(
             @NonNull Activity activity,
             @NonNull String clientId,
-            @NonNull SessionConfiguration.EndpointRegion region,
             @NonNull Collection<Scope> requestedScopes,
             @NonNull Collection<String> requestedCustomScopes,
             int requestCode) {
-        this.region = region;
         this.activity = activity;
         this.clientId = clientId;
         this.requestCode = requestCode;
@@ -101,10 +95,17 @@ public class SsoDeeplink implements Deeplink {
         checkState(isSupported(), "Single sign on is not supported on the device. " +
                 "Please install or update to the latest version of Uber app.");
 
-        final Uri deepLinkUri = createSsoUri();
+
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setPackage(AppProtocol.UBER_PACKAGE_NAME);
+        final Uri deepLinkUri = createSsoUri();
         intent.setData(deepLinkUri);
+
+        for (String installedPackage : AppProtocol.UBER_PACKAGE_NAMES) {
+            if (PackageManagers.isPackageAvailable(activity, installedPackage)) {
+                intent.setPackage(installedPackage);
+                break;
+            }
+        }
         activity.startActivityForResult(intent, requestCode);
     }
 
@@ -118,7 +119,6 @@ public class SsoDeeplink implements Deeplink {
                 .authority(URI_HOST)
                 .appendQueryParameter(URI_QUERY_CLIENT_ID, clientId)
                 .appendQueryParameter(URI_QUERY_SCOPE, scopes)
-                .appendQueryParameter(URI_QUERY_LOGIN_TYPE, region.name())
                 .appendQueryParameter(URI_QUERY_PLATFORM, AppProtocol.PLATFORM)
                 .appendQueryParameter(URI_QUERY_SDK_VERSION, BuildConfig.VERSION_NAME)
                 .build();
@@ -131,10 +131,18 @@ public class SsoDeeplink implements Deeplink {
      */
     @Override
     public boolean isSupported() {
-        final PackageInfo packageInfo = PackageManagers.getPackageInfo(activity, UBER_PACKAGE_NAME);
+
+        PackageInfo packageInfo = null;
+        for (String installedPackage : AppProtocol.UBER_PACKAGE_NAMES) {
+            if (PackageManagers.isPackageAvailable(activity, installedPackage)) {
+                packageInfo = PackageManagers.getPackageInfo(activity, installedPackage);
+                break;
+            }
+        }
+
         return (packageInfo != null)
-                && (packageInfo.versionCode >= MIN_VERSION_SUPPORTED) &&
-                appProtocol.validateSignature(activity, UBER_PACKAGE_NAME);
+                && appProtocol.validateMinimumVersion(activity, packageInfo, MIN_VERSION_SUPPORTED)
+                && appProtocol.validateSignature(activity, packageInfo.packageName);
     }
 
     public static class Builder {
@@ -144,7 +152,6 @@ public class SsoDeeplink implements Deeplink {
         private String clientId;
         private Collection<Scope> requestedScopes;
         private Collection<String> requestedCustomScopes;
-        private SessionConfiguration.EndpointRegion region;
         private int requestCode = DEFAULT_REQUEST_CODE;
 
         public Builder(@NonNull Activity activity) {
@@ -171,11 +178,6 @@ public class SsoDeeplink implements Deeplink {
             return this;
         }
 
-        public Builder region(@NonNull SessionConfiguration.EndpointRegion region) {
-            this.region = region;
-            return this;
-        }
-
         public Builder activityRequestCode(int requestCode) {
             this.requestCode = requestCode;
             return this;
@@ -186,10 +188,6 @@ public class SsoDeeplink implements Deeplink {
 
             checkNotEmpty(requestedScopes, "Scopes must be set.");
 
-            if (region == null) {
-                region = SessionConfiguration.EndpointRegion.WORLD;
-            }
-
             if (requestedCustomScopes == null) {
                 requestedCustomScopes = new ArrayList<>();
             }
@@ -197,7 +195,7 @@ public class SsoDeeplink implements Deeplink {
             if (requestCode == DEFAULT_REQUEST_CODE) {
                 Log.i(UBER_SDK_LOG_TAG, "Request code is not set, using default request code");
             }
-            return new SsoDeeplink(activity, clientId, region, requestedScopes, requestedCustomScopes, requestCode);
+            return new SsoDeeplink(activity, clientId, requestedScopes, requestedCustomScopes, requestCode);
         }
     }
 }

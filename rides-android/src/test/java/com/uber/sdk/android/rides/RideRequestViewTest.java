@@ -74,7 +74,7 @@ public class RideRequestViewTest extends RobolectricTestBase {
     private static final String DROPOFF_NICK = "pickupNick";
     private static final String DROPOFF_ADDR = "Dropoff Address";
     private static final String TOKEN_STRING = "thisIsAnAccessToken";
-    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.5.4-ride_request_view";
+    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.6.0-ride_request_view";
 
     private AccessToken accessToken;
     private RideRequestView rideRequestView;
@@ -103,27 +103,12 @@ public class RideRequestViewTest extends RobolectricTestBase {
 
         SessionConfiguration configuration = new SessionConfiguration.Builder()
                 .setClientId("clientId")
-                .setEndpointRegion(SessionConfiguration.EndpointRegion.WORLD)
                 .build();
 
         String result = RideRequestView.buildUrlFromRideParameters(context, rideParameters, configuration);
         assertEquals(expectedUri, result);
     }
 
-    @Test
-    public void onBuildUrl_inChinaRegion_shouldHaveUrlWithChinaDomain() throws IOException {
-        String path = "src/test/resources/riderequestviewuris/china_uri";
-        String expectedUri = readUriResourceWithUserAgentParam(path, USER_AGENT_RIDE_VIEW);
-
-        RideParameters rideParameters = new RideParameters.Builder().build();
-        SessionConfiguration configuration = new SessionConfiguration.Builder()
-                .setClientId("clientId")
-                .setEndpointRegion(SessionConfiguration.EndpointRegion.CHINA)
-                .build();
-
-        String result = RideRequestView.buildUrlFromRideParameters(context, rideParameters, configuration);
-        assertEquals(expectedUri, result);
-    }
 
     @Test
     public void onBuildUrl_inSandboxMode_shouldHaveUrlWithSandboxParam() throws IOException {
@@ -131,7 +116,6 @@ public class RideRequestViewTest extends RobolectricTestBase {
 
         SessionConfiguration configuration = new SessionConfiguration.Builder()
                 .setClientId("clientId")
-                .setEndpointRegion(SessionConfiguration.EndpointRegion.WORLD)
                 .setEnvironment(SessionConfiguration.Environment.SANDBOX)
                 .build();
 
@@ -152,7 +136,6 @@ public class RideRequestViewTest extends RobolectricTestBase {
                 .build();
         SessionConfiguration configuration = new SessionConfiguration.Builder()
                 .setClientId("clientId")
-                .setEndpointRegion(SessionConfiguration.EndpointRegion.WORLD)
                 .build();
 
         String result = RideRequestView.buildUrlFromRideParameters(context, rideParameters, configuration);
@@ -161,7 +144,7 @@ public class RideRequestViewTest extends RobolectricTestBase {
 
     @Test
     public void onBuildUrl_withUserAgentNonNull_shouldNotOverride() throws IOException {
-        String widgetUserAgent = "rides-android-v0.5.4-ride_request_widget";
+        String widgetUserAgent = "rides-android-v0.6.0-ride_request_widget";
         String path = "src/test/resources/riderequestviewuris/default_uri";
         String expectedUri = readUriResourceWithUserAgentParam(path, widgetUserAgent);
 
@@ -170,7 +153,6 @@ public class RideRequestViewTest extends RobolectricTestBase {
 
         SessionConfiguration configuration = new SessionConfiguration.Builder()
                 .setClientId("clientId")
-                .setEndpointRegion(SessionConfiguration.EndpointRegion.WORLD)
                 .build();
 
         String result = RideRequestView.buildUrlFromRideParameters(context, rideParameters, configuration);
@@ -265,6 +247,6 @@ public class RideRequestViewTest extends RobolectricTestBase {
         verifyZeroInteractions(callback);
         Intent startedIntent = shadowActivity.getNextStartedActivity();
         assertEquals(Intent.ACTION_VIEW, startedIntent.getAction());
-        assertEquals("tel:+91555555555#Intent;end", startedIntent.toUri(0));
+        assertEquals("tel:+91555555555#Intent;action=android.intent.action.VIEW;end", startedIntent.toUri(0));
     }
 }

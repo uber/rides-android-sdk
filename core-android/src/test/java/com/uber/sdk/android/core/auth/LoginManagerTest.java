@@ -91,11 +91,11 @@ public class LoginManagerTest extends RobolectricTestBase {
     private static final ImmutableList<Scope> MIXED_SCOPES = ImmutableList.of(Scope.PROFILE, Scope.REQUEST_RECEIPT);
     private static final ImmutableList<Scope> GENERAL_SCOPES = ImmutableList.of(Scope.PROFILE, Scope.HISTORY);
 
-    private static final String WORLD_REGION =
-            "uber://connect?client_id=Client1234&scope=profile%20request_receipt&login_type=WORLD&sdk=android&sdk_version="
+    private static final String DEFAULT_REGION =
+            "uber://connect?client_id=Client1234&scope=profile%20request_receipt&sdk=android&sdk_version="
                     + BuildConfig.VERSION_NAME;
 
-    private static final String INSTALL = "https://m.uber.com/sign-up?client_id=Client1234&user-agent=core-android-v0.5.4-login_manager";
+    private static final String INSTALL = "https://m.uber.com/sign-up?client_id=Client1234&user-agent=core-android-v0.6.0-login_manager";
     private static final String AUTHORIZATION_CODE = "Auth123Code";
 
     @Mock
@@ -125,7 +125,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
     @Test
     public void loginWithAppInstalledPrivilegedScopes_shouldLaunchIntent() {
-        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAME, SsoDeeplink.MIN_VERSION_SUPPORTED);
+        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_VERSION_SUPPORTED);
 
         loginManager.login(activity);
 
@@ -134,7 +134,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
 
-        assertThat(intentCaptor.getValue().getData().toString()).isEqualTo(WORLD_REGION);
+        assertThat(intentCaptor.getValue().getData().toString()).isEqualTo(DEFAULT_REGION);
         assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
     }
 
@@ -142,7 +142,7 @@ public class LoginManagerTest extends RobolectricTestBase {
     public void loginWithAppInstalledPrivilegedScopesAndRequestCode_shouldLaunchIntent() {
         loginManager = new LoginManager(accessTokenManager, callback, sessionConfiguration, REQUEST_CODE);
 
-        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAME, SsoDeeplink.MIN_VERSION_SUPPORTED);
+        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_VERSION_SUPPORTED);
 
         loginManager.login(activity);
 
@@ -151,7 +151,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
 
-        assertThat(intentCaptor.getValue().getData().toString()).isEqualTo(WORLD_REGION);
+        assertThat(intentCaptor.getValue().getData().toString()).isEqualTo(DEFAULT_REGION);
         assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE);
     }
 
@@ -160,7 +160,7 @@ public class LoginManagerTest extends RobolectricTestBase {
         sessionConfiguration = sessionConfiguration.newBuilder().setScopes(GENERAL_SCOPES).build();
         loginManager = new LoginManager(accessTokenManager, callback, sessionConfiguration);
 
-        stubAppNotInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAME);
+        stubAppNotInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0]);
 
         loginManager.login(activity);
 
@@ -185,7 +185,7 @@ public class LoginManagerTest extends RobolectricTestBase {
         loginManager = new LoginManager(accessTokenManager, callback, sessionConfiguration)
                 .setRedirectForAuthorizationCode(false);
 
-        stubAppNotInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAME);
+        stubAppNotInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0]);
 
         loginManager.login(activity);
 
@@ -371,6 +371,7 @@ public class LoginManagerTest extends RobolectricTestBase {
         final PackageInfo packageInfo = new PackageInfo();
         packageInfo.versionCode = versionCode;
         packageInfo.signatures = new Signature[]{new Signature(PUBLIC_SIGNATURE)};
+        packageInfo.packageName = packageName;
         try {
             when(packageManager.getPackageInfo(eq(packageName), anyInt()))
                     .thenReturn(packageInfo);

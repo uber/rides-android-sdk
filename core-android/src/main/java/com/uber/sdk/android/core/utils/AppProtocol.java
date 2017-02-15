@@ -17,7 +17,8 @@ import java.util.HashSet;
 import javax.annotation.Nullable;
 
 public class AppProtocol {
-    public static final String UBER_PACKAGE_NAME = "com.ubercab";
+    public static final String[] UBER_PACKAGE_NAMES =
+            {"com.ubercab", "com.ubercab.presidio.app", "com.ubercab.presidio.exo"};
     public static final String DEEPLINK_SCHEME = "uber";
     public static final String PLATFORM = "android";
 
@@ -31,13 +32,24 @@ public class AppProtocol {
         set.add(UBER_RIDER_HASH);
         return set;
     }
+
+    /**
+     * Validates minimum version of app required or returns true if in debug.
+     */
+    public boolean validateMinimumVersion(Context context, PackageInfo packageInfo, int minimumVersion) {
+        if (isDebug(context)) {
+            return true;
+        }
+
+        return packageInfo.versionCode >= minimumVersion;
+    }
+
+    /**
+     * Validates the app signature required or returns true if in debug.
+     */
     @SuppressLint("PackageManagerGetSignatures")
     public boolean validateSignature(Context context, String packageName) {
-        String brand = Build.BRAND;
-        int applicationFlags = context.getApplicationInfo().flags;
-        if ((brand.startsWith("Android") || brand.startsWith("generic")) &&
-                (applicationFlags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-            // We are debugging on an emulator, don't validate package signature.
+        if (isDebug(context)) {
             return true;
         }
 
@@ -95,5 +107,16 @@ public class AppProtocol {
     @NonNull
     MessageDigest getSha1MessageDigest() throws NoSuchAlgorithmException {
         return MessageDigest.getInstance(HASH_ALGORITHM_SHA1);
+    }
+
+    private boolean isDebug(Context context) {
+        String brand = Build.BRAND;
+        int applicationFlags = context.getApplicationInfo().flags;
+        if ((brand.startsWith("Android") || brand.startsWith("generic")) &&
+                (applicationFlags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            // We are debugging on an emulator, don't validate package signature.
+            return true;
+        }
+        return false;
     }
 }

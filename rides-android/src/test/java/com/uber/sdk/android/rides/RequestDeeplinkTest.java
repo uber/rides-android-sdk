@@ -31,6 +31,7 @@ import com.uber.sdk.rides.client.SessionConfiguration;
 
 import org.junit.Test;
 import org.robolectric.Robolectric;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.res.builder.RobolectricPackageManager;
 import org.robolectric.shadows.ShadowActivity;
 
@@ -56,7 +57,7 @@ public class RequestDeeplinkTest extends RobolectricTestBase {
     private static final Double DROPOFF_LONG = -122.6789;
     private static final String DROPOFF_NICK = "pickupNick";
     private static final String DROPOFF_ADDR = "Dropoff Address";
-    private static final String USER_AGENT_DEEPLINK = "rides-android-v0.5.4-deeplink";
+    private static final String USER_AGENT_DEEPLINK = "rides-android-v0.6.0-deeplink";
 
     private Context context;
 
@@ -179,7 +180,7 @@ public class RequestDeeplinkTest extends RobolectricTestBase {
         Activity activity = Robolectric.setupActivity(Activity.class);
         ShadowActivity shadowActivity = shadowOf(activity);
 
-        RobolectricPackageManager packageManager = (RobolectricPackageManager) shadowActivity.getPackageManager();
+        RobolectricPackageManager packageManager = RuntimeEnvironment.getRobolectricPackageManager();
 
         PackageInfo uberPackage = new PackageInfo();
         uberPackage.packageName = UBER_PACKAGE_NAME;

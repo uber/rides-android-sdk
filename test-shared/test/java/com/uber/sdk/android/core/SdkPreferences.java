@@ -54,7 +54,7 @@ public class SdkPreferences {
 
     @NonNull
     public SessionConfiguration.EndpointRegion getRegion() {
-        return SessionConfiguration.EndpointRegion.valueOf(sharedPreferences.getString(REGION_KEY, SessionConfiguration.EndpointRegion.WORLD.name()));
+        return SessionConfiguration.EndpointRegion.valueOf(sharedPreferences.getString(REGION_KEY, SessionConfiguration.EndpointRegion.DEFAULT.name()));
     }
 
     @Nullable

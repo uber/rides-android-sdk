@@ -32,6 +32,11 @@ import java.util.Locale;
 public enum AuthenticationError {
 
     /**
+     * User cancelled flow
+     */
+    CANCELLED,
+
+    /**
      * There was a connectivity error while trying to load.
      */
     CONNECTIVITY_ISSUE,

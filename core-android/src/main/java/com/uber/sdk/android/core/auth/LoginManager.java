@@ -84,7 +84,7 @@ public class LoginManager {
 
     static final int REQUEST_CODE_LOGIN_DEFAULT = 1001;
 
-    private static final String USER_AGENT = "core-android-v0.5.4-login_manager";
+    private static final String USER_AGENT = "core-android-v0.6.0-login_manager";
 
     private final AccessTokenManager accessTokenManager;
     private final LoginCallback callback;
@@ -144,7 +144,6 @@ public class LoginManager {
 
         SsoDeeplink ssoDeeplink = new SsoDeeplink.Builder(activity)
                 .clientId(sessionConfiguration.getClientId())
-                .region(sessionConfiguration.getEndpointRegion())
                 .scopes(sessionConfiguration.getScopes())
                 .customScopes(sessionConfiguration.getCustomScopes())
                 .activityRequestCode(requestCode)
@@ -304,7 +303,11 @@ public class LoginManager {
         final AuthenticationError authenticationError
                 = (error != null) ? AuthenticationError.fromString(error) : AuthenticationError.UNKNOWN;
 
-        if (authenticationError.equals(AuthenticationError.UNAVAILABLE) &&
+        if (authenticationError.equals(AuthenticationError.CANCELLED)) {
+            // User canceled login
+            callback.onLoginCancel();
+            return;
+        } else if (authenticationError.equals(AuthenticationError.UNAVAILABLE) &&
                 !AuthUtils.isPrivilegeScopeRequired(sessionConfiguration.getScopes())) {
             loginForImplicitGrant(activity);
             return;

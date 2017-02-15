@@ -20,7 +20,7 @@ To use the Uber Rides Android SDK, add the compile dependency with the latest ve
 Add the Uber Rides Android SDK to your `build.gradle`:
 ```gradle
 dependencies {
-    compile 'com.uber.sdk:rides-android:0.5.4'
+    compile 'com.uber.sdk:rides-android:0.6.0'
 }
 ```
 
@@ -31,7 +31,7 @@ In the `pom.xml` file:
 <dependency>
     <groupId>com.uber.sdk</groupId>
     <artifactId>rides-android</artifactId>
-    <version>0.5.4</version>
+    <version>0.6.0</version>
 </dependency>
 ```
 
@@ -319,7 +319,7 @@ service.getUserProfile().enqueue(new Callback<UserProfile>() {
 
 ## Sample Apps
 
-Sample apps can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases/tag/v0.5.4).
+Sample apps can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases/tag/v0.6.0).
 
 The Sample apps require configuration parameters to interact with the Uber API, these include the client id, redirect uri, and server token. They are provided on the [Uber developer dashboard](https://developer.uber.com/dashboard).
 
@@ -348,7 +348,5 @@ As the Uber Android SDK get closer to a 1.0 release, the API's will become more 
 ## Contributing
 
 We :heart: contributions. Found a bug or looking for a new feature? Open an issue and we'll respond as fast as we can. Or, better yet, implement it yourself and open a pull request! We ask that you include tests to show the bug was fixed or the feature works as expected.
-
-**Note:** All contributors also need to fill out the [Uber Contributor License Agreement](http://t.uber.com/cla) before we can merge in any of your changes.
 
 ## MIT Licensed

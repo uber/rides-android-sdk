@@ -55,7 +55,7 @@ import java.util.Map;
  */
 public class RideRequestView extends LinearLayout {
 
-    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.5.4-ride_request_view";
+    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.6.0-ride_request_view";
     @Nullable private AccessTokenSession accessTokenSession;
     @NonNull @VisibleForTesting RideParameters rideParameters = new RideParameters.Builder().build();
     @Nullable private RideRequestViewCallback rideRequestViewCallback;
@@ -167,7 +167,7 @@ public class RideRequestView extends LinearLayout {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme(HTTPS)
-                .authority(ENDPOINT + "." + loginConfiguration.getEndpointRegion().domain)
+                .authority(ENDPOINT + "." + loginConfiguration.getEndpointRegion().getDomain())
                 .appendEncodedPath(PATH);
 
         if (rideParameters.getUserAgent() == null) {

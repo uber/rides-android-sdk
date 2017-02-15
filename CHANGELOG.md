@@ -1,5 +1,14 @@
-v0.5.5 - TBD
-------------
+v0.6.0 - 2/14/2017
+-------------------
+### Fixed
+- [Issue #71](https://github.com/uber/rides-android-sdk/issues/71) LoginManager breaks when used with Rides SDK 0.6.0
+- [Issue #65](https://github.com/uber/rides-android-sdk/issues/65) Empty AndroidHttpClient get compiled when using core-android 0.5.4 leading to unresolved references to actual methods of AndroidHttpClient
+
+### Added
+- Updated to match API 1.2 changes
+
+### Breaking
+- Removed Region (China) support
 
 v0.5.4 - 9/29/2016
 ------------------
@@ -12,6 +21,7 @@ v0.5.4 - 9/29/2016
 - [Issue #44](https://github.com/uber/rides-android-sdk/issues/44) Null pointer exception when selected setPickupToMyLocation
 - [Issue #48](https://github.com/uber/rides-android-sdk/issues/48) Typo in Readme.md
 - [Issue #54](https://github.com/uber/rides-android-sdk/issues/54) log4j lib still exists in 0.5.3 causing Proguard failing
+
 
 v0.5.3 - 8/12/2016
 ------------------

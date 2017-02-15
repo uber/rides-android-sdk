@@ -177,7 +177,7 @@ public class LoginActivity extends Activity {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme(HTTPS)
-                .authority(ENDPOINT + "." + configuration.getEndpointRegion().domain)
+                .authority(ENDPOINT + "." + configuration.getEndpointRegion().getDomain())
                 .appendEncodedPath(PATH)
                 .appendQueryParameter(CLIENT_ID_PARAM, configuration.getClientId())
                 .appendQueryParameter(REDIRECT_PARAM, redirectUri)

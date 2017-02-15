@@ -46,7 +46,7 @@ import static com.uber.sdk.android.core.utils.Preconditions.checkNotNull;
  */
 public class RequestDeeplink implements Deeplink {
 
-    private static final String USER_AGENT_DEEPLINK = "rides-android-v0.5.4-deeplink";
+    private static final String USER_AGENT_DEEPLINK = "rides-android-v0.6.0-deeplink";
 
     @NonNull
     private final Uri uri;
@@ -78,7 +78,12 @@ public class RequestDeeplink implements Deeplink {
 
     @Override
     public boolean isSupported() {
-        return PackageManagers.isPackageAvailable(context, AppProtocol.UBER_PACKAGE_NAME);
+        for (String packageName : AppProtocol.UBER_PACKAGE_NAMES) {
+            if(PackageManagers.isPackageAvailable(context, packageName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

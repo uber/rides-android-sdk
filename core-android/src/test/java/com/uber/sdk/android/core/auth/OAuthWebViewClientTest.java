@@ -85,24 +85,6 @@ public class OAuthWebViewClientTest extends RobolectricTestBase {
     }
 
     @Test
-    public void onBuildUrl_withChinaRegion_shouldHaveChinaDomain() {
-        String clientId = "clientId1234";
-        String redirectUri = "localHost1234";
-
-        SessionConfiguration loginConfiguration = new SessionConfiguration.Builder()
-                .setRedirectUri(redirectUri)
-                .setClientId(clientId)
-                .setScopes(Arrays.asList(Scope.HISTORY))
-                .setEndpointRegion(SessionConfiguration.EndpointRegion.CHINA).build();
-
-        String url = testLoginActivity.buildUrl(redirectUri, ResponseType.TOKEN, loginConfiguration);
-        assertEquals(
-                "https://login.uber.com.cn/oauth/v2/authorize?client_id=" + clientId +
-                        "&redirect_uri=" + redirectUri + "&response_type=token&scope=history" +
-                        "&show_fb=false&signup_params=eyJyZWRpcmVjdF90b19sb2dpbiI6dHJ1ZX0%3D%0A", url);
-    }
-
-    @Test
     public void onLoadLoginView_withNoRedirectUrl_shouldReturnError() {
         SessionConfiguration config = new SessionConfiguration.Builder().setClientId("clientId").build();
         Intent intent = new Intent();

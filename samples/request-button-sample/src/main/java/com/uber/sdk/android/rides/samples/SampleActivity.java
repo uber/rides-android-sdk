@@ -85,10 +85,6 @@ public class SampleActivity extends AppCompatActivity implements RideRequestButt
                 .setServerToken(SERVER_TOKEN)
                 .build();
 
-        // Optional: to use the SDK in China, set the region property
-        // See https://developer.uber.com/docs/china for more details.
-        // configuration.setEndpointRegion(SessionConfiguration.EndpointRegion.CHINA);
-
         validateConfiguration(configuration);
         ServerTokenSession session = new ServerTokenSession(configuration);
 

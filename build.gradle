@@ -10,7 +10,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.0'
+        classpath 'com.android.tools.build:gradle:2.2.3'
         classpath 'net.researchgate:gradle-release:2.3.5'
         classpath 'co.riiid:gradle-github-plugin:0.4.2'
         classpath 'net.saliman:gradle-cobertura-plugin:2.3.1'

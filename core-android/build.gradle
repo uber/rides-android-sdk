@@ -10,7 +10,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
     }
 }
 
@@ -129,12 +129,6 @@ uploadArchives {
                         name 'Ty Smith'
                         email 'tys@uber.com'
                     }
-
-                    developer {
-                        id 'yhartanto'
-                        name 'Yohan Hartanto'
-                        email 'yohan@uber.com'
-                    }
                 }
             }
         }
@@ -153,7 +147,7 @@ cobertura {
 }
 
 dependencies {
-    compile ('com.uber.sdk:rides:0.5.2') {
+    compile ('com.uber.sdk:rides:0.6.0') {
         //Do not need Google OAuth based logic in Android
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
         exclude group: 'com.google.oauth-client', module: 'google-oauth-client'
@@ -171,7 +165,7 @@ dependencies {
     testCompile 'com.google.http-client:google-http-client-jackson2:1.19.0'
     testCompile 'org.mockito:mockito-core:1.10.19'
     testCompile 'org.assertj:assertj-core:1.7.1'
-    testCompile 'org.robolectric:robolectric:3.0'
+    testCompile 'org.robolectric:robolectric:3.2.2'
 
     //Needed for Cobertura checks because of above exclude
     testCompile 'com.google.http-client:google-http-client-jackson2:1.19.0'

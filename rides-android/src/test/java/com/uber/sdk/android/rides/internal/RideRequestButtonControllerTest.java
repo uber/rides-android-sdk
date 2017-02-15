@@ -32,6 +32,7 @@ import com.squareup.moshi.Moshi;
 import com.uber.sdk.android.rides.RideParameters;
 import com.uber.sdk.android.rides.RideRequestButtonCallback;
 import com.uber.sdk.rides.client.error.ApiError;
+import com.uber.sdk.rides.client.internal.BigDecimalAdapter;
 import com.uber.sdk.rides.client.model.PriceEstimate;
 import com.uber.sdk.rides.client.model.PriceEstimatesResponse;
 import com.uber.sdk.rides.client.model.TimeEstimate;
@@ -78,8 +79,8 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 @RunWith(MockitoJUnitRunner.class)
 public class RideRequestButtonControllerTest {
 
-    private static final String TIME_ESTIMATES_API = "/v1/estimates/time";
-    private static final String PRICE_ESTIMATES_API = "/v1/estimates/price";
+    private static final String TIME_ESTIMATES_API = "/v1.2/estimates/time";
+    private static final String PRICE_ESTIMATES_API = "/v1.2/estimates/price";
     private static WireMockConfiguration WIRE_MOCK_CONFIG = wireMockConfig()
             .notifier(new ConsoleNotifier(true))
             .dynamicPort();
@@ -135,6 +136,7 @@ public class RideRequestButtonControllerTest {
                 .build();
 
         Moshi moshi = new Moshi.Builder()
+                .add(new BigDecimalAdapter())
                 .build();
 
         okHttpClient = new OkHttpClient.Builder()

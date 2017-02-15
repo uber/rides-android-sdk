@@ -73,19 +73,19 @@ public class AppProtocolTest extends RobolectricTestBase {
     @Test
     public void validateSignature_whenValid_returnsTrue() throws Exception {
         stubAppSignature(GOOD_SIGNATURE);
-        assertTrue(appProtocol.validateSignature(activity, AppProtocol.UBER_PACKAGE_NAME));
+        assertTrue(appProtocol.validateSignature(activity, AppProtocol.UBER_PACKAGE_NAMES[0]));
     }
 
     @Test
     public void validateSignature_whenInvalid_returnsFalse() throws Exception {
         stubAppSignature(BAD_SIGNATURE);
-        assertFalse(appProtocol.validateSignature(activity, AppProtocol.UBER_PACKAGE_NAME));
+        assertFalse(appProtocol.validateSignature(activity, AppProtocol.UBER_PACKAGE_NAMES[0]));
     }
 
     @Test
     public void validateSignature_whenGoodAndBad_returnsFalse() throws Exception {
         stubAppSignature(GOOD_SIGNATURE, BAD_SIGNATURE);
-        assertFalse(appProtocol.validateSignature(activity, AppProtocol.UBER_PACKAGE_NAME));
+        assertFalse(appProtocol.validateSignature(activity, AppProtocol.UBER_PACKAGE_NAMES[0]));
     }
 
     @Test
@@ -98,7 +98,8 @@ public class AppProtocolTest extends RobolectricTestBase {
     public void getPackageSignature_whenNameNotFoundException_shouldReturnNull() throws Exception {
         stubAppSignature(GOOD_SIGNATURE);
         final Throwable throwable = new PackageManager.NameNotFoundException();
-        doThrow(throwable).when(packageManager).getPackageInfo(AppProtocol.UBER_PACKAGE_NAME, PackageManager.GET_SIGNATURES);
+        doThrow(throwable).when(packageManager)
+                .getPackageInfo(AppProtocol.UBER_PACKAGE_NAMES[0], PackageManager.GET_SIGNATURES);
 
         assertThat(appProtocol.getAppSignature(activity)).isNull();
     }
@@ -106,7 +107,7 @@ public class AppProtocolTest extends RobolectricTestBase {
     @Test
     public void getPackageSignature_whenNullPackageInfo_shouldReturnNull() throws Exception {
         stubAppSignature(GOOD_SIGNATURE);
-        when(packageManager.getPackageInfo(AppProtocol.UBER_PACKAGE_NAME, PackageManager.GET_SIGNATURES))
+        when(packageManager.getPackageInfo(AppProtocol.UBER_PACKAGE_NAMES[0], PackageManager.GET_SIGNATURES))
                 .thenReturn(null);
 
         assertThat(appProtocol.getAppSignature(activity)).isNull();
@@ -132,7 +133,7 @@ public class AppProtocolTest extends RobolectricTestBase {
     }
 
     private void stubAppSignature(String... sig) throws Exception {
-        when(activity.getPackageName()).thenReturn(AppProtocol.UBER_PACKAGE_NAME);
+        when(activity.getPackageName()).thenReturn(AppProtocol.UBER_PACKAGE_NAMES[0]);
         when(activity.getPackageManager()).thenReturn(packageManager);
 
         Signature[] signatures = new Signature[sig.length];
@@ -143,7 +144,7 @@ public class AppProtocolTest extends RobolectricTestBase {
         packageInfo.signatures = signatures;
 
         try {
-            when(packageManager.getPackageInfo(eq(AppProtocol.UBER_PACKAGE_NAME), anyInt()))
+            when(packageManager.getPackageInfo(eq(AppProtocol.UBER_PACKAGE_NAMES[0]), anyInt()))
                     .thenReturn(packageInfo);
         } catch (PackageManager.NameNotFoundException e) {
             fail("Unable to mock Package Manager");

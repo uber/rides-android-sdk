@@ -34,7 +34,6 @@ import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.RobolectricTestBase;
 import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.core.auth.Scope;
-import com.uber.sdk.rides.client.SessionConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +49,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -64,11 +62,8 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     private static final Set<Scope> GENERAL_SCOPES = Sets.newHashSet(Scope.HISTORY, Scope.PROFILE);
     private static final int REQUEST_CODE = 1234;
 
-    private static final String CHINA__REGION =
-            "uber://connect?client_id=MYCLIENTID&scope=profile%20history&login_type=CHINA&sdk=android&sdk_version=" + BuildConfig.VERSION_NAME;
-
-    private static final String WORLD_REGION =
-            "uber://connect?client_id=MYCLIENTID&scope=profile%20history&login_type=WORLD&sdk=android&sdk_version=" + BuildConfig.VERSION_NAME;
+    private static final String DEFAULT_REGION =
+            "uber://connect?client_id=MYCLIENTID&scope=profile%20history&sdk=android&sdk_version=" + BuildConfig.VERSION_NAME;
 
     @Mock
     PackageManager packageManager;
@@ -120,7 +115,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
 
         when(activity.getPackageManager()).thenReturn(packageManager);
         try {
-            when(packageManager.getPackageInfo(AppProtocol.UBER_PACKAGE_NAME, 0)).thenReturn(packageInfo);
+            when(packageManager.getPackageInfo(AppProtocol.UBER_PACKAGE_NAMES[0], 0)).thenReturn(packageInfo);
         } catch (PackageManager.NameNotFoundException e) {
             fail("Unable to mock Package Manager");
         }
@@ -140,7 +135,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     public void testIsSupported_noAppInstalled_shouldBeFalse() {
         when(activity.getPackageManager()).thenReturn(packageManager);
         try {
-            when(packageManager.getPackageInfo(AppProtocol.UBER_PACKAGE_NAME, PackageManager.GET_META_DATA))
+            when(packageManager.getPackageInfo(AppProtocol.UBER_PACKAGE_NAMES[0], PackageManager.GET_META_DATA))
                     .thenThrow(PackageManager.NameNotFoundException.class);
         } catch (PackageManager.NameNotFoundException e) {
             fail("Unable to mock Package Manager");
@@ -155,29 +150,6 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
         final boolean isSupported = link.isSupported();
 
         assertThat(isSupported).isFalse();
-    }
-
-    @Test
-    public void testInvokeWithAllParams_shouldContainsFullUri() {
-        enableSupport();
-
-        final SsoDeeplink link = new SsoDeeplink.Builder(activity)
-                .clientId(CLIENT_ID)
-                .region(SessionConfiguration.EndpointRegion.CHINA)
-                .scopes(GENERAL_SCOPES)
-                .activityRequestCode(REQUEST_CODE)
-                .build();
-        link.appProtocol = protocol;
-        link.execute();
-
-        final ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        final ArgumentCaptor<Integer> requestCodeCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(activity).startActivityForResult(intentCaptor.capture(), requestCodeCaptor.capture());
-
-        final Uri uri = intentCaptor.getValue().getData();
-
-        assertThat(uri.toString()).isEqualTo(CHINA__REGION);
-        assertThat(requestCodeCaptor.getValue()).isEqualTo(REQUEST_CODE);
     }
 
     @Test
@@ -199,7 +171,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
 
         final Uri uri = intentCaptor.getValue().getData();
 
-        assertThat(uri.toString()).isEqualTo(WORLD_REGION);
+        assertThat(uri.toString()).isEqualTo(DEFAULT_REGION);
         assertThat(requestCodeCaptor.getValue()).isEqualTo(REQUEST_CODE);
     }
 
@@ -221,7 +193,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
 
         Uri uri = intentCaptor.getValue().getData();
 
-        assertThat(uri.toString()).isEqualTo(WORLD_REGION);
+        assertThat(uri.toString()).isEqualTo(DEFAULT_REGION);
         assertThat(requestCodeCaptor.getValue()).isEqualTo(LoginManager.REQUEST_CODE_LOGIN_DEFAULT);
     }
 
@@ -232,7 +204,6 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
 
         final SsoDeeplink link = new SsoDeeplink.Builder(activity)
                 .clientId(CLIENT_ID)
-                .region(SessionConfiguration.EndpointRegion.WORLD)
                 .activityRequestCode(REQUEST_CODE)
                 .build();
 
@@ -249,7 +220,6 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
 
         final SsoDeeplink link = new SsoDeeplink.Builder(activity)
                 .clientId(CLIENT_ID)
-                .region(SessionConfiguration.EndpointRegion.WORLD)
                 .activityRequestCode(REQUEST_CODE)
                 .scopes(GENERAL_SCOPES)
                 .customScopes(collection)
@@ -270,7 +240,6 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
 
         final SsoDeeplink link = new SsoDeeplink.Builder(activity)
                 .scopes(GENERAL_SCOPES)
-                .region(SessionConfiguration.EndpointRegion.WORLD)
                 .activityRequestCode(REQUEST_CODE)
                 .build();
 
@@ -282,7 +251,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     public void testInvokeWithoutAppInstalled_shouldFail() {
         when(activity.getPackageManager()).thenReturn(packageManager);
         try {
-            when(packageManager.getPackageInfo(AppProtocol.UBER_PACKAGE_NAME, PackageManager.GET_META_DATA))
+            when(packageManager.getPackageInfo(AppProtocol.UBER_PACKAGE_NAMES[0], PackageManager.GET_META_DATA))
                     .thenThrow(PackageManager.NameNotFoundException.class);
         } catch (PackageManager.NameNotFoundException e) {
             fail("Unable to mock Package Manager");
@@ -302,11 +271,12 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
         when(activity.getPackageManager()).thenReturn(packageManager);
 
         try {
-            when(packageManager.getPackageInfo(eq(AppProtocol.UBER_PACKAGE_NAME), anyInt()))
+            when(packageManager.getPackageInfo(eq(AppProtocol.UBER_PACKAGE_NAMES[0]), anyInt()))
                     .thenReturn(packageInfo);
         } catch (PackageManager.NameNotFoundException e) {
             fail("Unable to mock Package Manager");
         }
         when(protocol.validateSignature(any(Context.class), anyString())).thenReturn(true);
+        when(protocol.validateMinimumVersion(any(Context.class), any(PackageInfo.class), anyInt())).thenReturn(true);
     }
 }

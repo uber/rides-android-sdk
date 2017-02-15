@@ -37,11 +37,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.res.Attribute;
-import org.robolectric.shadows.CoreShadowsAdapter;
-import org.robolectric.shadows.RoboAttributeSet;
-
-import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -53,23 +48,6 @@ import static org.junit.Assert.assertTrue;
  * Tests {@link UberButton}
  */
 public class UberButtonTest extends RobolectricTestBase {
-
-    private static final String ANDROID_ATTR_BACKGROUND = "android:attr/background";
-    private static final String ANDROID_ATTR_DRAWABLE_LEFT = "android:attr/drawableLeft";
-    private static final String ANDROID_ATTR_DRAWABLE_TOP = "android:attr/drawableTop";
-    private static final String ANDROID_ATTR_DRAWABLE_RIGHT = "android:attr/drawableRight";
-    private static final String ANDROID_ATTR_DRAWABLE_BOTTOM = "android:attr/drawableBottom";
-    private static final String ANDROID_ATTR_DRAWABLE_PADDING = "android:attr/drawablePadding";
-    private static final String ANDROID_ATTR_GRAVITY = "android:attr/gravity";
-    private static final String ANDROID_ATTR_PADDING = "android:attr/padding";
-    private static final String ANDROID_ATTR_PADDING_LEFT = "android:attr/paddingLeft";
-    private static final String ANDROID_ATTR_PADDING_TOP = "android:attr/paddingTop";
-    private static final String ANDROID_ATTR_PADDING_RIGHT = "android:attr/paddingRight";
-    private static final String ANDROID_ATTR_PADDING_BOTTOM = "android:attr/paddingBottom";
-    private static final String ANDROID_ATTR_TEXT_COLOR = "android:attr/textColor";
-    private static final String ANDROID_ATTR_TEXT_SIZE = "android:attr/textSize";
-    private static final String ANDROID_ATTR_TEXT_STYLE = "android:attr/textStyle";
-    private static final String ANDROID_ATTR_TEXT = "android:attr/text";
 
     private static final String ANDROID_COLOR_BLACK = "@android:color/black";
     private static final String ANDROID_COLOR_WHITE = "@android:color/white";
@@ -83,7 +61,6 @@ public class UberButtonTest extends RobolectricTestBase {
     private static final String TEXT = "test";
 
     private static final String UBER_PACKAGE_NAME = "com.uber.sdk.android.core";
-    private static final String UBER_ATTR_UBER_STYE = UBER_PACKAGE_NAME + ":attr/ub__style";
 
     private Context context;
 
@@ -94,22 +71,22 @@ public class UberButtonTest extends RobolectricTestBase {
 
     @Test
     public void onCreate_whenBackgroundAttributeSet_shouldSetBackground() {
-        AttributeSet attributeSet = makeAttributeSet(
-                makeAttribute(ANDROID_ATTR_BACKGROUND, ANDROID_COLOR_WHITE)
-        );
+        AttributeSet attributeSet = Robolectric.buildAttributeSet()
+                .addAttribute(android.R.attr.background, ANDROID_COLOR_WHITE)
+                .build();
         UberButton uberButton = new UberButton(context, attributeSet, 0, 0) { };
         assertEquals(Color.WHITE, ((ColorDrawable) uberButton.getBackground()).getColor());
     }
 
     @Test
     public void onCreate_whenCompoundDrawablesAndPaddingSet_shouldSetCompoundDrawableAttributes() {
-        AttributeSet attributeSet = makeAttributeSet(
-                makeAttribute(ANDROID_ATTR_DRAWABLE_LEFT, DRAWABLE_UBER_BADGE),
-                makeAttribute(ANDROID_ATTR_DRAWABLE_TOP, DRAWABLE_UBER_BADGE),
-                makeAttribute(ANDROID_ATTR_DRAWABLE_RIGHT, DRAWABLE_UBER_BADGE),
-                makeAttribute(ANDROID_ATTR_DRAWABLE_BOTTOM, DRAWABLE_UBER_BADGE),
-                makeAttribute(ANDROID_ATTR_DRAWABLE_PADDING, ONE_SP)
-        );
+        AttributeSet attributeSet = Robolectric.buildAttributeSet()
+                .addAttribute(android.R.attr.drawableLeft, DRAWABLE_UBER_BADGE)
+                .addAttribute(android.R.attr.drawableTop, DRAWABLE_UBER_BADGE)
+                .addAttribute(android.R.attr.drawableRight, DRAWABLE_UBER_BADGE)
+                .addAttribute(android.R.attr.drawableBottom, DRAWABLE_UBER_BADGE)
+                .addAttribute(android.R.attr.drawablePadding, ONE_SP)
+                .build();
 
         UberButton uberButton = new UberButton(context, attributeSet, 0, 0) { };
         Drawable[] drawables = uberButton.getCompoundDrawables();
@@ -122,9 +99,9 @@ public class UberButtonTest extends RobolectricTestBase {
 
     @Test
     public void onCreate_whenOverallPaddingSet_shouldAddOverallPadding() {
-        AttributeSet attributeSet = makeAttributeSet(
-                makeAttribute(ANDROID_ATTR_PADDING, ONE_SP)
-        );
+        AttributeSet attributeSet = Robolectric.buildAttributeSet()
+                .addAttribute(android.R.attr.padding, ONE_SP)
+                .build();
         UberButton uberButton = new UberButton(context, attributeSet, 0, 0) { };
         assertEquals(1, uberButton.getPaddingLeft());
         assertEquals(1, uberButton.getPaddingTop());
@@ -134,12 +111,13 @@ public class UberButtonTest extends RobolectricTestBase {
 
     @Test
     public void onCreate_whenIndividualPaddingsSet_shouldHaveSeparatePaddings() {
-        AttributeSet attributeSet = makeAttributeSet(
-                makeAttribute(ANDROID_ATTR_PADDING_LEFT, ONE_SP),
-                makeAttribute(ANDROID_ATTR_PADDING_TOP, TWO_SP),
-                makeAttribute(ANDROID_ATTR_PADDING_RIGHT, THREE_SP),
-                makeAttribute(ANDROID_ATTR_PADDING_BOTTOM, FOUR_SP)
-        );
+        AttributeSet attributeSet = Robolectric.buildAttributeSet()
+                .addAttribute(android.R.attr.paddingLeft, ONE_SP)
+                .addAttribute(android.R.attr.paddingTop, TWO_SP)
+                .addAttribute(android.R.attr.paddingRight, THREE_SP)
+                .addAttribute(android.R.attr.paddingBottom, FOUR_SP)
+                .build();
+
         UberButton uberButton = new UberButton(context, attributeSet, 0, 0) { };
         assertEquals(1, uberButton.getPaddingLeft());
         assertEquals(2, uberButton.getPaddingTop());
@@ -149,11 +127,12 @@ public class UberButtonTest extends RobolectricTestBase {
 
     @Test
     public void onCreate_whenIndividualAndOverallPaddingsSet_shouldHaveIndividualPaddingsTrumpOverall() {
-        AttributeSet attributeSet = makeAttributeSet(
-                makeAttribute(ANDROID_ATTR_PADDING, ONE_SP),
-                makeAttribute(ANDROID_ATTR_PADDING_TOP, TWO_SP),
-                makeAttribute(ANDROID_ATTR_PADDING_BOTTOM, FOUR_SP)
-        );
+        AttributeSet attributeSet = Robolectric.buildAttributeSet()
+                .addAttribute(android.R.attr.padding, ONE_SP)
+                .addAttribute(android.R.attr.paddingTop, TWO_SP)
+                .addAttribute(android.R.attr.paddingBottom, FOUR_SP)
+                .build();
+
         UberButton uberButton = new UberButton(context, attributeSet, 0, 0) { };
         assertEquals(1, uberButton.getPaddingLeft());
         assertEquals(2, uberButton.getPaddingTop());
@@ -163,13 +142,14 @@ public class UberButtonTest extends RobolectricTestBase {
 
     @Test
     public void onCreate_whenTextAttributesSet_shouldAddAllAttributes() {
-        AttributeSet attributeSet = makeAttributeSet(
-                makeAttribute(ANDROID_ATTR_TEXT_COLOR, ANDROID_COLOR_BLACK),
-                makeAttribute(ANDROID_ATTR_GRAVITY, GRAVITY_END),
-                makeAttribute(ANDROID_ATTR_TEXT_SIZE, FOUR_SP),
-                makeAttribute(ANDROID_ATTR_TEXT_STYLE, STYLE_ITALIC),
-                makeAttribute(ANDROID_ATTR_TEXT, TEXT)
-        );
+        AttributeSet attributeSet = Robolectric.buildAttributeSet()
+                .addAttribute(android.R.attr.textColor, ANDROID_COLOR_BLACK)
+                .addAttribute(android.R.attr.gravity, GRAVITY_END)
+                .addAttribute(android.R.attr.textSize, FOUR_SP)
+                .addAttribute(android.R.attr.textStyle, STYLE_ITALIC)
+                .addAttribute(android.R.attr.text, TEXT)
+                .build();
+
         UberButton uberButton = new UberButton(context, attributeSet, 0, 0) { };
         assertEquals(Color.BLACK, uberButton.getCurrentTextColor());
         assertEquals(Typeface.ITALIC, uberButton.getTypeface().getStyle());
@@ -203,9 +183,9 @@ public class UberButtonTest extends RobolectricTestBase {
 
     @Test
     public void onCreate_whenUberStyleSet_shouldUseUberStyle() {
-        AttributeSet attributeSet = makeAttributeSet(
-                makeAttribute(UBER_ATTR_UBER_STYE, "white")
-        );
+        AttributeSet attributeSet = Robolectric.buildAttributeSet()
+                .addAttribute(R.attr.ub__style, "white")
+                .build();
 
         UberButton uberButton = new UberButton(context, attributeSet, 0, R.style.UberButton_White) { };
         Resources resources = context.getResources();
@@ -265,13 +245,5 @@ public class UberButtonTest extends RobolectricTestBase {
         UberButton uberButton = new UberButton(wrapper, null, 0, 0) { };
 
         uberButton.getActivity();
-    }
-
-    private static AttributeSet makeAttributeSet(Attribute... attributes) {
-        return new RoboAttributeSet(Arrays.asList(attributes), new CoreShadowsAdapter().getResourceLoader());
-    }
-
-    private static Attribute makeAttribute(String fullyQualifiedAttributeName, Object value) {
-        return new Attribute(fullyQualifiedAttributeName, String.valueOf(value), UBER_PACKAGE_NAME);
     }
 }
