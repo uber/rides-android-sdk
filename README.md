@@ -1,4 +1,4 @@
-# Uber Rides Android SDK (beta) [![Build Status](https://travis-ci.org/uber/rides-android-sdk.svg?branch=master)](https://travis-ci.org/uber/rides-android-sdk)
+# Uber Rides Android SDK (beta) [![Build Status](https://travis-ci.org/uber/rides-android-sdk.svg?branch=master)](https://travis-ci.org/uber/rides-android-sdk) [![CLA assistant](https://cla-assistant.io/readme/badge/agraebe/rides-android-sdk)](https://cla-assistant.io/agraebe/rides-android-sdk)
 
 Official Android SDK (beta) to support:
  - Ride Request Button
