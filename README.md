@@ -167,7 +167,7 @@ If you want to provide a more custom experience in your app, there are a few cla
 ### Login
 The Uber SDK allows for three login flows: Implicit Grant (local web view), Single Sign On with the Uber App, and Authorization Code Grant (requires a backend to catch the local web view redirect and complete OAuth).
 
-To use Single Sign On you must register a hash of your application's signing certificate in the Application Signature section of the [developer dashboard] (https://developer.uber.com/dashboard).
+To use Single Sign On you must register a hash of your application's signing certificate in the Application Signature section of the [developer dashboard](https://developer.uber.com/dashboard).
 
 To get the hash of your signing certificate, run this command with the alias of your key and path to your keystore:
 
