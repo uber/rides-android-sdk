@@ -91,7 +91,11 @@ class AuthUtils {
 
         String[] scopeStrings = scopesString.split(" ");
         for (String scopeName : scopeStrings) {
-            scopeCollection.add(Scope.valueOf(scopeName.toUpperCase()));
+            try {
+                scopeCollection.add(Scope.valueOf(scopeName.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // do nothing, will omit custom or bad scopes
+            }
         }
 
         return scopeCollection;

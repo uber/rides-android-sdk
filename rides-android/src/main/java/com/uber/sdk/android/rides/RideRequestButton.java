@@ -61,7 +61,7 @@ public class RideRequestButton extends FrameLayout implements RideRequestButtonV
     @StyleRes
     int[] STYLES = {R.style.UberButton, R.style.UberButton_White};
 
-    private static final String USER_AGENT_BUTTON = "rides-android-v0.6.0-button";
+    private static final String USER_AGENT_BUTTON = "rides-android-v0.6.1-button";
 
     private RideRequestBehavior rideRequestBehavior;
 

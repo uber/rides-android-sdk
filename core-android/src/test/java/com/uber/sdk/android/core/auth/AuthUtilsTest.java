@@ -77,6 +77,16 @@ public class AuthUtilsTest extends RobolectricTestBase {
     }
 
     @Test
+    public void stringToScopeCollection_whenUnknownScopeInString_shouldReturnOnlyKnownScopes() {
+        String scopeString = "profile custom";
+        List<Scope> scopes = new ArrayList<>();
+        scopes.addAll(AuthUtils.stringToScopeCollection(scopeString));
+
+        assertEquals(scopes.size(), 1);
+        assertTrue(scopes.contains(Scope.PROFILE));
+    }
+
+    @Test
     public void scopeCollectionToString_withMultipleScopes_shouldReturnSpaceDelimitedStringScopes() {
         List<Scope> scopes = new ArrayList<Scope>();
         scopes.add(Scope.PROFILE);
@@ -101,11 +111,6 @@ public class AuthUtilsTest extends RobolectricTestBase {
         String result = AuthUtils.scopeCollectionToString(scopes);
 
         assertTrue(result.isEmpty());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void withBadScopeString_shouldThrowException() {
-        AuthUtils.stringToScopeCollection("blah");
     }
 
     @Test

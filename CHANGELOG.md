@@ -1,5 +1,7 @@
-v0.6.1 - TBD
-------------
+v0.6.1 - 4/5/2017
+-------------------
+### Changed
+ - AuthUtils now omits unrecognized scopes from parsed AccessToken instead of throwing an exception when creating
 
 v0.6.0 - 2/14/2017
 -------------------
