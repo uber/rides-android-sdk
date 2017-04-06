@@ -225,23 +225,38 @@ public class RideRequestButton extends FrameLayout implements RideRequestButtonV
                 attrsResources,
                 defStyleAttr,
                 defStyleRes);
+
+        TypedArray textSizeAttributes = context.getTheme().obtainStyledAttributes(
+                attrs,
+                R.styleable.RideRequestButton,
+                defStyleAttr,
+                defStyleRes);
+        int primaryTextSize = (int) textSizeAttributes.getDimension(
+                R.styleable.RideRequestButton_ub__primary_text_size,
+                getResources().getDimension(R.dimen.ub__text_size));
+        int secondaryTextSize = (int) textSizeAttributes.getDimension(
+                R.styleable.RideRequestButton_ub__secondary_text_size,
+                getResources().getDimension(R.dimen.ub__secondary_text_size));
+        textSizeAttributes.recycle();
+
         try {
-            applyTextAttributes(priceEstimateView, textAttributes);
-            applyTextAttributes(timeEstimateView, textAttributes);
-            applyTextAttributes(requestButton, textAttributes);
+            applyTextAttributes(priceEstimateView, textAttributes, secondaryTextSize);
+            applyTextAttributes(timeEstimateView, textAttributes, secondaryTextSize);
+            applyTextAttributes(requestButton, textAttributes, primaryTextSize);
         } finally {
             textAttributes.recycle();
         }
     }
 
     @SuppressLint("ResourceType")
-    private void applyTextAttributes(TextView textView, TypedArray textAttributes) {
+    private void applyTextAttributes(TextView textView, TypedArray textAttributes, int textSize) {
         textView.setTextColor(textAttributes.getColor(0, Color.WHITE));
         textView.setTypeface(Typeface.defaultFromStyle(textAttributes.getInt(3, Typeface.NORMAL)));
         String text = textAttributes.getString(4);
         if (text != null) {
             textView.setText(textAttributes.getString(4));
         }
+        textView.setTextSize(textSize);
     }
 
     @SuppressLint("ResourceType")
