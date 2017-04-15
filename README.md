@@ -175,7 +175,7 @@ To get the hash of your signing certificate, run this command with the alias of 
 keytool -exportcert -alias <your_key_alias> -keystore <your_keystore_path> | openssl sha1 -binary | openssl base64
 ```
 
-Before you can request any rides, you need to get an `AccessToken`. The Uber Rides SDK provides the `LoginManager` class for this task. Simply create a new instance and use its login method to present the login screen to the user.
+Before you can request any rides, you need to get an `AccessToken`. The Uber Rides SDK provides the `LoginManager` class for this task. Simply create a new instance and use its login method to present the login screen to the user. test
 
 ```java
 LoginCallback loginCallback = new LoginCallback() {
