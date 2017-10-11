@@ -235,12 +235,13 @@ public class LoginActivity extends Activity {
             super(redirectUri);
         }
 
-
         @Override
-        public void onPageFinished(WebView view, String url) {
-            if (url.startsWith(redirectUri)) {
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            if(url.startsWith(redirectUri)) {
                 onCodeReceived(Uri.parse(url));
+                return true;
             }
+            return super.shouldOverrideUrlLoading(view, url);
         }
     }
 

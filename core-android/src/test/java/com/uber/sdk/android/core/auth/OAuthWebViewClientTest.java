@@ -174,12 +174,12 @@ public class OAuthWebViewClientTest extends RobolectricTestBase {
     }
 
     @Test
-    public void onPageFinished_withMatchingRedirectUri_shouldReturnedUri() {
+    public void shouldOverrideUrlLoading_withMatchingRedirectUri_shouldReturnUri() {
         client = testLoginActivity.new AuthorizationCodeClient(REDIRECT_URI);
 
         String redirectUrl = REDIRECT_URI + "code=myCode123";
 
-        client.onPageFinished(mock(WebView.class), redirectUrl);
+        client.shouldOverrideUrlLoading(mock(WebView.class), redirectUrl);
 
         verify(testLoginActivity).onCodeReceived(eq(Uri.parse(redirectUrl)));
     }
