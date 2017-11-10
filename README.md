@@ -17,10 +17,11 @@ To use the Uber Rides Android SDK, add the compile dependency with the latest ve
 
 ### Gradle
 
-Add the Uber Rides Android SDK to your `build.gradle`:
+[![Maven Central](https://img.shields.io/maven-central/v/com.uber.sdk/rides-android.svg)](https://mvnrepository.com/artifact/com.uber.sdk/rides-android)
+
 ```gradle
 dependencies {
-    compile 'com.uber.sdk:rides-android:0.6.1'
+    compile 'com.uber.sdk:rides-android:x.y.z'
 }
 ```
 
