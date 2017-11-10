@@ -33,8 +33,8 @@ import android.webkit.WebView;
 import com.google.common.collect.ImmutableList;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.Scope;
-import com.uber.sdk.rides.client.AccessTokenSession;
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.AccessTokenSession;
+import com.uber.sdk.core.client.SessionConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -74,7 +74,8 @@ public class RideRequestViewTest extends RobolectricTestBase {
     private static final String DROPOFF_NICK = "pickupNick";
     private static final String DROPOFF_ADDR = "Dropoff Address";
     private static final String TOKEN_STRING = "thisIsAnAccessToken";
-    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.6.1-ride_request_view";
+    private static final String USER_AGENT_RIDE_VIEW = String.format("rides-android-v%s-ride_request_view",
+            BuildConfig.VERSION_NAME);
 
     private AccessToken accessToken;
     private RideRequestView rideRequestView;
@@ -144,7 +145,8 @@ public class RideRequestViewTest extends RobolectricTestBase {
 
     @Test
     public void onBuildUrl_withUserAgentNonNull_shouldNotOverride() throws IOException {
-        String widgetUserAgent = "rides-android-v0.6.1-ride_request_widget";
+        String widgetUserAgent = String.format("rides-android-v%s-ride_request_widget",
+                BuildConfig.VERSION_NAME);
         String path = "src/test/resources/riderequestviewuris/default_uri";
         String expectedUri = readUriResourceWithUserAgentParam(path, widgetUserAgent);
 

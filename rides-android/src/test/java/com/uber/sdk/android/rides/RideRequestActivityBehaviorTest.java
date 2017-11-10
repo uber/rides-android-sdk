@@ -25,7 +25,7 @@ package com.uber.sdk.android.rides;
 import android.app.Activity;
 import android.content.Intent;
 
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.SessionConfiguration;
 
 import org.junit.Test;
 import org.robolectric.Robolectric;

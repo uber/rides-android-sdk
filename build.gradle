@@ -1,208 +1,36 @@
-apply plugin: 'distribution'
-apply plugin: 'net.researchgate.release'
-apply plugin: 'co.riiid.gradle'
-
-import groovy.text.GStringTemplateEngine
-import org.codehaus.groovy.runtime.DateGroovyMethods
+/*
+ * Copyright (C) 2017. Uber Technologies
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 buildscript {
+    apply from: 'gradle/dependencies.gradle'
+
     repositories {
         jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
-        classpath 'net.researchgate:gradle-release:2.3.5'
-        classpath 'co.riiid:gradle-github-plugin:0.4.2'
-        classpath 'net.saliman:gradle-cobertura-plugin:2.3.1'
+        classpath deps.build.gradlePlugins.github
+        classpath deps.build.gradlePlugins.release
     }
 }
 
-allprojects {
-    apply plugin: 'checkstyle'
-    apply plugin: 'maven'
-
-    ["githubToken", "ossrhUsername", "ossrhPassword",
-     "signing.keyId", "signing.password", "signing.secretKeyRingFile",].each {
-        checkAndDefaultProperty(it)
-    }
-
-    ext.set("unsnapshottedVersion", version.replaceAll("-SNAPSHOT", ""))
-    ext.set("samples", project(":samples").subprojects.collect { it.path })
-    ext.set("isReleaseVersion", !version.endsWith("SNAPSHOT"))
-
-    repositories {
-        jcenter()
-    }
-
-    checkstyle {
-        toolVersion = "6.11.2"
-    }
-
-    task checkstyleMain(type: Checkstyle, overwrite: true) {
-        configFile = new File("{$project.projectDir}/config/checkstyle/checkstyle-main.xml")
-    }
-
-    task checkstyleTest(type: Checkstyle, overwrite: true) {
-        configFile = new File("{$project.projectDir}/config/checkstyle/checkstyle-test.xml")
-    }
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.2.1'
+    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 }
 
-def generateReleaseNotes() {
-    def changelogSnippet = generateChangelogSnippet()
-    def model = [title  : "Uber Rides Android SDK (Beta) v${unsnapshottedVersion}",
-                 date   : DateGroovyMethods.format(new Date(), 'MM/dd/yyyy'),
-                 snippet: changelogSnippet,
-                 assets : project.samples.collect {
-                     [
-                             title      : project(it).name,
-                             download   : githubDownloadPrefix + "v${unsnapshottedVersion}/"
-                                     + project(it).name + "-v${unsnapshottedVersion}.zip",
-                             description: project(it).description,
-                     ]
-                 }]
-    def engine = new GStringTemplateEngine()
-    def template = engine.createTemplate(rootProject.file('releasenotes.gtpl')).make(model)
-    return template.toString()
-}
-
-def generateChangelogSnippet() {
-    def changelog = rootProject.file('CHANGELOG.md').text
-    def snippet = ""
-    def stop = false
-    changelog.eachLine { line, count ->
-        if (count >= 2) {
-            stop = stop || line.startsWith("v");
-            if (!stop) {
-                snippet += line + "\n";
-            }
-        }
-    }
-    return "  " + snippet.trim();
-}
-
-def checkAndDefaultProperty(prop) {
-    if (!project.hasProperty(prop)) {
-        logger.warn("Add " + prop + " to your ~/.gradle/gradle.properties file.")
-        rootProject.ext.set(prop, prop)
-    }
-}
-
-def checkForChangelogUpdates(task) {
-    def changelogtext = rootProject.file('CHANGELOG.md').text
-    if (!changelogtext.startsWith("v${unsnapshottedVersion} -")) {
-        throw new AssertionError(
-                "Changelog must be updated with v{$unsnapshottedVersion} before release. Please check " +
-                        rootProject.file('CHANGELOG.md').absolutePath)
-    }
-}
-
-gradle.taskGraph.afterTask { Task task, TaskState state ->
-    if (task.path.endsWith("release") || task.path.endsWith("githubReleaseZip")
-            || task.path.endsWith("publicrepoDistZip")) {
-        checkForChangelogUpdates(task)
-    }
-}
-
-// Skip signing archives on Jenkins when -SNAPSHOT is being checked in.
-gradle.taskGraph.beforeTask { Task task ->
-    if (task.path.contains("sign") && !ext.isReleaseVersion) {
-        task.enabled = false
-    }
-}
-
-task updateChangelog() << {
-    def newVersion = findProperty("version").replaceAll('-SNAPSHOT', '')
-    def changelog = rootProject.file('CHANGELOG.md')
-    def changelogText = changelog.text
-    if (!changelogText.startsWith("v${newVersion} -")) {
-        def updatedChangelog = "v${newVersion} - TBD\n"
-        def dashesCount = updatedChangelog.length()-1
-        updatedChangelog += "-"*dashesCount + "\n\n"
-
-        changelog.write(updatedChangelog + changelogText)
-    }
-}
-
-afterReleaseBuild.dependsOn(":core-android:uploadArchives", ":rides-android:uploadArchives")
-updateVersion.dependsOn ":githubRelease"
-commitNewVersion.dependsOn ':updateChangelog'
-githubRelease.dependsOn project(":samples").subprojects.collect { it.path + ":githubReleaseZip" }
-
-release {
-    failOnCommitNeeded = false
-    failOnPublishNeeded = false
-    failOnSnapshotDependencies = false
-    revertOnFail = true
-    tagTemplate = "v${unsnapshottedVersion}"
-}
-
-github {
-    owner = 'uber'
-    repo = 'rides-android-sdk'
-    token = "${githubToken}"
-    tagName = "v${unsnapshottedVersion}"
-    targetCommitish = 'master'
-    name = "v${unsnapshottedVersion}"
-    body = generateReleaseNotes()
-    assets = project.samples.collect {
-        project(it).buildDir.absolutePath + "/distributions/" + project(it).name +
-                "-v${unsnapshottedVersion}.zip"
-    }
-}
-
-distributions {
-    publicrepo {
-        baseName = 'publicrepo'
-        contents {
-            from(rootDir) {
-                include 'build.gradle'
-                include 'CHANGELOG.md'
-                include 'gradle.properties'
-                include 'gradlew'
-                include 'gradlew.bat'
-                include 'LICENSE'
-                include 'releasenotes.gtpl'
-                include 'settings.gradle'
-                include 'gradle/'
-                include 'config'
-                include 'test-shared/'
-                include '.travis.yml'
-            }
-
-            from(rootDir) {
-                include 'README.md'
-                filter { String line ->
-                    line.replaceAll("_version_", unsnapshottedVersion)
-                }
-            }
-
-            from('core-android') {
-                filesNotMatching("**/*.png") {
-                    filter { String line ->
-                        line.replaceAll("_version_", unsnapshottedVersion)
-                    }
-                }
-                exclude 'build'
-                exclude '*.iml'
-                into 'core-android'
-            }
-
-            from('rides-android') {
-                filesNotMatching("**/*.png") {
-                    filter { String line ->
-                        line.replaceAll("_version_", unsnapshottedVersion)
-                    }
-                }
-                exclude 'build'
-                exclude '*.iml'
-                into 'rides-android'
-            }
-
-            from('samples') {
-                exclude '**/build'
-                exclude '**/*.iml'
-                into 'samples'
-            }
-        }
-    }
-}
+apply from: 'gradle/github-release.gradle'
+apply from: 'gradle/verification.gradle'

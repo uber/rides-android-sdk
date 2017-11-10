@@ -34,7 +34,7 @@ import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.install.SignupDeeplink;
 import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.android.core.utils.PackageManagers;
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.SessionConfiguration;
 
 import static com.uber.sdk.android.core.utils.Preconditions.checkNotNull;
 
@@ -46,7 +46,8 @@ import static com.uber.sdk.android.core.utils.Preconditions.checkNotNull;
  */
 public class RequestDeeplink implements Deeplink {
 
-    private static final String USER_AGENT_DEEPLINK = "rides-android-v0.6.1-deeplink";
+    private static final String USER_AGENT_DEEPLINK = String.format("rides-android-v%s-deeplink",
+            BuildConfig.VERSION_NAME);
 
     @NonNull
     private final Uri uri;

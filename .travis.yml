@@ -2,13 +2,52 @@ language: android
 
 android:
   components:
-    - platform-tools
+    # Update tools and then platform-tools explicitly so lint gets an updated database. Can be removed once 3.0 is out.
     - tools
-    - build-tools-23.0.1
-    - android-23
-    - extra-google-m2repository
-    - extra-android-m2repository
+    - platform-tools
 
 jdk:
   - oraclejdk8
 
+before_install:
+  # Install SDK license so Android Gradle plugin can install deps.
+  - mkdir "$ANDROID_HOME/licenses" || true
+  - echo "$LICENSES_HASH" > "$ANDROID_HOME/licenses/android-sdk-license"
+  - echo "$LICENSES_HASH_TWO" >> "$ANDROID_HOME/licenses/android-sdk-license"
+  # Install the rest of tools (e.g., avdmanager)
+  - sdkmanager tools
+  # Install the system image
+  - sdkmanager "system-images;android-18;default;armeabi-v7a"
+  # Create and start emulator for the script. Meant to race the install task.
+  - echo no | avdmanager create avd --force -n test -k "system-images;android-18;default;armeabi-v7a"
+  - $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window > /dev/null 2>&1 &
+
+install: ./gradlew clean assemble assembleAndroidTest --stacktrace
+
+before_script:
+  - android-wait-for-emulator
+  - adb shell input keyevent 82
+
+script:
+  - ./gradlew check connectedCheck --stacktrace
+
+after_success:
+ - .buildscript/deploy_snapshot.sh
+
+env:
+  global:
+   - secure: "FrNGjknmIfrU2/6UHWd9toPdLcfXs07RHOgk1NdKKK0DoMTsz2ovbaftotZJ2Uk2Y2GqnTITdhd+AbwfLb/eCAymSN+FXDrZ69Yv22D5dmMmBlFNI7txb4s7cAobtOb80aZyOJpafqdxhgvDHldHereOLNl4cSWRw5behg2M+82vckDoXPmNT/h1ebGdxsV1R5t6Tkg0OEuvryytQr3OuPRC8RbuxwSefqeIe/qsTGxEkR8OWc8B+pjdt20bYt+FXezG8W371Zb72dJUYfB5tl2t/3RG5FTDGdSh7niC37MPHy/JTunUR+hTcBjBsJDUFV9aPmulKmOLHaEKP9tM5H8MGdQMyC9fIt4Qp89TytkVLoGtPXE9mDAv5oKOwqz779os7FSNQ9BswoKIYtTpsNA9KxOLlghpnBXUA8rTyCNNgjaseOw4W8aF+JsvUzdw37eVfGlIOpZiy2t+mHPZU+JpzPt0Ydr+UCOWVXL/9B7mA/B/53Y/WA5YQ3yitwdXzkSpdJ0IUePRdcUfTK4LUMUH8WgxjVKLpECGRq5dk+IXHGkFihXjzRbQiaNox+DroXzjgBqoTAZ3HgRJ3PvSWrIlzWO+eaK5G3ACeDLthPpGIGv4AUebH89hZS9s3iO/1tKG58xlZayl+19FtxkYSaR/0z3UlBDcsohJ2+L6j0w="
+   - secure: "QIJXhUaNBAgAfEwyPtoh1Lrb9VhPKVFbqmmCpywTTC/hHzj9sl84ZiCraQ4W3yWg81J2CvIMWh3qy5q03BsJ6ZZ7HxBq5Z72Lm4i1ckXoZMTOPc0ppvE6Ep3bNXSG74yk6oBc+zkrNqIkYIZrbiyutZwqKJmlbmSU16Zq6E3suy47gigZnLYo/yIBHJ14slLcPJYaxwA/XuIl4ed+7oklEtSwHZ4plcIPNaeDTBaAZ5Ws4gIxteNQrVbRn8BWQf74iH/XWBj8HPsC4MQzRWi+HjNN95b/U9rAO8EGVUy1xamotRJJu8hdLF4Wynqj0MyxAQsmqmRJCISmcYXgxQ0Ig3DaR44NEfBNuxeKpR5dKF4qgtlCjSap5JArQAc/jkr0E+HtH4TPIgKdEkNm+K65Txpsw0Z5SCaURPBrsyiWK2V3Dw854qQBAw4VeeDgh63ysBjEEBsUqthRUlCgIHeHOagUPACByltzfI4Ha2Ld0/AAMx/w59+1sBgYFqiUT/ac0UHqvFkOEGbw5874rIwZrkNvwoiApTHV50AWYU5ET6UsNGrVGC8t4H792XM8hmqodxAovuyBLVvgxorLpnH76q8mnZFMlS1D5dxu+lz6p3oDchf4dl3QaMeldAx9P8+/Fky7y0sqiFgJLVQSo5nUEwjwDpt1IhSb8R2mj1Rv/A="
+
+branches:
+  except:
+    - gh-pages
+
+notifications:
+  email: false
+
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.gradle

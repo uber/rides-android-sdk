@@ -37,7 +37,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.uber.sdk.android.core.R;
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.SessionConfiguration;
 
 import java.util.Locale;
 

@@ -28,7 +28,7 @@ import android.support.annotation.VisibleForTesting;
 
 import com.uber.sdk.android.rides.RideParameters;
 import com.uber.sdk.android.rides.RideRequestButtonCallback;
-import com.uber.sdk.rides.client.Session;
+import com.uber.sdk.core.client.Session;
 import com.uber.sdk.rides.client.UberRidesApi;
 import com.uber.sdk.rides.client.error.ApiError;
 import com.uber.sdk.rides.client.error.ClientError;
@@ -46,7 +46,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.uber.sdk.rides.client.utils.Preconditions.checkNotNull;
+import static com.uber.sdk.core.client.utils.Preconditions.checkNotNull;
 
 
 public class RideRequestButtonController {

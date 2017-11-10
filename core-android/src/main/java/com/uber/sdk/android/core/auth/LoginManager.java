@@ -28,17 +28,18 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.install.SignupDeeplink;
 import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.Scope;
-import com.uber.sdk.rides.client.AccessTokenSession;
-import com.uber.sdk.rides.client.ServerTokenSession;
-import com.uber.sdk.rides.client.Session;
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.AccessTokenSession;
+import com.uber.sdk.core.client.ServerTokenSession;
+import com.uber.sdk.core.client.Session;
+import com.uber.sdk.core.client.SessionConfiguration;
 
-import static com.uber.sdk.rides.client.utils.Preconditions.checkNotEmpty;
+import static com.uber.sdk.core.client.utils.Preconditions.checkNotEmpty;
 
 /**
  * Manages user login via OAuth 2.0 Implicit Grant.  Be sure to call
@@ -84,7 +85,8 @@ public class LoginManager {
 
     static final int REQUEST_CODE_LOGIN_DEFAULT = 1001;
 
-    private static final String USER_AGENT = "core-android-v0.6.1-login_manager";
+    private static final String USER_AGENT = String.format("core-android-v%s-login_manager",
+            BuildConfig.VERSION_NAME);
 
     private final AccessTokenManager accessTokenManager;
     private final LoginCallback callback;

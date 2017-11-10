@@ -43,8 +43,8 @@ import com.uber.sdk.android.rides.RideRequestButton;
 import com.uber.sdk.android.rides.RideRequestButtonCallback;
 import com.uber.sdk.android.rides.RideRequestViewError;
 import com.uber.sdk.core.auth.AccessToken;
-import com.uber.sdk.rides.client.ServerTokenSession;
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.ServerTokenSession;
+import com.uber.sdk.core.client.SessionConfiguration;
 import com.uber.sdk.rides.client.error.ApiError;
 
 import static com.uber.sdk.android.core.utils.Preconditions.checkNotNull;

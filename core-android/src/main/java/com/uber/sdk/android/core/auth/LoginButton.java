@@ -39,7 +39,7 @@ import com.uber.sdk.android.core.UberButton;
 import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.UberStyle;
 import com.uber.sdk.core.auth.Scope;
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.SessionConfiguration;
 
 import java.util.Collection;
 

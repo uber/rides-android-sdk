@@ -36,8 +36,8 @@ import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenAuthenticator;
 import com.uber.sdk.core.auth.Scope;
-import com.uber.sdk.rides.client.Session;
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.Session;
+import com.uber.sdk.core.client.SessionConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -95,7 +95,9 @@ public class LoginManagerTest extends RobolectricTestBase {
             "uber://connect?client_id=Client1234&scope=profile%20request_receipt&sdk=android&sdk_version="
                     + BuildConfig.VERSION_NAME;
 
-    private static final String INSTALL = "https://m.uber.com/sign-up?client_id=Client1234&user-agent=core-android-v0.6.1-login_manager";
+    private static final String INSTALL =
+            String.format("https://m.uber.com/sign-up?client_id=Client1234&user-agent=core-android-v%s-login_manager",
+                    BuildConfig.VERSION_NAME);
     private static final String AUTHORIZATION_CODE = "Auth123Code";
 
     @Mock

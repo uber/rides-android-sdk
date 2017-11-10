@@ -22,7 +22,7 @@
 
 package com.uber.sdk.android.core;
 
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.SessionConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -63,7 +63,8 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     private static final int REQUEST_CODE = 1234;
 
     private static final String DEFAULT_REGION =
-            "uber://connect?client_id=MYCLIENTID&scope=profile%20history&sdk=android&sdk_version=" + BuildConfig.VERSION_NAME;
+            "uber://connect?client_id=MYCLIENTID&scope=profile%20history&sdk=android&sdk_version="
+                    + BuildConfig.VERSION_NAME;
 
     @Mock
     PackageManager packageManager;

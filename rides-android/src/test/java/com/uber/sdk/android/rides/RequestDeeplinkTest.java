@@ -27,7 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.SessionConfiguration;
 
 import org.junit.Test;
 import org.robolectric.Robolectric;
@@ -57,7 +57,8 @@ public class RequestDeeplinkTest extends RobolectricTestBase {
     private static final Double DROPOFF_LONG = -122.6789;
     private static final String DROPOFF_NICK = "pickupNick";
     private static final String DROPOFF_ADDR = "Dropoff Address";
-    private static final String USER_AGENT_DEEPLINK = "rides-android-v0.6.1-deeplink";
+    private static final String USER_AGENT_DEEPLINK = String
+            .format("rides-android-v%s-deeplink", BuildConfig.VERSION_NAME);
 
     private Context context;
 

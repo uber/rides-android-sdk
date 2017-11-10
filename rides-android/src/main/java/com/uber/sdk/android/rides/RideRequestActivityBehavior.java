@@ -30,7 +30,7 @@ import android.support.annotation.NonNull;
 import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.auth.AccessTokenManager;
 import com.uber.sdk.core.auth.AccessTokenStorage;
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.SessionConfiguration;
 
 /**
  * The {@link RideRequestBehavior} to pass to the {@link RideRequestButton} to have it launch a {@link RideRequestActivity}.
