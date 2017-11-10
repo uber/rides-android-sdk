@@ -43,8 +43,8 @@ import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.auth.AccessTokenManager;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenStorage;
-import com.uber.sdk.rides.client.AccessTokenSession;
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.AccessTokenSession;
+import com.uber.sdk.core.client.SessionConfiguration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,7 +55,8 @@ import java.util.Map;
  */
 public class RideRequestView extends LinearLayout {
 
-    private static final String USER_AGENT_RIDE_VIEW = "rides-android-v0.6.1-ride_request_view";
+    private static final String USER_AGENT_RIDE_VIEW = String.format("rides-android-v%s-ride_request_view",
+            BuildConfig.VERSION_NAME);
     @Nullable private AccessTokenSession accessTokenSession;
     @NonNull @VisibleForTesting RideParameters rideParameters = new RideParameters.Builder().build();
     @Nullable private RideRequestViewCallback rideRequestViewCallback;

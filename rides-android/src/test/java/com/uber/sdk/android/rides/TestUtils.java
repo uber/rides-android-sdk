@@ -23,8 +23,8 @@
 package com.uber.sdk.android.rides;
 
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
-import com.google.api.client.repackaged.com.google.common.base.Joiner;
 import com.google.common.io.Files;
 
 import java.io.File;
@@ -48,7 +48,7 @@ public final class TestUtils {
         if (!file.exists()) {
             // If not at full path, check module dir
             List<String> list = Arrays.asList(path.split(File.pathSeparator));
-            file = new File(Joiner.on(File.pathSeparatorChar).join(list.subList(1, list.size())));
+            file = new File(TextUtils.join(File.pathSeparator, list.subList(1, list.size())));
         }
         return Files.toString(file, StandardCharsets.UTF_8).trim();
     }

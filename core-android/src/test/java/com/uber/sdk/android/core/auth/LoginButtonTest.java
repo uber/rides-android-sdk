@@ -32,7 +32,7 @@ import com.google.common.collect.Sets;
 import com.uber.sdk.android.core.R;
 import com.uber.sdk.android.core.RobolectricTestBase;
 import com.uber.sdk.core.auth.Scope;
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.SessionConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;

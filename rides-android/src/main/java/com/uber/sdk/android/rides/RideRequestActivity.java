@@ -43,8 +43,8 @@ import com.uber.sdk.android.core.auth.LoginCallback;
 import com.uber.sdk.android.core.auth.LoginManager;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.Scope;
-import com.uber.sdk.rides.client.AccessTokenSession;
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.AccessTokenSession;
+import com.uber.sdk.core.client.SessionConfiguration;
 
 import java.util.Arrays;
 
@@ -68,7 +68,8 @@ public class RideRequestActivity extends Activity implements LoginCallback, Ride
     static final int LOGIN_REQUEST_CODE = 1112;
 
     private static final int REQUEST_FINE_LOCATION_PERMISSION_CODE = 1002;
-    private static final String USER_AGENT_RIDE_WIDGET = "rides-android-v0.6.1-ride_request_widget";
+    private static final String USER_AGENT_RIDE_WIDGET = String.format("rides-android-v%s-ride_request_widget",
+            BuildConfig.VERSION_NAME);
 
     @VisibleForTesting static final String RIDE_PARAMETERS = "ride_parameters";
     static final String EXTRA_LOGIN_CONFIGURATION = "login_configuration";

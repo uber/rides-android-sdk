@@ -21,7 +21,10 @@
   ~ THE SOFTWARE.
   -->
 
-<resources>
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
+
     <string name="app_name">Login Sample</string>
     <string name="copy_access_token_to_clipboard">Copy Access Token to Clipboard</string>
     <string name="clear_access_token">Clear Access Token</string>

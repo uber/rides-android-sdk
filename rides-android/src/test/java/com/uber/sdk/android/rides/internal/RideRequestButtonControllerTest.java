@@ -32,7 +32,7 @@ import com.squareup.moshi.Moshi;
 import com.uber.sdk.android.rides.RideParameters;
 import com.uber.sdk.android.rides.RideRequestButtonCallback;
 import com.uber.sdk.rides.client.error.ApiError;
-import com.uber.sdk.rides.client.internal.BigDecimalAdapter;
+import com.uber.sdk.core.client.internal.BigDecimalAdapter;
 import com.uber.sdk.rides.client.model.PriceEstimate;
 import com.uber.sdk.rides.client.model.PriceEstimatesResponse;
 import com.uber.sdk.rides.client.model.TimeEstimate;

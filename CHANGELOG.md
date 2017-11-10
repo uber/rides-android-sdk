@@ -1,5 +1,11 @@
-v0.6.2 - TBD
+v0.7.0 - TBD
 ------------
+
+### Fixed
+- Moved all release, dependencies, and snapshot code to gradle folder in root
+
+### Breaking
+- Upgraded dependencies on uber java sdk to [modularized SDK](https://github.com/uber/rides-java-sdk/blob/master/CHANGELOG.md). This moved imports to follow the new format.
 
 v0.6.1 - 4/5/2017
 -------------------

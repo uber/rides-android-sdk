@@ -35,14 +35,15 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
 import android.support.annotation.VisibleForTesting;
+import android.support.v7.widget.AppCompatButton;
 import android.util.AttributeSet;
 import android.view.Gravity;
-import android.widget.Button;
+
 
 /**
  * {@link android.widget.Button} that can be used as a button and provides default Uber styling.
  */
-public class UberButton extends Button {
+public class UberButton extends AppCompatButton {
 
     private static final @StyleRes int[] STYLES = {R.style.UberButton, R.style.UberButton_White};
 

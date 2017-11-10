@@ -1,0 +1,31 @@
+subprojects {
+    buildscript {
+        repositories {
+            jcenter()
+        }
+    }
+
+    repositories {
+        jcenter()
+        maven {
+            url 'https://maven.google.com'
+        }
+    }
+
+    apply plugin: 'checkstyle'
+
+    task checkstyleMain(type: Checkstyle, overwrite: true) {
+        configFile = new File("{$project.projectDir}/config/checkstyle/checkstyle-main.xml")
+    }
+
+    task checkstyleTest(type: Checkstyle, overwrite: true) {
+        configFile = new File("{$project.projectDir}/config/checkstyle/checkstyle-test.xml")
+    }
+
+    afterEvaluate {
+        tasks.withType(Checkstyle) {
+            configProperties = ['proj.module.dir'      : projectDir.absolutePath,
+                                'checkstyle.cache.file': './build/cache/checkstyle-cache']
+        }
+    }
+}

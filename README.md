@@ -24,17 +24,6 @@ dependencies {
 }
 ```
 
-### Maven
-
-In the `pom.xml` file:
-```xml
-<dependency>
-    <groupId>com.uber.sdk</groupId>
-    <artifactId>rides-android</artifactId>
-    <version>0.6.1</version>
-</dependency>
-```
-
 ## SDK Configuration
 
 In order for the SDK to function correctly, you need to add some information about your app. In your application, create a `SessionConfiguration` to use with the various components of the library. If you prefer the set it and forget it model, use the `UberSdk` class to initialize with a default `SessionConfiguration`.
@@ -319,7 +308,7 @@ service.getUserProfile().enqueue(new Callback<UserProfile>() {
 
 ## Sample Apps
 
-Sample apps can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases/tag/v0.6.1).
+Sample apps can be found in the `samples` folder. Alternatively, you can also download a sample from the [releases page](https://github.com/uber/rides-android-sdk/releases).
 
 The Sample apps require configuration parameters to interact with the Uber API, these include the client id, redirect uri, and server token. They are provided on the [Uber developer dashboard](https://developer.uber.com/dashboard).
 

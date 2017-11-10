@@ -42,8 +42,8 @@ import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.UberStyle;
 import com.uber.sdk.android.rides.internal.RideRequestButtonController;
 import com.uber.sdk.android.rides.internal.RideRequestButtonView;
-import com.uber.sdk.rides.client.Session;
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.Session;
+import com.uber.sdk.core.client.SessionConfiguration;
 import com.uber.sdk.rides.client.model.PriceEstimate;
 import com.uber.sdk.rides.client.model.TimeEstimate;
 
@@ -61,7 +61,8 @@ public class RideRequestButton extends FrameLayout implements RideRequestButtonV
     @StyleRes
     int[] STYLES = {R.style.UberButton, R.style.UberButton_White};
 
-    private static final String USER_AGENT_BUTTON = "rides-android-v0.6.1-button";
+    private static final String USER_AGENT_BUTTON = String.format("rides-android-v%s-button",
+            BuildConfig.VERSION_NAME);
 
     private RideRequestBehavior rideRequestBehavior;
 

@@ -24,9 +24,9 @@ package com.uber.sdk.android.core;
 
 import android.support.annotation.NonNull;
 
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.SessionConfiguration;
 
-import static com.uber.sdk.rides.client.utils.Preconditions.checkNotNull;
+import static com.uber.sdk.core.client.utils.Preconditions.checkNotNull;
 
 /**
  * Uber SDK management class. Uber SDK Classes behavior is undefined if the SDK is not initialized.

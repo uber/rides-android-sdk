@@ -32,7 +32,7 @@ import com.uber.sdk.android.core.auth.AuthenticationError;
 import com.uber.sdk.android.core.auth.LoginManager;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.Scope;
-import com.uber.sdk.rides.client.SessionConfiguration;
+import com.uber.sdk.core.client.SessionConfiguration;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -121,13 +121,13 @@ public class RideRequestActivityTest extends RobolectricTestBase {
                 "refreshToken", "tokenType");
         activity.onLoginSuccess(accessToken);
 
-        assertEquals("rides-android-v0.6.1-ride_request_widget",
+        assertEquals(String.format("rides-android-v%s-ride_request_widget", BuildConfig.VERSION_NAME),
                 activity.rideRequestView.rideParameters.getUserAgent());
     }
 
     @Test
     public void onLoad_withUserAgentInRideParametersButton_shouldNotGetOverridden() {
-        String userAgent = "rides-android-v0.6.1-button";
+        String userAgent = String.format("rides-android-v%s-button", BuildConfig.VERSION_NAME);
         RideParameters rideParameters = new RideParameters.Builder().build();
         rideParameters.setUserAgent(userAgent);
         Intent data = RideRequestActivity.newIntent(Robolectric.setupActivity(Activity.class),
