@@ -1,7 +1,6 @@
 import groovy.text.GStringTemplateEngine
 import org.codehaus.groovy.runtime.DateGroovyMethods
 
-apply plugin: 'distribution'
 apply plugin: 'net.researchgate.release'
 apply plugin: 'co.riiid.gradle'
 
@@ -118,48 +117,6 @@ github {
     }
 }
 
-distributions {
-    publicrepo {
-        baseName = 'publicrepo'
-        contents {
-            from(rootDir) {
-                include 'build.gradle'
-                include 'CHANGELOG.md'
-                include 'gradle.properties'
-                include 'gradlew'
-                include 'gradlew.bat'
-                include 'LICENSE'
-                include 'releasenotes.gtpl'
-                include 'settings.gradle'
-                include 'gradle/'
-                include 'config'
-                include 'test-shared/'
-                include '.travis.yml'
-                include 'README.md'
-                include '.buildscript/'
-            }
-
-            from('core-android') {
-                exclude 'build'
-                exclude '*.iml'
-                into 'core-android'
-            }
-
-            from('rides-android') {
-                exclude 'build'
-                exclude '*.iml'
-                into 'rides-android'
-            }
-
-            from('samples') {
-                exclude '**/build'
-                exclude '**/*.iml'
-                into 'samples'
-            }
-        }
-    }
-}
-
 subprojects {
     configure(subprojects.findAll {it.parent.name == 'samples'}) {
         task githubReleaseZip(type: Zip) << {
@@ -201,6 +158,4 @@ subprojects {
             }
         }
     }
-
-
 }
