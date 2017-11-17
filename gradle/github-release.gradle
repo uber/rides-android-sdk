@@ -88,7 +88,7 @@ task updateNewVersionChangelog() << {
     if (!changelogText.startsWith("v${newVersion} - TBD")) {
         def updatedChangelog = "v${newVersion} - TBD\n"
         def dashesCount = updatedChangelog.length()-1
-        updatedChangelog += "-"*dashesCount + "\n\n" + changlogText
+        updatedChangelog += "-"*dashesCount + "\n\n" + changelogText
         changelog.write(updatedChangelog)
     }
 }
