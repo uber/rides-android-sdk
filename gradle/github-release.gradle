@@ -4,25 +4,45 @@ import org.codehaus.groovy.runtime.DateGroovyMethods
 apply plugin: 'net.researchgate.release'
 apply plugin: 'co.riiid.gradle'
 
-ext.set("unsnapshottedVersion", VERSION_NAME.replaceAll("-SNAPSHOT", ""))
+ext.set("oldVersion", VERSION_NAME.replaceAll("-SNAPSHOT", ""))
 ext.set("samples", project(":samples").subprojects.collect { it.path })
-ext.set("isReleaseVersion", !VERSION_NAME.endsWith("SNAPSHOT"))
 
-["githubToken", "ossrhUsername", "ossrhPassword",
- "signing.keyId", "signing.password", "signing.secretKeyRingFile",].each {
+["GITHUB_TOKEN"].each {
     checkAndDefaultProperty(it)
+}
+
+def checkAndDefaultProperty(prop) {
+    if (!project.hasProperty(prop)) {
+        checkProperty(prop)
+        rootProject.ext.set(prop, prop)
+    }
+}
+
+def checkProperty(prop) {
+    if (!project.hasProperty(prop)) {
+        def message = "Add " + prop + " to your ~/.gradle/gradle.properties file."
+        if (isReleaseBuild()) {
+            throw new GradleException(message)
+        } else {
+            logger.warn(message)
+        }
+    }
+}
+
+def isReleaseBuild() {
+    return VERSION_NAME.contains("SNAPSHOT") == false
 }
 
 def generateReleaseNotes() {
     def changelogSnippet = generateChangelogSnippet()
-    def model = [title  : "Uber Rides Android SDK (Beta) v${unsnapshottedVersion}",
+    def model = [title  : "Uber Rides Android SDK (Beta) v${findProperty("version")}",
                  date   : DateGroovyMethods.format(new Date(), 'MM/dd/yyyy'),
                  snippet: changelogSnippet,
                  assets : project.samples.collect {
                      [
                              title      : project(it).name,
-                             download   : GITHUB_DOWNLOAD_PREFIX + "v${unsnapshottedVersion}/"
-                                     + project(it).name + "-v${unsnapshottedVersion}.zip",
+                             download   : GITHUB_DOWNLOAD_PREFIX + "v${findProperty("version")}/"
+                                     + project(it).name + "-v${findProperty("version")}.zip",
                              description: project(it).description,
                      ]
                  }]
@@ -46,53 +66,37 @@ def generateChangelogSnippet() {
     return "  " + snippet.trim()
 }
 
-def checkAndDefaultProperty(prop) {
-    if (!project.hasProperty(prop)) {
-        logger.warn("Add " + prop + " to your ~/.gradle/gradle.properties file.")
-        rootProject.ext.set(prop, prop)
-    }
-}
-
-def checkForChangelogUpdates(task) {
-    def changelogtext = rootProject.file('CHANGELOG.md').text
-    if (!changelogtext.startsWith("v${unsnapshottedVersion} -")) {
-        throw new AssertionError(
-                "Changelog must be updated with v{$unsnapshottedVersion} before release. Please check " +
-                        rootProject.file('CHANGELOG.md').absolutePath)
-    }
-}
-
-gradle.taskGraph.afterTask { Task task, TaskState state ->
-    println task.path
-    if (task.path.endsWith("release") || task.path.endsWith("githubReleaseZip")
-            || task.path.endsWith("publicrepoDistZip")) {
-        checkForChangelogUpdates(task)
-    }
-}
-
-// Skip signing archives on Jenkins when -SNAPSHOT is being checked in.
-gradle.taskGraph.beforeTask { Task task ->
-    if (task.path.contains("sign") && !ext.isReleaseVersion) {
-        task.enabled = false
-    }
-}
-
-task updateChangelog() << {
+task updateReleaseVersionChangelog() << {
     def newVersion = findProperty("version").replaceAll('-SNAPSHOT', '')
     def changelog = rootProject.file('CHANGELOG.md')
     def changelogText = changelog.text
-    if (!changelogText.startsWith("v${newVersion} -")) {
+    def date = new Date().format('MM/dd/yyyy')
+
+    if (changelogText.startsWith("v${oldVersion} - TBD")) {
+        def updatedChangelog = changelogText.replace("v${oldVersion} - TBD",
+                "v${newVersion} - ${date}")
+        changelog.write(updatedChangelog)
+
+    }
+}
+
+task updateNewVersionChangelog() << {
+    def newVersion = findProperty("version").replaceAll('-SNAPSHOT', '')
+    def changelog = rootProject.file('CHANGELOG.md')
+    def changelogText = changelog.text
+
+    if (!changelogText.startsWith("v${newVersion} - TBD")) {
         def updatedChangelog = "v${newVersion} - TBD\n"
         def dashesCount = updatedChangelog.length()-1
-        updatedChangelog += "-"*dashesCount + "\n\n"
-
-        changelog.write(updatedChangelog + changelogText)
+        updatedChangelog += "-"*dashesCount + "\n\n" + changlogText
+        changelog.write(updatedChangelog)
     }
 }
 
 afterReleaseBuild.dependsOn(":core-android:uploadArchives", ":rides-android:uploadArchives")
 updateVersion.dependsOn ":githubRelease"
-commitNewVersion.dependsOn ':updateChangelog'
+preTagCommit.dependsOn ':updateReleaseVersionChangelog'
+commitNewVersion.dependsOn ':updateNewVersionChangelog'
 githubRelease.dependsOn project(":samples").subprojects.collect { it.path + ":githubReleaseZip" }
 
 release {
@@ -100,37 +104,38 @@ release {
     failOnPublishNeeded = false
     failOnSnapshotDependencies = false
     revertOnFail = true
-    tagTemplate = "v${unsnapshottedVersion}"
+    tagTemplate = 'v$version'
+    versionProperties = ['VERSION_NAME']
 }
 
 github {
     owner = GITHUB_OWNER
     repo = GITHUB_REPO
-    token = "${githubToken}"
-    tagName = "v${unsnapshottedVersion}"
+    token = "${GITHUB_TOKEN}"
+    tagName = "v${findProperty("version")}"
     targetCommitish = GITHUB_BRANCH
-    name = "v${unsnapshottedVersion}"
+    name = "v${findProperty("version")}"
     body = generateReleaseNotes()
     assets = project.samples.collect {
         project(it).buildDir.absolutePath + "/distributions/" + project(it).name +
-                "-v${unsnapshottedVersion}.zip"
+                "-v${findProperty("version")}.zip"
     }
 }
 
 subprojects {
     configure(subprojects.findAll {it.parent.name == 'samples'}) {
         task githubReleaseZip(type: Zip) << {
-            version = "v${unsnapshottedVersion}"
+            version = "v${findProperty("version")}"
 
             from('.') {
                 filesNotMatching("**/*.png") {
                     filter { String line ->
                         line.replaceAll("compile project\\(':rides-android'\\)",
-                                "compile '${groupId}:rides-android:${unsnapshottedVersion}'")
+                                "compile '${groupId}:rides-android:${findProperty("version")}'")
                     }
                     filter { String line ->
                         line.replaceAll("compile project\\(':core-android'\\)",
-                                "compile '${groupId}:core-android:${unsnapshottedVersion}'")
+                                "compile '${groupId}:core-android:${findProperty("version")}'")
                     }
                 }
                 into '.'

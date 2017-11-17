@@ -20,6 +20,32 @@ apply plugin: 'signing'
 version = VERSION_NAME
 group = GROUP
 
+["SONATYPE_NEXUS_USERNAME", "SONATYPE_NEXUS_PASSWORD"].each {
+    checkAndDefaultProperty(it)
+}
+
+["signing.keyId", "signing.password", "signing.secretKeyRingFile"].each {
+    checkProperty(it)
+}
+
+def checkAndDefaultProperty(prop) {
+    if (!project.hasProperty(prop)) {
+        checkProperty(prop)
+        rootProject.ext.set(prop, prop)
+    }
+}
+
+def checkProperty(prop) {
+    if (!project.hasProperty(prop)) {
+        def message = "Add " + prop + " to your ~/.gradle/gradle.properties file."
+        if (isReleaseBuild()) {
+            throw new GradleException(message)
+        } else {
+            logger.warn(message)
+        }
+    }
+}
+
 def isReleaseBuild() {
     return VERSION_NAME.contains("SNAPSHOT") == false
 }
