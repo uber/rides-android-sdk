@@ -7,9 +7,26 @@ apply plugin: 'co.riiid.gradle'
 ext.set("oldVersion", VERSION_NAME.replaceAll("-SNAPSHOT", ""))
 ext.set("samples", project(":samples").subprojects.collect { it.path })
 
-["githubToken", "ossrhUsername", "ossrhPassword",
- "signing.keyId", "signing.password", "signing.secretKeyRingFile",].each {
+["GITHUB_TOKEN"].each {
     checkAndDefaultProperty(it)
+}
+
+def checkAndDefaultProperty(prop) {
+    if (!project.hasProperty(prop)) {
+        checkProperty(prop)
+        rootProject.ext.set(prop, prop)
+    }
+}
+
+def checkProperty(prop) {
+    if (!project.hasProperty(prop)) {
+        def message = "Add " + prop + " to your ~/.gradle/gradle.properties file."
+        if (isReleaseBuild()) {
+            throw new GradleException(message)
+        } else {
+            logger.warn(message)
+        }
+    }
 }
 
 def generateReleaseNotes() {
@@ -43,13 +60,6 @@ def generateChangelogSnippet() {
         }
     }
     return "  " + snippet.trim()
-}
-
-def checkAndDefaultProperty(prop) {
-    if (!project.hasProperty(prop)) {
-        logger.warn("Add " + prop + " to your ~/.gradle/gradle.properties file.")
-        rootProject.ext.set(prop, prop)
-    }
 }
 
 task updateReleaseVersionChangelog() << {
@@ -97,7 +107,7 @@ release {
 github {
     owner = GITHUB_OWNER
     repo = GITHUB_REPO
-    token = "${githubToken}"
+    token = "${GITHUB_TOKEN}"
     tagName = "v${findProperty("version")}"
     targetCommitish = GITHUB_BRANCH
     name = "v${findProperty("version")}"
