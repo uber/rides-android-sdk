@@ -29,6 +29,10 @@ def checkProperty(prop) {
     }
 }
 
+def isReleaseBuild() {
+    return VERSION_NAME.contains("SNAPSHOT") == false
+}
+
 def generateReleaseNotes() {
     def changelogSnippet = generateChangelogSnippet()
     def model = [title  : "Uber Rides Android SDK (Beta) v${findProperty("version")}",
