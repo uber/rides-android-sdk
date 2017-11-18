@@ -20,12 +20,7 @@ def checkAndDefaultProperty(prop) {
 
 def checkProperty(prop) {
     if (!project.hasProperty(prop)) {
-        def message = "Add " + prop + " to your ~/.gradle/gradle.properties file."
-        if (isReleaseBuild()) {
-            throw new GradleException(message)
-        } else {
-            logger.warn(message)
-        }
+        logger.warn("Add " + prop + " to your ~/.gradle/gradle.properties file.")
     }
 }
 
@@ -35,14 +30,14 @@ def isReleaseBuild() {
 
 def generateReleaseNotes() {
     def changelogSnippet = generateChangelogSnippet()
-    def model = [title  : "Uber Rides Android SDK (Beta) v${findProperty("version")}",
+    def model = [title  : "Uber Rides Android SDK (Beta) v${rootProject.version}",
                  date   : DateGroovyMethods.format(new Date(), 'MM/dd/yyyy'),
                  snippet: changelogSnippet,
                  assets : project.samples.collect {
                      [
                              title      : project(it).name,
-                             download   : GITHUB_DOWNLOAD_PREFIX + "v${findProperty("version")}/"
-                                     + project(it).name + "-v${findProperty("version")}.zip",
+                             download   : GITHUB_DOWNLOAD_PREFIX + "v${rootProject.version}/"
+                                     + project(it).name + "-v${rootProject.version}.zip",
                              description: project(it).description,
                      ]
                  }]
@@ -67,7 +62,7 @@ def generateChangelogSnippet() {
 }
 
 task updateReleaseVersionChangelog() << {
-    def newVersion = findProperty("version").replaceAll('-SNAPSHOT', '')
+    def newVersion = rootProject.version.replaceAll('-SNAPSHOT', '')
     def changelog = rootProject.file('CHANGELOG.md')
     def changelogText = changelog.text
     def date = new Date().format('MM/dd/yyyy')
@@ -81,7 +76,7 @@ task updateReleaseVersionChangelog() << {
 }
 
 task updateNewVersionChangelog() << {
-    def newVersion = findProperty("version").replaceAll('-SNAPSHOT', '')
+    def newVersion = rootProject.version.replaceAll('-SNAPSHOT', '')
     def changelog = rootProject.file('CHANGELOG.md')
     def changelogText = changelog.text
 
@@ -112,30 +107,30 @@ github {
     owner = GITHUB_OWNER
     repo = GITHUB_REPO
     token = "${GITHUB_TOKEN}"
-    tagName = "v${findProperty("version")}"
+    tagName = "v${rootProject.version}"
     targetCommitish = GITHUB_BRANCH
-    name = "v${findProperty("version")}"
+    name = "v${rootProject.version}"
     body = generateReleaseNotes()
     assets = project.samples.collect {
         project(it).buildDir.absolutePath + "/distributions/" + project(it).name +
-                "-v${findProperty("version")}.zip"
+                "-v${rootProject.version}.zip"
     }
 }
 
 subprojects {
     configure(subprojects.findAll {it.parent.name == 'samples'}) {
         task githubReleaseZip(type: Zip) << {
-            version = "v${findProperty("version")}"
+            version = "v${rootProject.version}"
 
             from('.') {
                 filesNotMatching("**/*.png") {
                     filter { String line ->
                         line.replaceAll("compile project\\(':rides-android'\\)",
-                                "compile '${groupId}:rides-android:${findProperty("version")}'")
+                                "compile '${groupId}:rides-android:${rootProject.version}'")
                     }
                     filter { String line ->
                         line.replaceAll("compile project\\(':core-android'\\)",
-                                "compile '${groupId}:core-android:${findProperty("version")}'")
+                                "compile '${groupId}:core-android:${rootProject.version}'")
                     }
                 }
                 into '.'
