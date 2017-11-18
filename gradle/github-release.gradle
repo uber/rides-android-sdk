@@ -20,12 +20,7 @@ def checkAndDefaultProperty(prop) {
 
 def checkProperty(prop) {
     if (!project.hasProperty(prop)) {
-        def message = "Add " + prop + " to your ~/.gradle/gradle.properties file."
-        if (isReleaseBuild()) {
-            throw new GradleException(message)
-        } else {
-            logger.warn(message)
-        }
+        logger.warn("Add " + prop + " to your ~/.gradle/gradle.properties file.")
     }
 }
 
