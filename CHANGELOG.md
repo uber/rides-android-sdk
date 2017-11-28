@@ -1,5 +1,7 @@
 v0.8.0 - TBD
 ------------
+### Changed
+ - [Issue #101](https://github.com/uber/rides-android-sdk/issues/101) LoginManager now uses AccessTokenStorage
 
 v0.7.0 - 11/17/2017
 ------------
@@ -96,7 +98,7 @@ The RideRequestButton has been updated to show information about your Uber ride.
 
 - Moved core functionality and authentication related classes to `core-android` and the Java SDK. Imports require updating.
 - Removed `UberSdk.initialize(context, clientId)` and all `UberSdk` setters in favor of `UberSdk.initialize(sessionConfiguration)`
-- Removed `LoginManager.loginWithScopes(activity, scopes)` in favor of `LoginManager.login(activity)` after using `new LoginManager(accessTokenManager, callback)`
+- Removed `LoginManager.loginWithScopes(activity, scopes)` in favor of `LoginManager.login(activity)` after using `new LoginManager(accessTokenStorage, callback)`
 - Removed `AccessTokenManager.getAccessToken(key)` and `AccessTokenManager.setAccessToken(key, token)` in favor of `new AccessTokenManager(context, key)`
 - Removed `LoginManager.onActivityResult(requestCode, resultCode, data, callback)` in favor of `LoginManager.onActivityResult(activity, requestCode, resultCode, data)`
 

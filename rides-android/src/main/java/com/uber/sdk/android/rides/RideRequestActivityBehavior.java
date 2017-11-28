@@ -29,7 +29,6 @@ import android.support.annotation.NonNull;
 
 import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.auth.AccessTokenManager;
-import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.client.SessionConfiguration;
 
 /**
@@ -71,7 +70,7 @@ public class RideRequestActivityBehavior implements RideRequestBehavior {
      * @param activity the {@link Activity} to launch the {@link RideRequestActivity} from
      * @param requestCode the request code to use for the {@link Activity} result
      * @param loginConfiguration used for login scenarios from ride request screen
-     * @param accessTokenStorageKey key to use for looking in {@link AccessTokenStorage}
+     * @param accessTokenStorageKey key to use for looking in {@link com.uber.sdk.core.auth.AccessTokenStorage}
      */
     public RideRequestActivityBehavior(@NonNull Activity activity,
                                        int requestCode,

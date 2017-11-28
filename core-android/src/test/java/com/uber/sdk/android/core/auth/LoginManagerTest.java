@@ -35,6 +35,7 @@ import com.uber.sdk.android.core.RobolectricTestBase;
 import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenAuthenticator;
+import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
 import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
@@ -110,7 +111,7 @@ public class LoginManagerTest extends RobolectricTestBase {
     LoginCallback callback;
 
     @Mock
-    AccessTokenManager accessTokenManager;
+    AccessTokenStorage accessTokenStorage;
 
     SessionConfiguration sessionConfiguration;
 
@@ -119,7 +120,7 @@ public class LoginManagerTest extends RobolectricTestBase {
     @Before
     public void setup() {
         sessionConfiguration = new SessionConfiguration.Builder().setClientId(CLIENT_ID).setScopes(MIXED_SCOPES).build();
-        loginManager = new LoginManager(accessTokenManager, callback, sessionConfiguration);
+        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration);
 
         when(activity.getPackageManager()).thenReturn(packageManager);
         when(activity.getApplicationInfo()).thenReturn(new ApplicationInfo());
@@ -142,7 +143,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
     @Test
     public void loginWithAppInstalledPrivilegedScopesAndRequestCode_shouldLaunchIntent() {
-        loginManager = new LoginManager(accessTokenManager, callback, sessionConfiguration, REQUEST_CODE);
+        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration, REQUEST_CODE);
 
         stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_VERSION_SUPPORTED);
 
@@ -160,7 +161,7 @@ public class LoginManagerTest extends RobolectricTestBase {
     @Test
     public void loginWithoutAppInstalledGeneralScopes_shouldLaunchWebView() {
         sessionConfiguration = sessionConfiguration.newBuilder().setScopes(GENERAL_SCOPES).build();
-        loginManager = new LoginManager(accessTokenManager, callback, sessionConfiguration);
+        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration);
 
         stubAppNotInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0]);
 
@@ -184,7 +185,7 @@ public class LoginManagerTest extends RobolectricTestBase {
         when(activity.getPackageManager()).thenReturn(packageManager);
 
         sessionConfiguration = sessionConfiguration.newBuilder().build();
-        loginManager = new LoginManager(accessTokenManager, callback, sessionConfiguration)
+        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration)
                 .setRedirectForAuthorizationCode(false);
 
         stubAppNotInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0]);
@@ -211,7 +212,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         ArgumentCaptor<AccessToken> storedToken = ArgumentCaptor.forClass(AccessToken.class);
         ArgumentCaptor<AccessToken> returnedToken = ArgumentCaptor.forClass(AccessToken.class);
-        verify(accessTokenManager).setAccessToken(storedToken.capture());
+        verify(accessTokenStorage).setAccessToken(storedToken.capture());
         verify(callback).onLoginSuccess(returnedToken.capture());
 
         assertThat(storedToken.getValue()).isEqualTo(ACCESS_TOKEN);
@@ -298,7 +299,7 @@ public class LoginManagerTest extends RobolectricTestBase {
     public void onActivityResult_whenUnavailableAndPrivilegedScopesNoRedirect_shouldError() {
         Intent intent = new Intent().putExtra(EXTRA_ERROR, AuthenticationError.UNAVAILABLE.toStandardString());
         sessionConfiguration = sessionConfiguration.newBuilder().build();
-        loginManager = new LoginManager(accessTokenManager, callback, sessionConfiguration)
+        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration)
                 .setRedirectForAuthorizationCode(false);
 
         loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, intent);
@@ -309,7 +310,7 @@ public class LoginManagerTest extends RobolectricTestBase {
     @Test
     public void onActivityResult_whenUnavailableAndPrivilegedScopes_shouldTriggerImplicitGrant() {
         sessionConfiguration = sessionConfiguration.newBuilder().setScopes(GENERAL_SCOPES).build();
-        loginManager = new LoginManager(accessTokenManager, callback, sessionConfiguration);
+        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration);
 
         Intent intent = new Intent().putExtra(EXTRA_ERROR, AuthenticationError.UNAVAILABLE.toStandardString());
 
@@ -331,41 +332,41 @@ public class LoginManagerTest extends RobolectricTestBase {
 
     @Test
     public void isAuthenticated_withServerToken_true() {
-        when(accessTokenManager.getAccessToken()).thenReturn(null);
-        loginManager = new LoginManager(accessTokenManager, callback, sessionConfiguration.newBuilder().setServerToken("serverToken").build());
+        when(accessTokenStorage.getAccessToken()).thenReturn(null);
+        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration.newBuilder().setServerToken("serverToken").build());
         assertTrue(loginManager.isAuthenticated());
     }
 
     @Test
     public void isAuthenticated_withAccessToken_true() {
-        when(accessTokenManager.getAccessToken()).thenReturn(ACCESS_TOKEN);
+        when(accessTokenStorage.getAccessToken()).thenReturn(ACCESS_TOKEN);
         assertTrue(loginManager.isAuthenticated());
     }
 
     @Test
     public void isAuthenticated_withoutAccessOrServerToken_false() {
-        when(accessTokenManager.getAccessToken()).thenReturn(null);
+        when(accessTokenStorage.getAccessToken()).thenReturn(null);
         assertFalse(loginManager.isAuthenticated());
     }
 
     @Test
     public void getSession_withServerToken_successful() {
-        when(accessTokenManager.getAccessToken()).thenReturn(null);
-        loginManager = new LoginManager(accessTokenManager, callback, sessionConfiguration.newBuilder().setServerToken("serverToken").build());
+        when(accessTokenStorage.getAccessToken()).thenReturn(null);
+        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration.newBuilder().setServerToken("serverToken").build());
         Session session = loginManager.getSession();
         assertEquals("serverToken", session.getAuthenticator().getSessionConfiguration().getServerToken());
     }
 
     @Test
     public void getSession_withAccessToken_successful() {
-        when(accessTokenManager.getAccessToken()).thenReturn(ACCESS_TOKEN);
+        when(accessTokenStorage.getAccessToken()).thenReturn(ACCESS_TOKEN);
         Session session = loginManager.getSession();
         assertEquals(ACCESS_TOKEN, ((AccessTokenAuthenticator)session.getAuthenticator()).getTokenStorage().getAccessToken());
     }
 
     @Test(expected = IllegalStateException.class)
     public void getSession_withoutAccessTokenOrToken_fails() {
-        when(accessTokenManager.getAccessToken()).thenReturn(null);
+        when(accessTokenStorage.getAccessToken()).thenReturn(null);
         loginManager.getSession();
     }
 
