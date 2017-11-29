@@ -191,8 +191,9 @@ public class LoginManager {
      */
     @Deprecated
     @NonNull
-    public AccessTokenStorage getAccessTokenManager() {
-        return accessTokenStorage;
+    @SuppressWarnings("unchecked")
+    public <T extends AccessTokenStorage> T getAccessTokenManager() {
+        return (T) accessTokenStorage;
     }
 
     /**
