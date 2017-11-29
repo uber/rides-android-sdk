@@ -184,8 +184,8 @@ LoginCallback loginCallback = new LoginCallback() {
                 // Successful login!  The AccessToken will have already been saved.
             }
         }
-AccessTokenManager accessTokenManager = new AccessTokenManager(context);
-LoginManager loginManager = new LoginManager(accessTokenManager, loginCallback);
+AccessTokenStorage accessTokenStorage = new AccessTokenManager(context);
+LoginManager loginManager = new LoginManager(accessTokenStorage, loginCallback);
 loginManager.login(activity);
 ```
 
@@ -209,20 +209,20 @@ Upon a failure to login, an `AuthenticationError` will be provided in the `Login
 If your app allows users to authorize via your own customized logic, you will need to create an `AccessToken` manually and save it in shared preferences using the `AccessTokenManager`.
 
 ```java
-AccessTokenManager accessTokenManager = new AccessTokenManager(context);
+AccessTokenStorage accessTokenStorage = new AccessTokenManager(context);
 Date expirationTime = 2592000;
 List<Scope> scopes = Arrays.asList(Scope.RIDE_WIDGETS);
 String token = "obtainedAccessToken";
 String refreshToken = "obtainedRefreshToken";
 String tokenType = "obtainedTokenType";
 AccessToken accessToken = new AccessToken(expirationTime, scopes, token, refreshToken, tokenType);
-accessTokenManager.setAccessToken(accessToken);
+accessTokenStorage.setAccessToken(accessToken);
 ```
 The `AccessTokenManager` can also be used to get an access token or delete it.
 
 ```java
 accessTokenManger.getAccessToken();
-accessTokenManager.removeAccessToken();
+accessTokenStorage.removeAccessToken();
 ```
 
 To keep track of multiple users, create an AccessTokenManager for each AccessToken.

@@ -31,6 +31,7 @@ import com.uber.sdk.android.core.auth.AccessTokenManager;
 import com.uber.sdk.android.core.auth.AuthenticationError;
 import com.uber.sdk.android.core.auth.LoginManager;
 import com.uber.sdk.core.auth.AccessToken;
+import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
 import com.uber.sdk.core.client.SessionConfiguration;
 
@@ -192,12 +193,12 @@ public class RideRequestActivityTest extends RobolectricTestBase {
     @Test
     public void onLoad_whenRideRequestViewAuthorizationErrorOccurs_shouldAttemptLoginLoad() {
         activity.loginManager = mock(LoginManager.class);
-        activity.accessTokenManager = mock(AccessTokenManager.class);
+        activity.accessTokenStorage = mock(AccessTokenStorage.class);
         ShadowActivity shadowActivity = shadowOf(activity);
         activity.onErrorReceived(RideRequestViewError.UNAUTHORIZED);
 
         assertNull(shadowActivity.getResultIntent());
-        verify(activity.accessTokenManager, times(1)).removeAccessToken();
+        verify(activity.accessTokenStorage, times(1)).removeAccessToken();
         verify(activity.loginManager).login(refEq(activity));
     }
 

@@ -36,7 +36,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.auth.AccessTokenManager;
 import com.uber.sdk.android.core.auth.AuthenticationError;
 import com.uber.sdk.android.core.auth.LoginButton;
@@ -45,6 +44,7 @@ import com.uber.sdk.android.core.auth.LoginManager;
 import com.uber.sdk.android.rides.samples.BuildConfig;
 import com.uber.sdk.android.rides.samples.R;
 import com.uber.sdk.core.auth.AccessToken;
+import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
 import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
@@ -82,7 +82,7 @@ public class LoginSampleActivity extends AppCompatActivity {
     private LoginButton blackButton;
     private LoginButton whiteButton;
     private Button customButton;
-    private AccessTokenManager accessTokenManager;
+    private AccessTokenStorage accessTokenStorage;
     private LoginManager loginManager;
     private SessionConfiguration configuration;
 
@@ -99,24 +99,24 @@ public class LoginSampleActivity extends AppCompatActivity {
 
         validateConfiguration(configuration);
 
-        accessTokenManager = new AccessTokenManager(this);
+        accessTokenStorage = new AccessTokenManager(this);
 
         //Create a button with a custom request code
         whiteButton = (LoginButton) findViewById(R.id.uber_button_white);
         whiteButton.setCallback(new SampleLoginCallback())
                     .setSessionConfiguration(configuration);
 
-        //Create a button using a custom AccessTokenManager
+        //Create a button using a custom AccessTokenStorage
         //Custom Scopes are set using XML for this button as well in R.layout.activity_sample
         blackButton = (LoginButton) findViewById(R.id.uber_button_black);
-        blackButton.setAccessTokenManager(accessTokenManager)
+        blackButton.setAccessTokenStorage(accessTokenStorage)
                     .setCallback(new SampleLoginCallback())
                     .setSessionConfiguration(configuration)
                     .setRequestCode(LOGIN_BUTTON_CUSTOM_REQUEST_CODE);
 
 
         //Use a custom button with an onClickListener to call the LoginManager directly
-        loginManager = new LoginManager(accessTokenManager,
+        loginManager = new LoginManager(accessTokenStorage,
                 new SampleLoginCallback(),
                 configuration,
                 CUSTOM_BUTTON_REQUEST_CODE);
@@ -215,15 +215,15 @@ public class LoginSampleActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        accessTokenManager = new AccessTokenManager(this);
+        accessTokenStorage = new AccessTokenManager(this);
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_clear) {
-            accessTokenManager.removeAccessToken();
+            accessTokenStorage.removeAccessToken();
             Toast.makeText(this, "AccessToken cleared", Toast.LENGTH_SHORT).show();
             return true;
         } else if (id == R.id.action_copy) {
-            AccessToken accessToken = accessTokenManager.getAccessToken();
+            AccessToken accessToken = accessTokenStorage.getAccessToken();
 
             String message = accessToken == null ? "No AccessToken stored" : "AccessToken copied to clipboard";
             if (accessToken != null) {

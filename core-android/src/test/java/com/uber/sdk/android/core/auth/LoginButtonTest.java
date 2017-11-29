@@ -31,6 +31,7 @@ import android.util.AttributeSet;
 import com.google.common.collect.Sets;
 import com.uber.sdk.android.core.R;
 import com.uber.sdk.android.core.RobolectricTestBase;
+import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
 import com.uber.sdk.core.client.SessionConfiguration;
 
@@ -61,7 +62,7 @@ public class LoginButtonTest extends RobolectricTestBase {
     LoginCallback loginCallback;
 
     @Mock
-    AccessTokenManager accessTokenManager;
+    AccessTokenStorage accessTokenStorage;
 
     private LoginButton loginButton;
 
@@ -133,12 +134,12 @@ public class LoginButtonTest extends RobolectricTestBase {
         loginButton.setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build());
         loginButton.setCallback(loginCallback);
         loginButton.setScopes(SCOPES);
-        loginButton.setAccessTokenManager(accessTokenManager);
+        loginButton.setAccessTokenStorage(accessTokenStorage);
         loginButton.callOnClick();
 
         assertThat(loginButton.getLoginManager()).isNotNull();
-        assertThat(loginButton.getLoginManager().getAccessTokenManager())
-                .isEqualTo(accessTokenManager);
+        assertThat(loginButton.getLoginManager().getAccessTokenStorage())
+                .isEqualTo(accessTokenStorage);
     }
 
     @Test

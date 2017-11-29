@@ -33,6 +33,7 @@ import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.install.SignupDeeplink;
 import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.core.auth.AccessToken;
+import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
 import com.uber.sdk.core.client.AccessTokenSession;
 import com.uber.sdk.core.client.ServerTokenSession;
@@ -88,7 +89,7 @@ public class LoginManager {
     private static final String USER_AGENT = String.format("core-android-v%s-login_manager",
             BuildConfig.VERSION_NAME);
 
-    private final AccessTokenManager accessTokenManager;
+    private final AccessTokenStorage accessTokenStorage;
     private final LoginCallback callback;
     private final SessionConfiguration sessionConfiguration;
     private final int requestCode;
@@ -96,40 +97,40 @@ public class LoginManager {
     private boolean redirectForAuthorizationCode = false;
 
     /**
-     * @param accessTokenManager to store access token.
+     * @param accessTokenStorage to store access token.
      * @param loginCallback      callback to be called when {@link LoginManager#onActivityResult(Activity, int, int, Intent)}
      *                           is called.
      */
     public LoginManager(
-            @NonNull AccessTokenManager accessTokenManager,
+            @NonNull AccessTokenStorage accessTokenStorage,
             @NonNull LoginCallback loginCallback) {
-        this(accessTokenManager, loginCallback, UberSdk.getDefaultSessionConfiguration());
+        this(accessTokenStorage, loginCallback, UberSdk.getDefaultSessionConfiguration());
     }
 
     /**
-     * @param accessTokenManager to store access token.
+     * @param accessTokenStorage to store access token.
      * @param loginCallback      callback to be called when {@link LoginManager#onActivityResult(Activity, int, int, Intent)} is called.
      * @param configuration      to provide authentication information
      */
     public LoginManager(
-            @NonNull AccessTokenManager accessTokenManager,
+            @NonNull AccessTokenStorage accessTokenStorage,
             @NonNull LoginCallback loginCallback,
             @NonNull SessionConfiguration configuration) {
-        this(accessTokenManager, loginCallback, configuration, REQUEST_CODE_LOGIN_DEFAULT);
+        this(accessTokenStorage, loginCallback, configuration, REQUEST_CODE_LOGIN_DEFAULT);
     }
 
     /**
-     * @param accessTokenManager to store access token.
+     * @param accessTokenStorage to store access token.
      * @param loginCallback      callback to be called when {@link LoginManager#onActivityResult(Activity, int, int, Intent)} is called.
      * @param configuration      to provide authentication information
      * @param requestCode        custom code to use for Activity communication
      */
     public LoginManager(
-            @NonNull AccessTokenManager accessTokenManager,
+            @NonNull AccessTokenStorage accessTokenStorage,
             @NonNull LoginCallback loginCallback,
             @NonNull SessionConfiguration configuration,
             int requestCode) {
-        this.accessTokenManager = accessTokenManager;
+        this.accessTokenStorage = accessTokenStorage;
         this.callback = loginCallback;
         this.sessionConfiguration = configuration;
         this.requestCode = requestCode;
@@ -185,11 +186,22 @@ public class LoginManager {
     }
 
     /**
-     * @return {@link AccessTokenManager} that is used.
+     * @return {@link AccessTokenStorage} that is used.
+     * @deprecated Use {@link LoginManager#getAccessTokenStorage()}
+     */
+    @Deprecated
+    @NonNull
+    @SuppressWarnings("unchecked")
+    public <T extends AccessTokenStorage> T getAccessTokenManager() {
+        return (T) accessTokenStorage;
+    }
+
+    /**
+     * @return {@link AccessTokenStorage} that is used.
      */
     @NonNull
-    public AccessTokenManager getAccessTokenManager() {
-        return accessTokenManager;
+    public AccessTokenStorage getAccessTokenStorage() {
+        return accessTokenStorage;
     }
 
     /**
@@ -205,7 +217,7 @@ public class LoginManager {
     }
 
     /**
-     * Gets session based on current {@link SessionConfiguration} and {@link AccessTokenManager}.
+     * Gets session based on current {@link SessionConfiguration} and {@link AccessTokenStorage}.
      *
      * @return Session to use with API requests.
      * @throws IllegalStateException when not logged in
@@ -214,20 +226,21 @@ public class LoginManager {
     public Session<?> getSession() {
         if (sessionConfiguration.getServerToken() != null) {
             return new ServerTokenSession(sessionConfiguration);
-        } else if (accessTokenManager.getAccessToken() != null) {
-            return new AccessTokenSession(sessionConfiguration, accessTokenManager);
+        } else if (accessTokenStorage.getAccessToken() != null) {
+            return new AccessTokenSession(sessionConfiguration, accessTokenStorage);
         } else {
             throw new IllegalStateException("Tried to call getSession but not logged in or server token set.");
         }
     }
 
     /**
-     * Determines if the Login Manager is authenticated based on set {@link SessionConfiguration} and {@link AccessTokenManager}
+     * Determines if the Login Manager is authenticated based on set {@link SessionConfiguration}
+     * and {@link AccessTokenStorage}
      *
      * @return true if authenticated, otherwise false;
      */
     public boolean isAuthenticated() {
-        return (sessionConfiguration.getServerToken() != null || accessTokenManager.getAccessToken() != null);
+        return (sessionConfiguration.getServerToken() != null || accessTokenStorage.getAccessToken() != null);
     }
 
     /**
@@ -344,7 +357,7 @@ public class LoginManager {
             callback.onAuthorizationCodeReceived(authorizationCode);
         } else {
             AccessToken accessToken = AuthUtils.createAccessToken(data);
-            accessTokenManager.setAccessToken(accessToken);
+            accessTokenStorage.setAccessToken(accessToken);
 
             callback.onLoginSuccess(accessToken);
 

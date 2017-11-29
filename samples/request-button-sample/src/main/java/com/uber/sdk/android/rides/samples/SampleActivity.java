@@ -43,6 +43,7 @@ import com.uber.sdk.android.rides.RideRequestButton;
 import com.uber.sdk.android.rides.RideRequestButtonCallback;
 import com.uber.sdk.android.rides.RideRequestViewError;
 import com.uber.sdk.core.auth.AccessToken;
+import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.client.ServerTokenSession;
 import com.uber.sdk.core.client.SessionConfiguration;
 import com.uber.sdk.rides.client.error.ApiError;
@@ -165,15 +166,15 @@ public class SampleActivity extends AppCompatActivity implements RideRequestButt
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        AccessTokenManager accessTokenManager = new AccessTokenManager(this);
+        AccessTokenStorage accessTokenStorage = new AccessTokenManager(this);
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_clear) {
-            accessTokenManager.removeAccessToken();
+            accessTokenStorage.removeAccessToken();
             Toast.makeText(this, "AccessToken cleared", Toast.LENGTH_SHORT).show();
             return true;
         } else if (id == R.id.action_copy) {
-            AccessToken accessToken = accessTokenManager.getAccessToken();
+            AccessToken accessToken = accessTokenStorage.getAccessToken();
 
             String message = accessToken == null ? "No AccessToken stored" : "AccessToken copied to clipboard";
             if (accessToken != null) {

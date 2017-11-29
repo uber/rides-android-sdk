@@ -42,6 +42,7 @@ import com.uber.sdk.android.core.auth.AuthenticationError;
 import com.uber.sdk.android.core.auth.LoginCallback;
 import com.uber.sdk.android.core.auth.LoginManager;
 import com.uber.sdk.core.auth.AccessToken;
+import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
 import com.uber.sdk.core.client.AccessTokenSession;
 import com.uber.sdk.core.client.SessionConfiguration;
@@ -75,7 +76,7 @@ public class RideRequestActivity extends Activity implements LoginCallback, Ride
     static final String EXTRA_LOGIN_CONFIGURATION = "login_configuration";
     static final String EXTRA_ACCESS_TOKEN_STORAGE_KEY = "access_token_storage_key";
 
-    @VisibleForTesting AccessTokenManager accessTokenManager;
+    @VisibleForTesting AccessTokenStorage accessTokenStorage;
     @Nullable @VisibleForTesting AlertDialog authenticationErrorDialog;
     @Nullable @VisibleForTesting AlertDialog rideRequestErrorDialog;
     @VisibleForTesting RideRequestView rideRequestView;
@@ -119,7 +120,7 @@ public class RideRequestActivity extends Activity implements LoginCallback, Ride
                 .getString(EXTRA_ACCESS_TOKEN_STORAGE_KEY, AccessTokenManager.ACCESS_TOKEN_DEFAULT_KEY);
 
         rideRequestView = (RideRequestView) findViewById(R.id.ub__ride_request_view);
-        accessTokenManager = new AccessTokenManager(this, accessTokenStorageKey);
+        accessTokenStorage = new AccessTokenManager(this, accessTokenStorageKey);
 
         RideParameters rideParameters = getIntent().getParcelableExtra(RIDE_PARAMETERS);
         if (rideParameters == null) {
@@ -136,7 +137,7 @@ public class RideRequestActivity extends Activity implements LoginCallback, Ride
                 .setScopes(Arrays.asList(Scope.RIDE_WIDGETS))
                 .build();
 
-        loginManager = new LoginManager(accessTokenManager, this, sessionConfiguration, LOGIN_REQUEST_CODE);
+        loginManager = new LoginManager(accessTokenStorage, this, sessionConfiguration, LOGIN_REQUEST_CODE);
         rideRequestView.setRideParameters(rideParameters);
         rideRequestView.setRideRequestViewCallback(this);
 
@@ -174,7 +175,7 @@ public class RideRequestActivity extends Activity implements LoginCallback, Ride
                 break;
             case NO_ACCESS_TOKEN:
             case UNAUTHORIZED:
-                accessTokenManager.removeAccessToken();
+                accessTokenStorage.removeAccessToken();
                 login();
                 break;
             default:
@@ -212,7 +213,7 @@ public class RideRequestActivity extends Activity implements LoginCallback, Ride
 
     @Override
     public void onLoginSuccess(@NonNull AccessToken accessToken) {
-        accessTokenManager.setAccessToken(accessToken);
+        accessTokenStorage.setAccessToken(accessToken);
         load();
     }
 
@@ -238,10 +239,11 @@ public class RideRequestActivity extends Activity implements LoginCallback, Ride
      * Loads the appropriate view in the activity based on whether user is successfully authorized or not.
      */
     private void load() {
-        AccessToken accessToken = accessTokenManager.getAccessToken();
+        AccessToken accessToken = accessTokenStorage.getAccessToken();
 
         if (accessToken != null) {
-            AccessTokenSession session = new AccessTokenSession(sessionConfiguration, accessTokenManager);
+            AccessTokenSession session = new AccessTokenSession(sessionConfiguration,
+                    accessTokenStorage);
             rideRequestView.setSession(session);
 
             loadRideRequestView();
