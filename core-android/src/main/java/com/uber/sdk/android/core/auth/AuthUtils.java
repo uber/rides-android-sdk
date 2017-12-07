@@ -22,17 +22,25 @@
 
 package com.uber.sdk.android.core.auth;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.webkit.WebView;
 
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.Scope;
+import com.uber.sdk.core.client.SessionConfiguration;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -118,6 +126,22 @@ class AuthUtils {
         return scopeCollection;
     }
 
+
+    public static boolean isRedirectUriRegistered(@NonNull Activity activity, @NonNull Uri uri) {
+
+        Intent activityIntent = new Intent(Intent.ACTION_VIEW, uri);
+        List<ResolveInfo> resolvedActivityList = activity.getPackageManager()
+                .queryIntentActivities(activityIntent, 0);
+
+        boolean supported = false;
+        for (ResolveInfo resolveInfo : resolvedActivityList) {
+            if (resolveInfo.activityInfo.packageName.equals(activity.getPackageName())) {
+                supported = true;
+            }
+        }
+        return supported;
+    }
+
     /**
      * Converts a {@link Collection} of {@link Scope}s into a space-delimited {@link String}.
      *
@@ -150,7 +174,29 @@ class AuthUtils {
     }
 
     @NonNull
-    static Intent parseTokenUri(@NonNull Uri uri) throws LoginAuthenticationException {
+    static AccessToken parseTokenUri(@NonNull Uri uri) throws LoginAuthenticationException {
+        final long expiresIn;
+        try {
+            expiresIn = Long.valueOf(uri.getQueryParameter(KEY_EXPIRATION_TIME));
+        } catch (NumberFormatException ex) {
+            throw new LoginAuthenticationException(AuthenticationError.INVALID_RESPONSE);
+        }
+
+        final String accessToken = uri.getQueryParameter(KEY_TOKEN);
+        final String refreshToken = uri.getQueryParameter(KEY_REFRESH_TOKEN);
+        final String scope = uri.getQueryParameter(KEY_SCOPES);
+        final String tokenType = uri.getQueryParameter(KEY_TOKEN_TYPE);
+
+        if (TextUtils.isEmpty(accessToken) || TextUtils.isEmpty(scope) || TextUtils.isEmpty(tokenType)) {
+            throw new LoginAuthenticationException(AuthenticationError.INVALID_RESPONSE);
+        }
+
+        return new AccessToken(expiresIn, AuthUtils.stringToScopeCollection
+                (scope), accessToken, refreshToken, tokenType);
+    }
+
+    @NonNull
+    static Intent parseTokenUriToIntent(@NonNull Uri uri) throws LoginAuthenticationException {
         final long expiresIn;
         try {
             expiresIn = Long.valueOf(uri.getQueryParameter(KEY_EXPIRATION_TIME));
@@ -200,5 +246,53 @@ class AuthUtils {
 
     static String createEncodedParam(String rawParam) {
         return Base64.encodeToString(rawParam.getBytes(), Base64.DEFAULT);
+    }
+
+    /**
+     * Builds a URL {@link String} using the necessary parameters to load in the {@link WebView}.
+     *
+     * @return the URL to load in the {@link WebView}
+     */
+    @NonNull
+    static String buildUrl(
+            @NonNull String redirectUri,
+            @NonNull ResponseType responseType,
+            @NonNull SessionConfiguration configuration) {
+
+        final String CLIENT_ID_PARAM = "client_id";
+        final String ENDPOINT = "login";
+        final String HTTPS = "https";
+        final String PATH = "oauth/v2/authorize";
+        final String REDIRECT_PARAM = "redirect_uri";
+        final String RESPONSE_TYPE_PARAM = "response_type";
+        final String SCOPE_PARAM = "scope";
+        final String SHOW_FB_PARAM = "show_fb";
+        final String SIGNUP_PARAMS = "signup_params";
+        final String REDIRECT_LOGIN = "{\"redirect_to_login\":true}";
+
+
+
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme(HTTPS)
+                .authority(ENDPOINT + "." + configuration.getEndpointRegion().getDomain())
+                .appendEncodedPath(PATH)
+                .appendQueryParameter(CLIENT_ID_PARAM, configuration.getClientId())
+                .appendQueryParameter(REDIRECT_PARAM, redirectUri)
+                .appendQueryParameter(RESPONSE_TYPE_PARAM, responseType.toString().toLowerCase(
+                        Locale.US))
+                .appendQueryParameter(SCOPE_PARAM, getScopes(configuration))
+                .appendQueryParameter(SHOW_FB_PARAM, "false")
+                .appendQueryParameter(SIGNUP_PARAMS, AuthUtils.createEncodedParam(REDIRECT_LOGIN));
+
+        return builder.build().toString();
+    }
+
+    private static String getScopes(SessionConfiguration configuration) {
+        String scopes = AuthUtils.scopeCollectionToString(configuration.getScopes());
+        if (!configuration.getCustomScopes().isEmpty()) {
+            scopes =  AuthUtils.mergeScopeStrings(scopes,
+                    AuthUtils.customScopeCollectionToString(configuration.getCustomScopes()));
+        }
+        return scopes;
     }
 }

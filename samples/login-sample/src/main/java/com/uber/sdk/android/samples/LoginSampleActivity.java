@@ -139,6 +139,12 @@ public class LoginSampleActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        loginManager.handleAuthorizationResult(intent);
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.i(LOG_TAG, String.format("onActivityResult requestCode:[%s] resultCode [%s]",
                 requestCode, resultCode));

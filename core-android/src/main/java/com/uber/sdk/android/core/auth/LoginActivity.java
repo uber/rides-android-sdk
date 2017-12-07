@@ -39,8 +39,6 @@ import android.webkit.WebViewClient;
 import com.uber.sdk.android.core.R;
 import com.uber.sdk.core.client.SessionConfiguration;
 
-import java.util.Locale;
-
 /**
  * {@link android.app.Activity} that shows web view for Uber user authentication and authorization.
  */
@@ -108,7 +106,7 @@ public class LoginActivity extends Activity {
         webView.getSettings().setAppCacheEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
         webView.setWebViewClient(createOAuthClient(redirectUri));
-        webView.loadUrl(buildUrl(redirectUri, responseType, sessionConfiguration));
+        webView.loadUrl(AuthUtils.buildUrl(redirectUri, responseType, sessionConfiguration));
     }
 
     protected OAuthWebViewClient createOAuthClient(String redirectUri) {
@@ -128,7 +126,7 @@ public class LoginActivity extends Activity {
 
     void onTokenReceived(@NonNull Uri uri) {
         try {
-            Intent data = AuthUtils.parseTokenUri(uri);
+            Intent data = AuthUtils.parseTokenUriToIntent(uri);
 
             setResult(RESULT_OK, data);
             finish();
@@ -148,54 +146,6 @@ public class LoginActivity extends Activity {
             onError(loginException.getAuthenticationError());
             return;
         }
-    }
-
-    /**
-     * Builds a URL {@link String} using the necessary parameters to load in the {@link WebView}.
-     *
-     * @return the URL to load in the {@link WebView}
-     */
-    @NonNull
-    @VisibleForTesting
-    String buildUrl(
-            @NonNull String redirectUri,
-            @NonNull ResponseType responseType,
-            @NonNull SessionConfiguration configuration) {
-
-        final String CLIENT_ID_PARAM = "client_id";
-        final String ENDPOINT = "login";
-        final String HTTPS = "https";
-        final String PATH = "oauth/v2/authorize";
-        final String REDIRECT_PARAM = "redirect_uri";
-        final String RESPONSE_TYPE_PARAM = "response_type";
-        final String SCOPE_PARAM = "scope";
-        final String SHOW_FB_PARAM = "show_fb";
-        final String SIGNUP_PARAMS = "signup_params";
-        final String REDIRECT_LOGIN = "{\"redirect_to_login\":true}";
-
-
-
-        Uri.Builder builder = new Uri.Builder();
-        builder.scheme(HTTPS)
-                .authority(ENDPOINT + "." + configuration.getEndpointRegion().getDomain())
-                .appendEncodedPath(PATH)
-                .appendQueryParameter(CLIENT_ID_PARAM, configuration.getClientId())
-                .appendQueryParameter(REDIRECT_PARAM, redirectUri)
-                .appendQueryParameter(RESPONSE_TYPE_PARAM, responseType.toString().toLowerCase(Locale.US))
-                .appendQueryParameter(SCOPE_PARAM, getScopes(configuration))
-                .appendQueryParameter(SHOW_FB_PARAM, "false")
-                .appendQueryParameter(SIGNUP_PARAMS, AuthUtils.createEncodedParam(REDIRECT_LOGIN));
-
-        return builder.build().toString();
-    }
-
-    private String getScopes(SessionConfiguration configuration) {
-        String scopes = AuthUtils.scopeCollectionToString(configuration.getScopes());
-        if (!configuration.getCustomScopes().isEmpty()) {
-            scopes =  AuthUtils.mergeScopeStrings(scopes,
-                    AuthUtils.customScopeCollectionToString(configuration.getCustomScopes()));
-        }
-        return scopes;
     }
 
     /**

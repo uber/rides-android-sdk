@@ -49,6 +49,7 @@ dependencies {
     compile (deps.uber.uberCore) {
         exclude module: 'slf4j-log4j12'
     }
+    compile deps.support.chrometabs
     compile deps.misc.jsr305
     compile deps.support.appCompat
     compile deps.support.annotations

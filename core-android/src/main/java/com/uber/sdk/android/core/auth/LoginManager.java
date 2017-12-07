@@ -24,14 +24,18 @@ package com.uber.sdk.android.core.auth;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.customtabs.CustomTabsIntent;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.install.SignupDeeplink;
 import com.uber.sdk.android.core.utils.AppProtocol;
+import com.uber.sdk.android.core.utils.Utility;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
@@ -53,6 +57,11 @@ public class LoginManager {
      * Used to retrieve the {@link AuthenticationError} from an {@link Intent}.
      */
     static final String EXTRA_ERROR = "ERROR";
+
+    /**
+     * Used to retrieve the {@link AuthenticationError} from a result URI
+     */
+    static final String QUERY_PARAM_ERROR = "error";
 
     /**
      * Used to retrieve the Access Token from an {@link Intent}.
@@ -145,6 +154,8 @@ public class LoginManager {
         checkNotEmpty(sessionConfiguration.getScopes(), "Scopes must be set in the Session " +
                 "Configuration.");
 
+        validateRedirectUriRegistration(activity);
+
         SsoDeeplink ssoDeeplink = new SsoDeeplink.Builder(activity)
                 .clientId(sessionConfiguration.getClientId())
                 .scopes(sessionConfiguration.getScopes())
@@ -169,9 +180,7 @@ public class LoginManager {
      * @param activity to start Activity on.
      */
     public void loginForImplicitGrant(@NonNull Activity activity) {
-
-        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, ResponseType.TOKEN);
-        activity.startActivityForResult(intent, requestCode);
+        loginWithCustomtab(activity, ResponseType.TOKEN);
     }
 
     /**
@@ -180,9 +189,7 @@ public class LoginManager {
      * @param activity to start Activity on.
      */
     public void loginForAuthorizationCode(@NonNull Activity activity) {
-
-        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, ResponseType.CODE);
-        activity.startActivityForResult(intent, requestCode);
+        loginWithCustomtab(activity, ResponseType.CODE);
     }
 
     /**
@@ -304,6 +311,58 @@ public class LoginManager {
         }
     }
 
+    private void loginWithCustomtab(@NonNull final Activity activity, @NonNull ResponseType responseType) {
+
+        final String url = AuthUtils.buildUrl(sessionConfiguration.getRedirectUri(), responseType,
+                sessionConfiguration);
+
+        if (AuthUtils.isRedirectUriRegistered(activity,
+                Uri.parse(sessionConfiguration.getRedirectUri()))) {
+            final CustomTabsIntent intent = new CustomTabsIntent.Builder().build();
+
+            CustomTabsHelper.openCustomTab(activity, intent, Uri.parse(url),
+                    new CustomTabsHelper.BrowserFallback());
+        } else {
+            Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, responseType);
+            activity.startActivityForResult(intent, requestCode);
+        }
+    }
+
+    /**
+     * Handle the Uber authorization result.
+     * This will parse the Intent to pull the access token or error out of the Data URI, and call
+     * the set callback.
+     *
+     * @param data
+     */
+    public void handleAuthorizationResult(@NonNull Intent data) {
+        if (data.getData() != null
+                && data.getData().toString().startsWith(sessionConfiguration.getRedirectUri())) {
+
+            final String fragment = data.getData().getFragment();
+
+            if (fragment == null) {
+                callback.onLoginError(AuthenticationError.INVALID_RESPONSE);
+                return;
+            }
+
+            final Uri fragmentUri = new Uri.Builder().encodedQuery(fragment).build();
+
+            final String error = fragmentUri.getQueryParameter(QUERY_PARAM_ERROR);
+            if (!TextUtils.isEmpty(error)) {
+                callback.onLoginError(AuthenticationError.fromString(error));
+                return;
+            }
+
+            try {
+                AccessToken token = AuthUtils.parseTokenUri(fragmentUri);
+                callback.onLoginSuccess(token);
+            } catch (LoginAuthenticationException e) {
+                callback.onLoginError(e.getAuthenticationError());
+            }
+        }
+    }
+
     private void handleResultCancelled(
             @NonNull Activity activity,
             @Nullable Intent data) {// An error occurred during login
@@ -361,6 +420,19 @@ public class LoginManager {
 
             callback.onLoginSuccess(accessToken);
 
+        }
+    }
+
+    private void validateRedirectUriRegistration(@NonNull Activity activity) {
+        if (!AuthUtils.isRedirectUriRegistered(activity, Uri.parse(sessionConfiguration
+                .getRedirectUri()))) {
+
+            String error = "Must now register redirect_uri in AndroidManifest.xml. See README.";
+            if (Utility.isDebugable(activity)) {
+                throw new IllegalStateException(error);
+            } else {
+                Log.e("Uber SDK", error);
+            }
         }
     }
 }

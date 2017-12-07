@@ -38,6 +38,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <data android:scheme="com.uber.sdk.android.rides.samples.loginsample"
+                android:host="redirect-uri" />
+        </intent-filter>
     </application>
 
 </manifest>

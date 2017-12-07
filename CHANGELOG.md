@@ -1,7 +1,12 @@
 v0.8.0 - TBD
 ------------
+
 ### Changed
  - [Issue #101](https://github.com/uber/rides-android-sdk/issues/101) LoginManager now uses AccessTokenStorage
+
+### Added
+ - [Issue #22](https://github.com/uber/rides-android-sdk/issues/22) Customtab support
+
 
 v0.7.0 - 11/17/2017
 ------------

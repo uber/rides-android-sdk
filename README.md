@@ -165,6 +165,7 @@ To get the hash of your signing certificate, run this command with the alias of 
 keytool -exportcert -alias <your_key_alias> -keystore <your_keystore_path> | openssl sha1 -binary | openssl base64
 ```
 
+
 Before you can request any rides, you need to get an `AccessToken`. The Uber Rides SDK provides the `LoginManager` class for this task. Simply create a new instance and use its login method to present the login screen to the user.
 
 ```java
@@ -196,6 +197,37 @@ The only required scope for the Ride Request Widget is the `RIDE_WIDGETS` scope,
 protected void onActivityResult(int requestCode, int resultCode, Intent data){
     super.onActivityResult(requestCode, resultCode, data);
     loginManager.onActivityResult(activity, requestCode, resultCode, data);
+}
+```
+
+#### Authentication Migration (Version 0.8 and above)
+
+We are moving the startActivityForResult/onActivityResult contract to use the standard URI
+contract indicated in the [IETF RFC](https://tools.ietf.org/html/draft-ietf-oauth-native-apps-12).
+
+Now, you must additionally specify your redirect_uri in the Android Manifest and
+proxy that information to the Uber SDK. The recommended format is com.example.yourpackage://redirect-uri
+
+To handle migrations from older Uber apps using the old contract, we recommend you implement both
+approaches in the
+short term until we indicate otherwise.
+
+```xml
+<intent-filter>
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <data android:scheme="com.example.yourpackage"
+                android:host="redirect-uri" />
+</intent-filter>
+```
+
+Following this change, you must proxy the results to the `LoginManager` from the called activity.
+
+```java
+@Override
+protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    loginManager.handleAuthorizationResult(intent);
 }
 ```
 

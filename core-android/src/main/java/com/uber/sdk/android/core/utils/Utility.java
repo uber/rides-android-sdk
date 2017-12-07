@@ -1,5 +1,9 @@
 package com.uber.sdk.android.core.utils;
 
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.support.annotation.NonNull;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -13,6 +17,15 @@ public class Utility {
 
     public static String sha1hash(byte[] bytes) {
         return hashWithAlgorithm(HASH_ALGORITHM_SHA1, bytes);
+    }
+
+    /**
+     * Detects if the Application is currently in a Debug state
+     */
+    public static boolean isDebugable(@NonNull Context context) {
+        return ( 0 != ( context.getApplicationInfo().flags & ApplicationInfo
+                .FLAG_DEBUGGABLE ) );
+
     }
 
     private static String hashWithAlgorithm(String algorithm, String key) {
