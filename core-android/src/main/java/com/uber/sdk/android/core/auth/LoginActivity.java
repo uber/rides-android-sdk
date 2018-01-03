@@ -22,10 +22,12 @@
 
 package com.uber.sdk.android.core.auth;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
@@ -218,8 +220,27 @@ public class LoginActivity extends Activity {
             this.redirectUri = redirectUri;
         }
 
+        /**
+         * add deprecated member "onReceivedError" to solve compatibility issue when API level < 23
+         * @param view
+         * @param errorCode
+         * @param description
+         * @param failingUrl
+         */
+        @Override
+        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+            if(Build.VERSION.SDK_INT<Build.VERSION_CODES.M) {
+                receivedError();
+            }
+        }
+
+        @TargetApi(23)
         @Override
         public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+            receivedError();
+        }
+
+        private void receivedError(){
             onError(AuthenticationError.CONNECTIVITY_ISSUE);
         }
 
