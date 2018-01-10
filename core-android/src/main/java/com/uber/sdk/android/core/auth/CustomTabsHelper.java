@@ -68,7 +68,7 @@ public class CustomTabsHelper {
             }
         } else {
             customTabsIntent.intent.setPackage(packageName);
-            customTabsIntent.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            customTabsIntent.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             customTabsIntent.launchUrl(activity, uri);
         }
     }

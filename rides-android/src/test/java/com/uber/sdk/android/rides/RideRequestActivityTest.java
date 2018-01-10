@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.uber.sdk.android.core.auth.AccessTokenManager;
 import com.uber.sdk.android.core.auth.AuthenticationError;
 import com.uber.sdk.android.core.auth.LoginManager;
+import com.uber.sdk.android.core.auth.ResponseType;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
@@ -47,6 +48,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.refEq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -199,7 +201,7 @@ public class RideRequestActivityTest extends RobolectricTestBase {
 
         assertNull(shadowActivity.getResultIntent());
         verify(activity.accessTokenStorage, times(1)).removeAccessToken();
-        verify(activity.loginManager).login(refEq(activity));
+        verify(activity.loginManager).loginWithWebView(refEq(activity), eq(ResponseType.TOKEN));
     }
 
     @Test

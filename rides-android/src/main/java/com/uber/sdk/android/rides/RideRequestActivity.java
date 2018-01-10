@@ -156,7 +156,7 @@ public class RideRequestActivity extends Activity implements LoginCallback, Ride
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == LOGIN_REQUEST_CODE) {
-            loginManager.onActivityResult(this, requestCode, resultCode, data);
+            loginManager.handleAuthorizationResult(this, data);
         }
     }
 

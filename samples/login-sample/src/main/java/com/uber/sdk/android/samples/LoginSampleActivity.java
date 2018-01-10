@@ -90,7 +90,6 @@ public class LoginSampleActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
-
         configuration = new SessionConfiguration.Builder()
                 .setClientId(CLIENT_ID)
                 .setRedirectUri(REDIRECT_URI)
@@ -120,6 +119,7 @@ public class LoginSampleActivity extends AppCompatActivity {
                 new SampleLoginCallback(),
                 configuration,
                 CUSTOM_BUTTON_REQUEST_CODE);
+        loginManager.handleAuthorizationResult(this, getIntent());
 
         customButton = (Button) findViewById(R.id.custom_uber_button);
         customButton.setOnClickListener(new View.OnClickListener() {
@@ -139,23 +139,12 @@ public class LoginSampleActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        loginManager.handleAuthorizationResult(intent);
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.i(LOG_TAG, String.format("onActivityResult requestCode:[%s] resultCode [%s]",
                 requestCode, resultCode));
 
-        //Allow each a chance to catch it.
-        whiteButton.onActivityResult(requestCode, resultCode, data);
-
-        blackButton.onActivityResult(requestCode, resultCode, data);
-
         //A temporary measure to account for older Uber app SSO implementations in the wild
-        loginManager.onActivityResult(this, requestCode, resultCode, data);
+        loginManager.handleAuthorizationResult(this, data);
     }
 
     private class SampleLoginCallback implements LoginCallback {

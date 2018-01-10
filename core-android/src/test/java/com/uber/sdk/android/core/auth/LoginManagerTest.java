@@ -235,12 +235,6 @@ public class LoginManagerTest extends RobolectricTestBase {
     }
 
     @Test
-    public void onActivityResult_whenResultCanceledAndNoData_shouldCallbackCancel() {
-        loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, null);
-        verify(callback).onLoginCancel();
-    }
-
-    @Test
     public void onActivityResult_whenResultCanceledAndHasData_shouldCallbackError() {
         Intent intent = new Intent().putExtra(EXTRA_ERROR, AuthenticationError.INVALID_RESPONSE
                 .toStandardString());
@@ -250,30 +244,10 @@ public class LoginManagerTest extends RobolectricTestBase {
     }
 
     @Test
-    public void onActivityResult_whenResultCanceledAndNoData_shouldCancel() {
-        loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, null);
-        verify(callback).onLoginCancel();
-    }
-
-    @Test
-    public void onActivityResult_whenResultOkAndNoData_shouldCallbackErrorUnknown() {
-        loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_OK, null);
-        verify(callback).onLoginError(AuthenticationError.UNKNOWN);
-    }
-
-    @Test
-    public void onActivityResult_whenRequestCodeDoesNotMatch_nothingShouldHappen() {
-        Intent intent = mock(Intent.class);
-        loginManager.onActivityResult(activity, 1337, Activity.RESULT_OK, intent);
-        verifyZeroInteractions(intent);
-        verifyZeroInteractions(callback);
-    }
-
-    @Test
     public void onActivityResult_whenResultCanceledAndDataButNoCallback_nothingShouldHappen() {
         Intent intent = mock(Intent.class);
         loginManager.onActivityResult(activity, 1337, Activity.RESULT_OK, intent);
-        verifyZeroInteractions(intent);
+        verifyZeroInteractions(callback);
     }
 
     @Test
