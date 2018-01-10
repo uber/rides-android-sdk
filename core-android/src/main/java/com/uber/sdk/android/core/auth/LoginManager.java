@@ -448,7 +448,10 @@ public class LoginManager {
         if (!AuthUtils.isRedirectUriRegistered(activity, Uri.parse(sessionConfiguration
                 .getRedirectUri()))) {
 
-            String error = "Must now register redirect_uri in AndroidManifest.xml. See README.";
+            String error = "Must now register redirect_uri " + sessionConfiguration
+                    .getRedirectUri() + " in an intent filter in the AndroidManifest.xml of the "
+                    + "application. See README in the rides-android-sdk for more information.";
+
             if (Utility.isDebugable(activity)) {
                 throw new IllegalStateException(error);
             } else {

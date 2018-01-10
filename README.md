@@ -216,6 +216,7 @@ short term until we indicate otherwise.
 <intent-filter>
     <action android:name="android.intent.action.VIEW" />
     <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
     <data android:scheme="com.example.yourpackage"
                 android:host="redirect-uri" />
 </intent-filter>
