@@ -154,6 +154,7 @@ public class LoginSampleActivity extends AppCompatActivity {
 
         blackButton.onActivityResult(requestCode, resultCode, data);
 
+        //A temporary measure to account for older Uber app SSO implementations in the wild
         loginManager.onActivityResult(this, requestCode, resultCode, data);
     }
 

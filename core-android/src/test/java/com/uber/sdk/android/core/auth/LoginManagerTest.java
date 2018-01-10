@@ -100,6 +100,7 @@ public class LoginManagerTest extends RobolectricTestBase {
             String.format("https://m.uber.com/sign-up?client_id=Client1234&user-agent=core-android-v%s-login_manager",
                     BuildConfig.VERSION_NAME);
     private static final String AUTHORIZATION_CODE = "Auth123Code";
+    private static final String REDIRECT_URI = "app://redirecturi";
 
     @Mock
     Activity activity;
@@ -119,7 +120,8 @@ public class LoginManagerTest extends RobolectricTestBase {
 
     @Before
     public void setup() {
-        sessionConfiguration = new SessionConfiguration.Builder().setClientId(CLIENT_ID).setScopes(MIXED_SCOPES).build();
+        sessionConfiguration = new SessionConfiguration.Builder().setClientId(CLIENT_ID)
+                .setScopes(MIXED_SCOPES).setRedirectUri(REDIRECT_URI).build();
         loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration);
 
         when(activity.getPackageManager()).thenReturn(packageManager);

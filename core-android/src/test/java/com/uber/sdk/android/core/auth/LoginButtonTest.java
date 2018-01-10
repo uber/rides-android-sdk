@@ -131,7 +131,8 @@ public class LoginButtonTest extends RobolectricTestBase {
                 .build();
 
         loginButton = new LoginButton(activity, attributeSet);
-        loginButton.setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build());
+        loginButton.setSessionConfiguration(new SessionConfiguration.Builder().setRedirectUri
+                ("app://redirecturi").setClientId("clientId").build());
         loginButton.setCallback(loginCallback);
         loginButton.setScopes(SCOPES);
         loginButton.setAccessTokenStorage(accessTokenStorage);

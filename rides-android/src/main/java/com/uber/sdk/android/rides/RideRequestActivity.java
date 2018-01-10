@@ -41,6 +41,7 @@ import com.uber.sdk.android.core.auth.AccessTokenManager;
 import com.uber.sdk.android.core.auth.AuthenticationError;
 import com.uber.sdk.android.core.auth.LoginCallback;
 import com.uber.sdk.android.core.auth.LoginManager;
+import com.uber.sdk.android.core.auth.ResponseType;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
@@ -253,7 +254,7 @@ public class RideRequestActivity extends Activity implements LoginCallback, Ride
     }
 
     private void login() {
-        loginManager.login(this);
+        loginManager.loginWithWebView(this, ResponseType.TOKEN);
     }
 
     /**

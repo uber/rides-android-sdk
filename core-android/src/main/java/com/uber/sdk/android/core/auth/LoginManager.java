@@ -180,7 +180,15 @@ public class LoginManager {
      * @param activity to start Activity on.
      */
     public void loginForImplicitGrant(@NonNull Activity activity) {
-        loginWithCustomtab(activity, ResponseType.TOKEN);
+        final String url = AuthUtils.buildUrl(sessionConfiguration.getRedirectUri(),
+                ResponseType.TOKEN, sessionConfiguration);
+
+        if (AuthUtils.isRedirectUriRegistered(activity,
+                Uri.parse(sessionConfiguration.getRedirectUri()))) {
+            loginWithCustomtab(activity, Uri.parse(url));
+        } else {
+            loginWithWebView(activity, ResponseType.TOKEN);
+        }
     }
 
     /**
@@ -189,7 +197,30 @@ public class LoginManager {
      * @param activity to start Activity on.
      */
     public void loginForAuthorizationCode(@NonNull Activity activity) {
-        loginWithCustomtab(activity, ResponseType.CODE);
+        final String url = AuthUtils.buildUrl(sessionConfiguration.getRedirectUri(),
+                ResponseType.CODE, sessionConfiguration);
+
+        if (AuthUtils.isRedirectUriRegistered(activity,
+                Uri.parse(sessionConfiguration.getRedirectUri()))) {
+            loginWithCustomtab(activity, Uri.parse(url));
+        } else {
+            loginWithWebView(activity, ResponseType.CODE);
+        }
+    }
+
+
+    /**
+     * Deprecated to use with Ride Request Widget while transitions are being made to registered
+     * URI redirects
+     * @param activity
+     * @param responseType
+     * @deprecated
+     */
+    @Deprecated
+    public void loginWithWebView(@NonNull final Activity activity, @NonNull ResponseType
+            responseType) {
+        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, responseType);
+        activity.startActivityForResult(intent, requestCode);
     }
 
     /**
@@ -311,23 +342,6 @@ public class LoginManager {
         }
     }
 
-    private void loginWithCustomtab(@NonNull final Activity activity, @NonNull ResponseType responseType) {
-
-        final String url = AuthUtils.buildUrl(sessionConfiguration.getRedirectUri(), responseType,
-                sessionConfiguration);
-
-        if (AuthUtils.isRedirectUriRegistered(activity,
-                Uri.parse(sessionConfiguration.getRedirectUri()))) {
-            final CustomTabsIntent intent = new CustomTabsIntent.Builder().build();
-
-            CustomTabsHelper.openCustomTab(activity, intent, Uri.parse(url),
-                    new CustomTabsHelper.BrowserFallback());
-        } else {
-            Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, responseType);
-            activity.startActivityForResult(intent, requestCode);
-        }
-    }
-
     /**
      * Handle the Uber authorization result.
      * This will parse the Intent to pull the access token or error out of the Data URI, and call
@@ -361,6 +375,13 @@ public class LoginManager {
                 callback.onLoginError(e.getAuthenticationError());
             }
         }
+    }
+
+
+    private void loginWithCustomtab(@NonNull final Activity activity, @NonNull Uri uri) {
+        final CustomTabsIntent intent = new CustomTabsIntent.Builder().build();
+        CustomTabsHelper.openCustomTab(activity, intent, uri, new CustomTabsHelper
+                .BrowserFallback());
     }
 
     private void handleResultCancelled(
