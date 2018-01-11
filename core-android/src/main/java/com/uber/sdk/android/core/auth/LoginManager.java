@@ -161,6 +161,7 @@ public class LoginManager {
                 .scopes(sessionConfiguration.getScopes())
                 .customScopes(sessionConfiguration.getCustomScopes())
                 .activityRequestCode(requestCode)
+                .redirectUri(sessionConfiguration.getRedirectUri())
                 .build();
 
         if (ssoDeeplink.isSupported()) {
