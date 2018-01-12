@@ -41,6 +41,7 @@ import com.uber.sdk.android.core.auth.AuthenticationError;
 import com.uber.sdk.android.core.auth.LoginButton;
 import com.uber.sdk.android.core.auth.LoginCallback;
 import com.uber.sdk.android.core.auth.LoginManager;
+import com.uber.sdk.android.core.auth.ResponseType;
 import com.uber.sdk.android.rides.samples.BuildConfig;
 import com.uber.sdk.android.rides.samples.R;
 import com.uber.sdk.core.auth.AccessToken;
@@ -125,6 +126,7 @@ public class LoginSampleActivity extends AppCompatActivity {
         customButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 loginManager.login(LoginSampleActivity.this);
             }
         });

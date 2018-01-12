@@ -15,6 +15,7 @@
 package com.uber.sdk.android.core.auth;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -23,7 +24,9 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsServiceConnection;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -56,21 +59,45 @@ public class CustomTabsHelper {
      * @param uri the Uri to be opened.
      * @param fallback a CustomTabFallback to be used if Custom Tabs is not available.
      */
-    public static void openCustomTab(Activity activity,
-            CustomTabsIntent customTabsIntent,
-            Uri uri,
+    public static void openCustomTab(
+            final Activity activity,
+            final CustomTabsIntent customTabsIntent,
+            final Uri uri,
             CustomTabFallback fallback) {
-        String packageName = getPackageNameToUse(activity);
+        final String packageName = getPackageNameToUse(activity);
 
         if (packageName == null) {
             if (fallback != null) {
                 fallback.openUri(activity, uri);
             }
         } else {
-            customTabsIntent.intent.setPackage(packageName);
-            customTabsIntent.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            customTabsIntent.launchUrl(activity, uri);
+            final CustomTabsServiceConnection connection = new CustomTabsServiceConnection() {
+                @Override
+                public void onCustomTabsServiceConnected(ComponentName componentName, CustomTabsClient client) {
+                    client.warmup(0L); // This prevents backgrounding after redirection
+
+                    customTabsIntent.intent.setPackage(packageName);
+                    customTabsIntent.intent.setData(uri);
+                    customTabsIntent.launchUrl(activity, uri);
+                }
+                @Override
+                public void onServiceDisconnected(ComponentName name) {}
+            };
+            CustomTabsClient.bindCustomTabsService(activity, packageName, connection);
         }
+//            customTabsIntent.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+//                    Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//            customTabsIntent.intent.setPackage(packageName);
+//            customTabsIntent.intent.setData(uri);
+//            activity.startActivityForResult(customTabsIntent.intent, 20);
+//            customTabsIntent.launchUrl(activity, uri);
+
+//        }
+    }
+
+
+    static void launchTab(final Context context, final Uri uri){
+
     }
 
     /**
