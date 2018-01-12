@@ -201,35 +201,35 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data){
 ```
 
 #### Authentication Migration (Version 0.8 and above)
+With Version 0.8 and above of the SDK, the redirect URI is more strongly enforced to meet IETF
+standards [IETF RFC](https://tools.ietf.org/html/draft-ietf-oauth-native-apps-12).
 
-We are moving the startActivityForResult/onActivityResult contract to use the standard URI
-contract indicated in the [IETF RFC](https://tools.ietf.org/html/draft-ietf-oauth-native-apps-12).
+The SDK will automatically created a redirect URI to be used in the oauth callbacks with
+the format "applicationId.uberauth", ex "com.example.uberauth". If this differs from the previous
+specified redirect URI configured in the SessionConfiguration, there are two options.
 
-Now, you must additionally specify your redirect_uri in the Android Manifest and
-proxy that information to the Uber SDK. The recommended format is com.example.yourpackage://redirect-uri
-
-To handle migrations from older Uber apps using the old contract, we recommend you implement both
-approaches in the
-short term until we indicate otherwise.
-
-```xml
-<intent-filter>
-    <action android:name="android.intent.action.VIEW" />
-    <category android:name="android.intent.category.DEFAULT" />
-    <category android:name="android.intent.category.BROWSABLE" />
-    <data android:scheme="com.example.yourpackage"
-                android:host="redirect-uri" />
-</intent-filter>
-```
-
-Following this change, you must proxy the results to the `LoginManager` from the called activity.
+ 1. Change the redirect URI to match the new scheme in the configuration of the Session. If this is left out entirely, the default will be used.
 
 ```java
-@Override
-protected void onNewIntent(Intent intent) {
-    super.onNewIntent(intent);
-    loginManager.handleAuthorizationResult(intent);
-}
+SessionConfiguration config = new SessionConfiguration.Builder()
+    .setRedirectUri("com.example.app.uberauth")
+    .build();
+```
+
+ 2. Override the LoginRedirectReceiverActivity in your main manifest and provide a custom intent
+filter.
+
+```xml
+<activity
+        android:name="com.uber.sdk.android.core.auth.LoginRedirectReceiverActivity"
+        tools:node="replace">
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="com.example.app"/>
+    </intent-filter>
+</activity>
 ```
 
 The default behavior of calling `LoginManager.login(activity)` is to activate Single Sign On, and if that is unavailable, fallback to Implicit Grant if privileged scopes are not requested, otherwise redirect to the Play Store. If Authorization Code Grant is required, set `LoginManager.setRedirectForAuthorizationCode(true)` to prevent the redirect to the Play Store. Implicit Grant will allow access to all non-privileged scopes, where as the other two both grant access to privileged scopes. [Read more about scopes](https://developer.uber.com/docs/scopes).
