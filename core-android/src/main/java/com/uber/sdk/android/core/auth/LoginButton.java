@@ -227,11 +227,6 @@ public class LoginButton extends UberButton {
      * @param requestCode request code originally supplied to {@link Activity#startActivityForResult(Intent, int)}.
      * @param resultCode  result code from returning {@link Activity}.
      * @param data        data from returning {@link Activity}.
-     *
-     * @deprecated use {@link LoginManager#handleAuthorizationResult(Activity, Intent)} going
-     * forward. Will be removed in future version once all
-     * startActivityForResult/onActivityResult code for implicit grant and SSO is switched to
-     * using redirect URIs.
      */
     public void onActivityResult(
             int requestCode,

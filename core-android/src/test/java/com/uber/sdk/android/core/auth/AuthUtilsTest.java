@@ -27,10 +27,12 @@ import android.net.Uri;
 import com.uber.sdk.android.core.RobolectricTestBase;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.Scope;
+import com.uber.sdk.core.client.SessionConfiguration;
 
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
@@ -259,5 +261,22 @@ public class AuthUtilsTest extends RobolectricTestBase {
     @Test
     public void testCreateEncodedParam() {
         assertThat(AuthUtils.createEncodedParam("{\"redirect_to_login\":true}")).isEqualTo("eyJyZWRpcmVjdF90b19sb2dpbiI6dHJ1ZX0=\n");
+    }
+
+    @Test
+    public void onBuildUrl_withDefaultRegion_shouldHaveDefaultUberDomain() {
+        String clientId = "clientId1234";
+        String redirectUri = "localHost1234";
+
+        SessionConfiguration loginConfiguration = new SessionConfiguration.Builder()
+                .setRedirectUri(redirectUri)
+                .setScopes(Arrays.asList(Scope.HISTORY))
+                .setClientId(clientId)
+                .build();
+
+        String url = AuthUtils.buildUrl(redirectUri, ResponseType.TOKEN, loginConfiguration);
+        assertEquals("https://login.uber.com/oauth/v2/authorize?client_id=" + clientId +
+                "&redirect_uri=" + redirectUri + "&response_type=token&scope=history&" +
+                "show_fb=false&signup_params=eyJyZWRpcmVjdF90b19sb2dpbiI6dHJ1ZX0%3D%0A", url);
     }
 }

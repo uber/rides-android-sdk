@@ -41,7 +41,6 @@ import com.uber.sdk.android.core.auth.AuthenticationError;
 import com.uber.sdk.android.core.auth.LoginButton;
 import com.uber.sdk.android.core.auth.LoginCallback;
 import com.uber.sdk.android.core.auth.LoginManager;
-import com.uber.sdk.android.core.auth.ResponseType;
 import com.uber.sdk.android.rides.samples.BuildConfig;
 import com.uber.sdk.android.rides.samples.R;
 import com.uber.sdk.core.auth.AccessToken;
@@ -91,6 +90,7 @@ public class LoginSampleActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
+
         configuration = new SessionConfiguration.Builder()
                 .setClientId(CLIENT_ID)
                 .setRedirectUri(REDIRECT_URI)
@@ -104,15 +104,15 @@ public class LoginSampleActivity extends AppCompatActivity {
         //Create a button with a custom request code
         whiteButton = (LoginButton) findViewById(R.id.uber_button_white);
         whiteButton.setCallback(new SampleLoginCallback())
-                    .setSessionConfiguration(configuration);
+                .setSessionConfiguration(configuration);
 
         //Create a button using a custom AccessTokenStorage
         //Custom Scopes are set using XML for this button as well in R.layout.activity_sample
         blackButton = (LoginButton) findViewById(R.id.uber_button_black);
         blackButton.setAccessTokenStorage(accessTokenStorage)
-                    .setCallback(new SampleLoginCallback())
-                    .setSessionConfiguration(configuration)
-                    .setRequestCode(LOGIN_BUTTON_CUSTOM_REQUEST_CODE);
+                .setCallback(new SampleLoginCallback())
+                .setSessionConfiguration(configuration)
+                .setRequestCode(LOGIN_BUTTON_CUSTOM_REQUEST_CODE);
 
 
         //Use a custom button with an onClickListener to call the LoginManager directly
@@ -120,13 +120,11 @@ public class LoginSampleActivity extends AppCompatActivity {
                 new SampleLoginCallback(),
                 configuration,
                 CUSTOM_BUTTON_REQUEST_CODE);
-        loginManager.handleAuthorizationResult(this, getIntent());
 
         customButton = (Button) findViewById(R.id.custom_uber_button);
         customButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 loginManager.login(LoginSampleActivity.this);
             }
         });
@@ -145,8 +143,12 @@ public class LoginSampleActivity extends AppCompatActivity {
         Log.i(LOG_TAG, String.format("onActivityResult requestCode:[%s] resultCode [%s]",
                 requestCode, resultCode));
 
-        //A temporary measure to account for older Uber app SSO implementations in the wild
-        loginManager.handleAuthorizationResult(this, data);
+        //Allow each a chance to catch it.
+        whiteButton.onActivityResult(requestCode, resultCode, data);
+
+        blackButton.onActivityResult(requestCode, resultCode, data);
+
+        loginManager.onActivityResult(this, requestCode, resultCode, data);
     }
 
     private class SampleLoginCallback implements LoginCallback {
@@ -182,21 +184,21 @@ public class LoginSampleActivity extends AppCompatActivity {
 
         service.getUserProfile()
                 .enqueue(new Callback<UserProfile>() {
-            @Override
-            public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(LoginSampleActivity.this, getString(R.string.greeting, response.body().getFirstName()), Toast.LENGTH_LONG).show();
-                } else {
-                    ApiError error = ErrorParser.parseError(response);
-                    Toast.makeText(LoginSampleActivity.this, error.getClientErrors().get(0).getTitle(), Toast.LENGTH_LONG).show();
-                }
-            }
+                    @Override
+                    public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
+                        if (response.isSuccessful()) {
+                            Toast.makeText(LoginSampleActivity.this, getString(R.string.greeting, response.body().getFirstName()), Toast.LENGTH_LONG).show();
+                        } else {
+                            ApiError error = ErrorParser.parseError(response);
+                            Toast.makeText(LoginSampleActivity.this, error.getClientErrors().get(0).getTitle(), Toast.LENGTH_LONG).show();
+                        }
+                    }
 
-            @Override
-            public void onFailure(Call<UserProfile> call, Throwable t) {
+                    @Override
+                    public void onFailure(Call<UserProfile> call, Throwable t) {
 
-            }
-        });
+                    }
+                });
     }
 
     @Override

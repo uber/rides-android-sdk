@@ -23,7 +23,9 @@
 package com.uber.sdk.android.core.auth;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -129,17 +131,15 @@ class AuthUtils {
 
     public static boolean isRedirectUriRegistered(@NonNull Activity activity, @NonNull Uri uri) {
 
-        Intent activityIntent = new Intent(Intent.ACTION_VIEW, uri);
-        List<ResolveInfo> resolvedActivityList = activity.getPackageManager()
-                .queryIntentActivities(activityIntent, 0);
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.setData(uri);
+        ComponentName info = intent.resolveActivity(activity.getPackageManager());
 
-        boolean supported = false;
-        for (ResolveInfo resolveInfo : resolvedActivityList) {
-            if (resolveInfo.activityInfo.packageName.equals(activity.getPackageName())) {
-                supported = true;
-            }
-        }
-        return supported;
+        return info != null && info.getClassName().equals(LoginRedirectReceiverActivity.class
+                .getName());
+
+
     }
 
     /**

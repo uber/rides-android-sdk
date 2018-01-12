@@ -100,7 +100,6 @@ public class LoginManagerTest extends RobolectricTestBase {
             String.format("https://m.uber.com/sign-up?client_id=Client1234&user-agent=core-android-v%s-login_manager",
                     BuildConfig.VERSION_NAME);
     private static final String AUTHORIZATION_CODE = "Auth123Code";
-    private static final String REDIRECT_URI = "app://redirecturi";
 
     @Mock
     Activity activity;
@@ -120,8 +119,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
     @Before
     public void setup() {
-        sessionConfiguration = new SessionConfiguration.Builder().setClientId(CLIENT_ID)
-                .setScopes(MIXED_SCOPES).setRedirectUri(REDIRECT_URI).build();
+        sessionConfiguration = new SessionConfiguration.Builder().setClientId(CLIENT_ID).setScopes(MIXED_SCOPES).build();
         loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration);
 
         when(activity.getPackageManager()).thenReturn(packageManager);
@@ -235,6 +233,12 @@ public class LoginManagerTest extends RobolectricTestBase {
     }
 
     @Test
+    public void onActivityResult_whenResultCanceledAndNoData_shouldCallbackCancel() {
+        loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, null);
+        verify(callback).onLoginCancel();
+    }
+
+    @Test
     public void onActivityResult_whenResultCanceledAndHasData_shouldCallbackError() {
         Intent intent = new Intent().putExtra(EXTRA_ERROR, AuthenticationError.INVALID_RESPONSE
                 .toStandardString());
@@ -244,10 +248,30 @@ public class LoginManagerTest extends RobolectricTestBase {
     }
 
     @Test
+    public void onActivityResult_whenResultCanceledAndNoData_shouldCancel() {
+        loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, null);
+        verify(callback).onLoginCancel();
+    }
+
+    @Test
+    public void onActivityResult_whenResultOkAndNoData_shouldCallbackErrorUnknown() {
+        loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_OK, null);
+        verify(callback).onLoginError(AuthenticationError.UNKNOWN);
+    }
+
+    @Test
+    public void onActivityResult_whenRequestCodeDoesNotMatch_nothingShouldHappen() {
+        Intent intent = mock(Intent.class);
+        loginManager.onActivityResult(activity, 1337, Activity.RESULT_OK, intent);
+        verifyZeroInteractions(intent);
+        verifyZeroInteractions(callback);
+    }
+
+    @Test
     public void onActivityResult_whenResultCanceledAndDataButNoCallback_nothingShouldHappen() {
         Intent intent = mock(Intent.class);
         loginManager.onActivityResult(activity, 1337, Activity.RESULT_OK, intent);
-        verifyZeroInteractions(callback);
+        verifyZeroInteractions(intent);
     }
 
     @Test

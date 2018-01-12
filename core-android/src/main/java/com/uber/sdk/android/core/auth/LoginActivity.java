@@ -55,6 +55,7 @@ public class LoginActivity extends Activity {
     private ResponseType responseType;
     private SessionConfiguration sessionConfiguration;
     private LoginManager loginManager;
+    private boolean authStarted;
 
     /**
      * Create an {@link Intent} to pass to this activity
@@ -118,8 +119,23 @@ public class LoginActivity extends Activity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        if(webView == null) {
+            if(!authStarted) {
+                authStarted = true;
+                return;
+            }
+
+            finish();
+        }
+    }
+
+    @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        authStarted = false;
         setIntent(intent);
         init();
     }
@@ -150,14 +166,10 @@ public class LoginActivity extends Activity {
             onError(AuthenticationError.UNAVAILABLE);
         }
 
-        final String redirectUri = sessionConfiguration.getRedirectUri();
-        if (redirectUri == null) {
-            onError(AuthenticationError.INVALID_REDIRECT_URI);
-            return;
-        }
+        String redirectUri = sessionConfiguration.getRedirectUri() != null ? sessionConfiguration
+                .getRedirectUri() : getApplicationContext().getPackageName() + "uberauth";
 
         String url = AuthUtils.buildUrl(redirectUri, responseType, sessionConfiguration);
-
         if (getIntent().getBooleanExtra(EXTRA_FORCE_WEBVIEW, false)) {
             loadWebview(url, redirectUri);
         } else {

@@ -61,14 +61,12 @@ public class SsoDeeplink implements Deeplink {
     private static final String URI_QUERY_PLATFORM = "sdk";
     private static final String URI_QUERY_SDK_VERSION = "sdk_version";
     private static final String URI_HOST = "connect";
-    private static final String URI_QUERY_REDIRECT_URI = "redirect_uri";
 
     private final Activity activity;
     private final String clientId;
     private final Collection<Scope> requestedScopes;
     private final Collection<String> requestedCustomScopes;
     private final int requestCode;
-    private final String redirectUri;
 
     AppProtocol appProtocol;
 
@@ -77,14 +75,12 @@ public class SsoDeeplink implements Deeplink {
             @NonNull String clientId,
             @NonNull Collection<Scope> requestedScopes,
             @NonNull Collection<String> requestedCustomScopes,
-            int requestCode,
-            @NonNull String redirectUri) {
+            int requestCode) {
         this.activity = activity;
         this.clientId = clientId;
         this.requestCode = requestCode;
         this.requestedScopes = requestedScopes;
         this.requestedCustomScopes = requestedCustomScopes;
-        this.redirectUri = redirectUri;
         appProtocol = new AppProtocol();
     }
 
@@ -116,8 +112,8 @@ public class SsoDeeplink implements Deeplink {
     private Uri createSsoUri() {
         String scopes = AuthUtils.scopeCollectionToString(requestedScopes);
         if (!requestedCustomScopes.isEmpty()) {
-           scopes =  AuthUtils.mergeScopeStrings(scopes,
-                   AuthUtils.customScopeCollectionToString(requestedCustomScopes));
+            scopes =  AuthUtils.mergeScopeStrings(scopes,
+                    AuthUtils.customScopeCollectionToString(requestedCustomScopes));
         }
         return new Uri.Builder().scheme(AppProtocol.DEEPLINK_SCHEME)
                 .authority(URI_HOST)
@@ -125,7 +121,6 @@ public class SsoDeeplink implements Deeplink {
                 .appendQueryParameter(URI_QUERY_SCOPE, scopes)
                 .appendQueryParameter(URI_QUERY_PLATFORM, AppProtocol.PLATFORM)
                 .appendQueryParameter(URI_QUERY_SDK_VERSION, BuildConfig.VERSION_NAME)
-                .appendQueryParameter(URI_QUERY_REDIRECT_URI, redirectUri)
                 .build();
     }
 
@@ -158,7 +153,6 @@ public class SsoDeeplink implements Deeplink {
         private Collection<Scope> requestedScopes;
         private Collection<String> requestedCustomScopes;
         private int requestCode = DEFAULT_REQUEST_CODE;
-        private String redirectUri;
 
         public Builder(@NonNull Activity activity) {
             this.activity = activity;
@@ -189,15 +183,8 @@ public class SsoDeeplink implements Deeplink {
             return this;
         }
 
-
-        public Builder redirectUri(@NonNull String redirectUri) {
-            this.redirectUri = redirectUri;
-            return this;
-        }
-
         public SsoDeeplink build() {
             checkNotNull(clientId, "Client Id must be set");
-            checkNotNull(redirectUri, "redirectUri must be set");
 
             checkNotEmpty(requestedScopes, "Scopes must be set.");
 
@@ -208,8 +195,7 @@ public class SsoDeeplink implements Deeplink {
             if (requestCode == DEFAULT_REQUEST_CODE) {
                 Log.i(UBER_SDK_LOG_TAG, "Request code is not set, using default request code");
             }
-            return new SsoDeeplink(activity, clientId, requestedScopes, requestedCustomScopes,
-                    requestCode, redirectUri);
+            return new SsoDeeplink(activity, clientId, requestedScopes, requestedCustomScopes, requestCode);
         }
     }
 }

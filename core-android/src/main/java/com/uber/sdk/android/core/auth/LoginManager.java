@@ -27,8 +27,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.customtabs.CustomTabsIntent;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.uber.sdk.android.core.BuildConfig;
@@ -57,11 +55,6 @@ public class LoginManager {
      * Used to retrieve the {@link AuthenticationError} from an {@link Intent}.
      */
     static final String EXTRA_ERROR = "ERROR";
-
-    /**
-     * Used to retrieve the {@link AuthenticationError} from a result URI
-     */
-    static final String QUERY_PARAM_ERROR = "error";
 
     /**
      * Used to retrieve the Access Token from an {@link Intent}.
@@ -107,7 +100,7 @@ public class LoginManager {
 
     /**
      * @param accessTokenStorage to store access token.
-     * @param loginCallback      callback to be called when {@link LoginManager#handleAuthorizationResult(Activity, Intent)}
+     * @param loginCallback      callback to be called when {@link LoginManager#onActivityResult(Activity, int, int, Intent)}
      *                           is called.
      */
     public LoginManager(
@@ -118,7 +111,7 @@ public class LoginManager {
 
     /**
      * @param accessTokenStorage to store access token.
-     * @param loginCallback      callback to be called when {@link LoginManager#handleAuthorizationResult(Activity, Intent)} is called.
+     * @param loginCallback      callback to be called when {@link LoginManager#onActivityResult(Activity, int, int, Intent)} is called.
      * @param configuration      to provide authentication information
      */
     public LoginManager(
@@ -130,7 +123,7 @@ public class LoginManager {
 
     /**
      * @param accessTokenStorage to store access token.
-     * @param loginCallback      callback to be called when {@link LoginManager#handleAuthorizationResult(Activity, Intent)} is called.
+     * @param loginCallback      callback to be called when {@link LoginManager#onActivityResult(Activity, int, int, Intent)} is called.
      * @param configuration      to provide authentication information
      * @param requestCode        custom code to use for Activity communication
      */
@@ -154,14 +147,11 @@ public class LoginManager {
         checkNotEmpty(sessionConfiguration.getScopes(), "Scopes must be set in the Session " +
                 "Configuration.");
 
-        validateRedirectUriRegistration(activity);
-
         SsoDeeplink ssoDeeplink = new SsoDeeplink.Builder(activity)
                 .clientId(sessionConfiguration.getClientId())
                 .scopes(sessionConfiguration.getScopes())
                 .customScopes(sessionConfiguration.getCustomScopes())
                 .activityRequestCode(requestCode)
-                .redirectUri(sessionConfiguration.getRedirectUri())
                 .build();
 
         if (ssoDeeplink.isSupported()) {
@@ -181,15 +171,9 @@ public class LoginManager {
      * @param activity to start Activity on.
      */
     public void loginForImplicitGrant(@NonNull Activity activity) {
-        final String url = AuthUtils.buildUrl(sessionConfiguration.getRedirectUri(),
-                ResponseType.TOKEN, sessionConfiguration);
-
-        if (AuthUtils.isRedirectUriRegistered(activity,
-                Uri.parse(sessionConfiguration.getRedirectUri()))) {
-            loginWithCustomtab(activity, Uri.parse(url));
-        } else {
-            loginWithWebView(activity, ResponseType.TOKEN);
-        }
+        validateRedirectUriRegistration(activity);
+        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, ResponseType.TOKEN);
+        activity.startActivityForResult(intent, requestCode);
     }
 
     /**
@@ -198,29 +182,8 @@ public class LoginManager {
      * @param activity to start Activity on.
      */
     public void loginForAuthorizationCode(@NonNull Activity activity) {
-        final String url = AuthUtils.buildUrl(sessionConfiguration.getRedirectUri(),
-                ResponseType.CODE, sessionConfiguration);
-
-        if (AuthUtils.isRedirectUriRegistered(activity,
-                Uri.parse(sessionConfiguration.getRedirectUri()))) {
-            loginWithCustomtab(activity, Uri.parse(url));
-        } else {
-            loginWithWebView(activity, ResponseType.CODE);
-        }
-    }
-
-
-    /**
-     * Deprecated to use with Ride Request Widget while transitions are being made to registered
-     * URI redirects
-     * @param activity
-     * @param responseType
-     * @deprecated
-     */
-    @Deprecated
-    public void loginWithWebView(@NonNull final Activity activity, @NonNull ResponseType
-            responseType) {
-        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, responseType);
+        validateRedirectUriRegistration(activity);
+        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, ResponseType.CODE);
         activity.startActivityForResult(intent, requestCode);
     }
 
@@ -326,112 +289,93 @@ public class LoginManager {
      * @param requestCode request code originally supplied to {@link Activity#startActivityForResult(Intent, int)}.
      * @param resultCode  result code from returning {@link Activity}.
      * @param data        data from returning {@link Activity}.
-     *
-     * @deprecated use {@link LoginManager#handleAuthorizationResult(Activity, Intent)} going
-     * forward. Will be removed in future version once all
-     * startActivityForResult/onActivityResult code for implicit grant and SSO is switched to
-     * using redirect URIs.
      */
-    @Deprecated
     public void onActivityResult(
             @NonNull Activity activity,
             int requestCode,
             int resultCode,
             @Nullable Intent data) {
-        handleAuthorizationResult(activity, data);
-    }
-
-    /**
-     * Handle the Uber authorization result.
-     * This will parse the Intent to pull the access token or error out of the Data URI, and call
-     * the set callback. This will no-op when no Uber Tokens are present.
-     *
-     * @param data
-     */
-    public void handleAuthorizationResult(@NonNull Activity activity, @Nullable Intent data) {
-        if(data == null) {
+        if (requestCode != this.requestCode) {
             return;
         }
 
-        if (data.getData() != null
-                && data.getData().toString().startsWith(sessionConfiguration.getRedirectUri())) {
-
-            final String fragment = data.getData().getFragment();
-
-            if (fragment == null) {
-                callback.onLoginError(AuthenticationError.INVALID_RESPONSE);
-                return;
-            }
-
-            final Uri fragmentUri = new Uri.Builder().encodedQuery(fragment).build();
-
-            final String error = fragmentUri.getQueryParameter(QUERY_PARAM_ERROR);
-            if (!TextUtils.isEmpty(error)) {
-                callback.onLoginError(AuthenticationError.fromString(error));
-                return;
-            }
-
-            try {
-                AccessToken token = AuthUtils.parseTokenUri(fragmentUri);
-                accessTokenStorage.setAccessToken(token);
-                callback.onLoginSuccess(token);
-            } catch (LoginAuthenticationException e) {
-                callback.onLoginError(e.getAuthenticationError());
-            }
-        } else if(data.getStringExtra(EXTRA_ERROR) != null) {
-            final String error = data.getStringExtra(EXTRA_ERROR);
-            final AuthenticationError authenticationError
-                    = (error != null) ? AuthenticationError.fromString(error) : AuthenticationError.UNKNOWN;
-
-            if (authenticationError.equals(AuthenticationError.CANCELLED)) {
-                // User canceled login
-                callback.onLoginCancel();
-                return;
-            } else if (authenticationError.equals(AuthenticationError.UNAVAILABLE) &&
-                    !AuthUtils.isPrivilegeScopeRequired(sessionConfiguration.getScopes())) {
-                loginForImplicitGrant(activity);
-                return;
-            } else if (authenticationError.equals(AuthenticationError.UNAVAILABLE)
-                    && redirectForAuthorizationCode) {
-                loginForAuthorizationCode(activity);
-            } else if (AuthenticationError.INVALID_APP_SIGNATURE.equals(authenticationError)) {
-                AppProtocol appProtocol = new AppProtocol();
-                String appSignature = appProtocol.getAppSignature(activity);
-                if (appSignature == null) {
-                    Log.e(UberSdk.UBER_SDK_LOG_TAG, "There was an error obtaining your Application Signature. Please check "
-                            + "your Application Signature and add it to the developer dashboard at https://developer.uber"
-                            + ".com/dashboard");
-                } else {
-                    Log.e(UberSdk.UBER_SDK_LOG_TAG, "Your Application Signature, " + appSignature
-                            + ", does not match one of the registered Application Signatures on the developer dashboard. "
-                            + "Check your settings at https://developer.uber.com/dashboard");
-                }
-            }
-            callback.onLoginError(authenticationError);
-        } else if(data.getStringExtra(EXTRA_CODE_RECEIVED) != null) {
-            final String authorizationCode = data.getStringExtra(EXTRA_CODE_RECEIVED);
-            callback.onAuthorizationCodeReceived(authorizationCode);
-        } else if (data.getStringExtra(LoginManager.EXTRA_ACCESS_TOKEN) != null) {
-            AccessToken accessToken = AuthUtils.createAccessToken(data);
-            accessTokenStorage.setAccessToken(accessToken);
-            callback.onLoginSuccess(accessToken);
+        if (resultCode == Activity.RESULT_OK) {
+            handleResultOk(data);
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            handleResultCancelled(activity, data);
         }
     }
 
+    private void handleResultCancelled(
+            @NonNull Activity activity,
+            @Nullable Intent data) {// An error occurred during login
 
-    private void loginWithCustomtab(@NonNull final Activity activity, @NonNull Uri uri) {
-        final CustomTabsIntent intent = new CustomTabsIntent.Builder().build();
-        CustomTabsHelper.openCustomTab(activity, intent, uri, new CustomTabsHelper
-                .BrowserFallback());
+        if (data == null) {
+            // User canceled login
+            callback.onLoginCancel();
+            return;
+        }
+
+        final String error = data.getStringExtra(EXTRA_ERROR);
+        final AuthenticationError authenticationError
+                = (error != null) ? AuthenticationError.fromString(error) : AuthenticationError.UNKNOWN;
+
+        if (authenticationError.equals(AuthenticationError.CANCELLED)) {
+            // User canceled login
+            callback.onLoginCancel();
+            return;
+        } else if (authenticationError.equals(AuthenticationError.UNAVAILABLE) &&
+                !AuthUtils.isPrivilegeScopeRequired(sessionConfiguration.getScopes())) {
+            loginForImplicitGrant(activity);
+            return;
+        } else if (authenticationError.equals(AuthenticationError.UNAVAILABLE)
+                && redirectForAuthorizationCode) {
+            loginForAuthorizationCode(activity);
+        } else if (AuthenticationError.INVALID_APP_SIGNATURE.equals(authenticationError)) {
+            AppProtocol appProtocol = new AppProtocol();
+            String appSignature = appProtocol.getAppSignature(activity);
+            if (appSignature == null) {
+                Log.e(UberSdk.UBER_SDK_LOG_TAG, "There was an error obtaining your Application Signature. Please check "
+                        + "your Application Signature and add it to the developer dashboard at https://developer.uber"
+                        + ".com/dashboard");
+            } else {
+                Log.e(UberSdk.UBER_SDK_LOG_TAG, "Your Application Signature, " + appSignature
+                        + ", does not match one of the registered Application Signatures on the developer dashboard. "
+                        + "Check your settings at https://developer.uber.com/dashboard");
+            }
+        }
+        callback.onLoginError(authenticationError);
+    }
+
+    private void handleResultOk(@Nullable Intent data) {
+        if (data == null) {
+            // Unknown error, should never occur
+            callback.onLoginError(AuthenticationError.UNKNOWN);
+            return;
+        }
+
+        final String authorizationCode = data.getStringExtra(EXTRA_CODE_RECEIVED);
+        if (authorizationCode != null) {
+            callback.onAuthorizationCodeReceived(authorizationCode);
+        } else {
+            AccessToken accessToken = AuthUtils.createAccessToken(data);
+            accessTokenStorage.setAccessToken(accessToken);
+
+            callback.onLoginSuccess(accessToken);
+
+        }
     }
 
     private void validateRedirectUriRegistration(@NonNull Activity activity) {
-        if (!AuthUtils.isRedirectUriRegistered(activity, Uri.parse(sessionConfiguration
-                .getRedirectUri()))) {
 
-            String error = "Must now register redirect_uri " + sessionConfiguration
-                    .getRedirectUri() + " in an intent filter in the AndroidManifest.xml of the "
-                    + "application. See README in the rides-android-sdk for more information.";
+        String generatedRedirectUri = activity.getPackageName().concat("uberauth");
+        String setRedirectUri = sessionConfiguration.getRedirectUri();
+        if (setRedirectUri != null &&
+                !generatedRedirectUri.equals(setRedirectUri)
+                && !AuthUtils.isRedirectUriRegistered(activity, Uri.parse(setRedirectUri))) {
+            String error = "Misconfigured redirect_uri in " + sessionConfiguration
+                    .getRedirectUri() + " and the LoginRedirectReceiverActivity to receive the "
+                    + "response. See https://github.com/uber/rides-android-sdk for more info.";
 
             if (Utility.isDebugable(activity)) {
                 throw new IllegalStateException(error);

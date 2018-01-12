@@ -41,7 +41,6 @@ import com.uber.sdk.android.core.auth.AccessTokenManager;
 import com.uber.sdk.android.core.auth.AuthenticationError;
 import com.uber.sdk.android.core.auth.LoginCallback;
 import com.uber.sdk.android.core.auth.LoginManager;
-import com.uber.sdk.android.core.auth.ResponseType;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
@@ -95,9 +94,9 @@ public class RideRequestActivity extends Activity implements LoginCallback, Ride
      */
     @NonNull
     public static Intent newIntent(@NonNull Context context,
-                                   @Nullable RideParameters rideParameters,
-                                   @NonNull SessionConfiguration loginConfiguration,
-                                   @Nullable String accessTokenStorageKey) {
+            @Nullable RideParameters rideParameters,
+            @NonNull SessionConfiguration loginConfiguration,
+            @Nullable String accessTokenStorageKey) {
         Intent data = new Intent(context, RideRequestActivity.class);
 
         if (rideParameters == null) {
@@ -156,7 +155,7 @@ public class RideRequestActivity extends Activity implements LoginCallback, Ride
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == LOGIN_REQUEST_CODE) {
-            loginManager.handleAuthorizationResult(this, data);
+            loginManager.onActivityResult(this, requestCode, resultCode, data);
         }
     }
 
@@ -254,7 +253,7 @@ public class RideRequestActivity extends Activity implements LoginCallback, Ride
     }
 
     private void login() {
-        loginManager.loginWithWebView(this, ResponseType.TOKEN);
+        loginManager.login(this);
     }
 
     /**
