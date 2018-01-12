@@ -368,14 +368,17 @@ public class LoginManager {
 
     private void validateRedirectUriRegistration(@NonNull Activity activity) {
 
-        String generatedRedirectUri = activity.getPackageName().concat("uberauth");
+        String generatedRedirectUri = activity.getPackageName().concat(".uberauth://redirect");
         String setRedirectUri = sessionConfiguration.getRedirectUri();
         if (setRedirectUri != null &&
                 !generatedRedirectUri.equals(setRedirectUri)
                 && !AuthUtils.isRedirectUriRegistered(activity, Uri.parse(setRedirectUri))) {
-            String error = "Misconfigured redirect_uri in " + sessionConfiguration
-                    .getRedirectUri() + " and the LoginRedirectReceiverActivity to receive the "
-                    + "response. See https://github.com/uber/rides-android-sdk for more info.";
+            String error = "Misconfigured redirect_uri. See https://github.com/uber/rides-android-sdk#authentication-migration-version-08-and-above "
+                    + "for more info. Either 1) Register " + generatedRedirectUri + " as a "
+                    + "redirect uri for the app at https://developer.uber.com/dashboard/ and "
+                    + "specify this in your SessionConfiguration or 2) Override the default "
+                    + "redirect_uri with the current one set (" + setRedirectUri + ") in the "
+                    + "AndroidManifest.";
 
             if (Utility.isDebugable(activity)) {
                 throw new IllegalStateException(error);
