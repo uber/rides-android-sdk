@@ -124,6 +124,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         when(activity.getPackageManager()).thenReturn(packageManager);
         when(activity.getApplicationInfo()).thenReturn(new ApplicationInfo());
+        when(activity.getPackageName()).thenReturn("com.example");
     }
 
     @Test
