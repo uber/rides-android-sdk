@@ -157,7 +157,18 @@ If you want to provide a more custom experience in your app, there are a few cla
 ### Login
 The Uber SDK allows for three login flows: Implicit Grant (local web view), Single Sign On with the Uber App, and Authorization Code Grant (requires a backend to catch the local web view redirect and complete OAuth).
 
-To use Single Sign On you must register a hash of your application's signing certificate in the Application Signature section of the [developer dashboard](https://developer.uber.com/dashboard).
+
+#### Dashboard configuration
+To use SDK features, two configuration details must be set on the Uber Developer Dashboard.
+
+ 1. Sign into to the [developer dashboard](https://developer.uber.com/dashboard)
+
+ 1. Register a redirect URI to be used to communication authentication results. The default used 
+ by the SDK is in the format of `applicationId.uberauth://redirect`. ex: `com.example
+ .uberauth://redirect`. To configure the SDK to use a different redirect URI, see the steps below. 
+ 
+ 1. To use Single Sign On you must register a hash of your application's signing certificate in the 
+ Application Signature section of the settings page of your application.
 
 To get the hash of your signing certificate, run this command with the alias of your key and path to your keystore:
 
@@ -200,7 +211,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data){
 }
 ```
 
-#### Authentication Migration (Version 0.8 and above)
+#### Authentication Migration and setup (Version 0.8 and above)
 With Version 0.8 and above of the SDK, the redirect URI is more strongly enforced to meet IETF
 standards [IETF RFC](https://tools.ietf.org/html/draft-ietf-oauth-native-apps-12).
 
@@ -232,7 +243,9 @@ filter.
 </activity>
 ```
 
-The default behavior of calling `LoginManager.login(activity)` is to activate Single Sign On, and if that is unavailable, fallback to Implicit Grant if privileged scopes are not requested, otherwise redirect to the Play Store. If Authorization Code Grant is required, set `LoginManager.setRedirectForAuthorizationCode(true)` to prevent the redirect to the Play Store. Implicit Grant will allow access to all non-privileged scopes, where as the other two both grant access to privileged scopes. [Read more about scopes](https://developer.uber.com/docs/scopes).
+The default behavior of calling   `LoginManager.login(activity)` is to activate Single Sign On, 
+and if SSO is unavailable, fallback to Implicit Grant if privileged scopes are not requested, 
+otherwise redirect to the Play Store. If Authorization Code Grant is required, set `LoginManager.setRedirectForAuthorizationCode(true)` to prevent the redirect to the Play Store. Implicit Grant will allow access to all non-privileged scopes, where as the other two both grant access to privileged scopes. [Read more about scopes](https://developer.uber.com/docs/scopes).
 
 #### Login Errors
 Upon a failure to login, an `AuthenticationError` will be provided in the `LoginCallback`. This enum provides a series of values that provide more information on the type of error.
