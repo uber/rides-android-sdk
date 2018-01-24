@@ -383,7 +383,7 @@ public class LoginManager {
             if (Utility.isDebugable(activity)) {
                 throw new IllegalStateException(error);
             } else {
-                Log.e("Uber SDK", error);
+                Log.e(UberSdk.UBER_SDK_LOG_TAG, error);
             }
         }
     }

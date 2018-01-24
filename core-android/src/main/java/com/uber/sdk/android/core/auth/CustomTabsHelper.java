@@ -30,6 +30,8 @@ import android.support.customtabs.CustomTabsServiceConnection;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.uber.sdk.android.core.UberSdk;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,11 +68,7 @@ public class CustomTabsHelper {
             CustomTabFallback fallback) {
         final String packageName = getPackageNameToUse(activity);
 
-        if (packageName == null) {
-            if (fallback != null) {
-                fallback.openUri(activity, uri);
-            }
-        } else {
+        if (packageName != null) {
             final CustomTabsServiceConnection connection = new CustomTabsServiceConnection() {
                 @Override
                 public void onCustomTabsServiceConnected(ComponentName componentName, CustomTabsClient client) {
@@ -84,20 +82,12 @@ public class CustomTabsHelper {
                 public void onServiceDisconnected(ComponentName name) {}
             };
             CustomTabsClient.bindCustomTabsService(activity, packageName, connection);
+        } else if (fallback != null) {
+            fallback.openUri(activity, uri);
+        } else {
+            Log.e(UberSdk.UBER_SDK_LOG_TAG,
+                    "Use of openCustomTab without Customtab support or a fallback set");
         }
-//            customTabsIntent.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-//                    Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//            customTabsIntent.intent.setPackage(packageName);
-//            customTabsIntent.intent.setData(uri);
-//            activity.startActivityForResult(customTabsIntent.intent, 20);
-//            customTabsIntent.launchUrl(activity, uri);
-
-//        }
-    }
-
-
-    static void launchTab(final Context context, final Uri uri){
-
     }
 
     /**
