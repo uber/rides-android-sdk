@@ -370,7 +370,8 @@ public class LoginManager {
 
         String generatedRedirectUri = activity.getPackageName().concat(".uberauth://redirect");
         String setRedirectUri = sessionConfiguration.getRedirectUri();
-        if (setRedirectUri != null &&
+        if (isRedirectForAuthorizationCode() &&
+                setRedirectUri != null &&
                 !generatedRedirectUri.equals(setRedirectUri)
                 && !AuthUtils.isRedirectUriRegistered(activity, Uri.parse(setRedirectUri))) {
             String error = "Misconfigured redirect_uri. See https://github.com/uber/rides-android-sdk#authentication-migration-version-08-and-above "
