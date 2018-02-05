@@ -56,6 +56,8 @@ public interface LoginCallback {
      * Client Secret, see https://developer.uber.com/docs/authentication#section-step-two-receive-redirect
      *
      * @param authorizationCode the authorizationCode that can be used to retrieve {@link AccessToken}
+     * @deprecated Should use Custom Tab flow with registered Redirect URI
      */
+    @Deprecated
     void onAuthorizationCodeReceived(@NonNull String authorizationCode);
 }

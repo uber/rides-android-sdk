@@ -43,6 +43,7 @@ import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
 
 import static com.uber.sdk.core.client.utils.Preconditions.checkNotEmpty;
+import static com.uber.sdk.core.client.utils.Preconditions.checkNotNull;
 
 /**
  * Manages user login via OAuth 2.0 Implicit Grant.  Be sure to call
@@ -96,7 +97,10 @@ public class LoginManager {
     private final SessionConfiguration sessionConfiguration;
     private final int requestCode;
 
+    private boolean authCodeFlowEnabled = false;
+    @Deprecated
     private boolean redirectForAuthorizationCode = false;
+
 
     /**
      * @param accessTokenStorage to store access token.
@@ -146,6 +150,8 @@ public class LoginManager {
     public void login(@NonNull Activity activity) {
         checkNotEmpty(sessionConfiguration.getScopes(), "Scopes must be set in the Session " +
                 "Configuration.");
+        checkNotNull(sessionConfiguration.getRedirectUri(), "Redirect URI must be set in "
+                + "Session Configuration.");
 
         SsoDeeplink ssoDeeplink = new SsoDeeplink.Builder(activity)
                 .clientId(sessionConfiguration.getClientId())
@@ -158,7 +164,7 @@ public class LoginManager {
             ssoDeeplink.execute();
         } else if (!AuthUtils.isPrivilegeScopeRequired(sessionConfiguration.getScopes())) {
             loginForImplicitGrant(activity);
-        } else if (redirectForAuthorizationCode) {
+        } else if (isAuthCodeFlowEnabled()) {
             loginForAuthorizationCode(activity);
         } else {
             redirectToInstallApp(activity);
@@ -171,8 +177,11 @@ public class LoginManager {
      * @param activity to start Activity on.
      */
     public void loginForImplicitGrant(@NonNull Activity activity) {
-        validateRedirectUriRegistration(activity);
-        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, ResponseType.TOKEN);
+        boolean forceWebView =
+                isInLegacyRedirectMode(activity);
+
+        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration,
+                ResponseType.TOKEN, forceWebView);
         activity.startActivityForResult(intent, requestCode);
     }
 
@@ -182,8 +191,10 @@ public class LoginManager {
      * @param activity to start Activity on.
      */
     public void loginForAuthorizationCode(@NonNull Activity activity) {
-        validateRedirectUriRegistration(activity);
-        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, ResponseType.CODE);
+        boolean forceWebView =
+                isInLegacyRedirectMode(activity);
+        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration,
+                ResponseType.CODE, forceWebView);
         activity.startActivityForResult(intent, requestCode);
     }
 
@@ -256,9 +267,12 @@ public class LoginManager {
      *
      * @param redirectForAuthorizationCode true if should redirect, otherwise false
      * @return this instance of {@link LoginManager}
+     * @deprecated, See Authorization Migration guide https://github.com/uber/rides-android-sdk#authentication-migration-version-08-and-above
      */
+    @Deprecated
     public LoginManager setRedirectForAuthorizationCode(boolean redirectForAuthorizationCode) {
         this.redirectForAuthorizationCode = redirectForAuthorizationCode;
+        setAuthCodeFlowEnabled(true);
         return this;
     }
 
@@ -272,9 +286,40 @@ public class LoginManager {
      * update Uber app instead.
      *
      * @return true if redirect by default, otherwise false
+     * @deprecated, See Authorization Migration guide https://github.com/uber/rides-android-sdk#authentication-migration-version-08-and-above
      */
+    @Deprecated
     public boolean isRedirectForAuthorizationCode() {
         return redirectForAuthorizationCode;
+    }
+
+
+    /**
+     * Enable the use of the Authorization Code Flow
+     * (https://developer.uber.com/docs/authentication#section-step-one-authorize) instead of an
+     * installation prompt for the Uber app as a login fallback mechanism.
+     *
+     * Requires that the app's backend system is configured to support this flow and the redirect
+     * URI is pointed correctly.
+     *
+     * @param authCodeFlowEnabled true for use of auth code flow, false to fallback to Uber app
+     * installation
+     * @return this instace of {@link LoginManager}
+     */
+    public LoginManager setAuthCodeFlowEnabled(boolean authCodeFlowEnabled) {
+        this.authCodeFlowEnabled = authCodeFlowEnabled;
+        return this;
+    }
+
+    /**
+     * Indicates the use of the Authorization Code Flow
+     * (https://developer.uber.com/docs/authentication#section-step-one-authorize) instead of an
+     * installation prompt for the Uber app as a login fallback mechanism.
+     *
+     * @return true if Auth Code Flow is enabled, otherwise false
+     */
+    public boolean isAuthCodeFlowEnabled() {
+        return authCodeFlowEnabled;
     }
 
     private void redirectToInstallApp(@NonNull Activity activity) {
@@ -329,7 +374,7 @@ public class LoginManager {
             loginForImplicitGrant(activity);
             return;
         } else if (authenticationError.equals(AuthenticationError.UNAVAILABLE)
-                && redirectForAuthorizationCode) {
+                && isAuthCodeFlowEnabled()) {
             loginForAuthorizationCode(activity);
         } else if (AuthenticationError.INVALID_APP_SIGNATURE.equals(authenticationError)) {
             AppProtocol appProtocol = new AppProtocol();
@@ -366,26 +411,53 @@ public class LoginManager {
         }
     }
 
-    private void validateRedirectUriRegistration(@NonNull Activity activity) {
-
+    boolean isInLegacyRedirectMode(@NonNull Activity activity) {
         String generatedRedirectUri = activity.getPackageName().concat(".uberauth://redirect");
         String setRedirectUri = sessionConfiguration.getRedirectUri();
-        if (isRedirectForAuthorizationCode() &&
-                setRedirectUri != null &&
-                !generatedRedirectUri.equals(setRedirectUri)
-                && !AuthUtils.isRedirectUriRegistered(activity, Uri.parse(setRedirectUri))) {
-            String error = "Misconfigured redirect_uri. See https://github.com/uber/rides-android-sdk#authentication-migration-version-08-and-above "
+
+        if (redirectForAuthorizationCode) {
+            String message = "The Uber Authentication Flow for the Authorization Code Flow has "
+                    + "been upgraded in 0.8.0 and a redirect URI must now be supplied to the application. "
+                    + "You are seeing this error because the use of deprecated method "
+                    + "LoginManager.setRedirectForAuthorizationCode() indicates your flow may not "
+                    + "support the recent changes. See https://github"
+                    + ".com/uber/rides-android-sdk#authentication-migration-version"
+                    + "-08-and-above for resolution steps"
+                    + "to insure your setup is correct and then migrate to the non-deprecate "
+                    + "method LoginManager.setAuthCodeFlowEnabled()";
+
+            logOrError(activity, new IllegalStateException(message));
+            return true;
+        }
+
+        if (sessionConfiguration.getRedirectUri() == null) {
+            String message = "Redirect URI must be set in "
+                    + "Session Configuration.";
+
+            logOrError(activity, new NullPointerException(message));
+            return true;
+        }
+
+        if (!generatedRedirectUri.equals(setRedirectUri) &&
+                !AuthUtils.isRedirectUriRegistered(activity, Uri.parse(setRedirectUri))) {
+            String message = "Misconfigured redirect_uri. See https://github.com/uber/rides-android-sdk#authentication-migration-version-08-and-above"
                     + "for more info. Either 1) Register " + generatedRedirectUri + " as a "
                     + "redirect uri for the app at https://developer.uber.com/dashboard/ and "
                     + "specify this in your SessionConfiguration or 2) Override the default "
                     + "redirect_uri with the current one set (" + setRedirectUri + ") in the "
                     + "AndroidManifest.";
+            logOrError(activity, new IllegalStateException(message));
+            return true;
+        }
 
-            if (Utility.isDebugable(activity)) {
-                throw new IllegalStateException(error);
-            } else {
-                Log.e(UberSdk.UBER_SDK_LOG_TAG, error);
-            }
+        return false;
+    }
+
+    private void logOrError(Activity activity, Exception exception) {
+        if (Utility.isDebugable(activity)) {
+            throw new IllegalStateException(exception);
+        } else {
+            Log.e(UberSdk.UBER_SDK_LOG_TAG, exception.getMessage(), exception);
         }
     }
 }

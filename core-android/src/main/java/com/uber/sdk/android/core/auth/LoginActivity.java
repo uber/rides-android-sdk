@@ -169,11 +169,8 @@ public class LoginActivity extends Activity {
         String redirectUri = sessionConfiguration.getRedirectUri() != null ? sessionConfiguration
                 .getRedirectUri() : getApplicationContext().getPackageName() + "uberauth";
 
-        boolean registeredRedirectUri = AuthUtils.isRedirectUriRegistered(this,
-                Uri.parse(redirectUri));
-
         String url = AuthUtils.buildUrl(redirectUri, responseType, sessionConfiguration);
-        if (getIntent().getBooleanExtra(EXTRA_FORCE_WEBVIEW, false) || !registeredRedirectUri) {
+        if (getIntent().getBooleanExtra(EXTRA_FORCE_WEBVIEW, false)) {
             loadWebview(url, redirectUri);
         } else {
             loadChrometab(url);
