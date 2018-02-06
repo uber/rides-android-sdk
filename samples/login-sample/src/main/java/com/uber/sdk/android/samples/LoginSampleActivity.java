@@ -104,15 +104,15 @@ public class LoginSampleActivity extends AppCompatActivity {
         //Create a button with a custom request code
         whiteButton = (LoginButton) findViewById(R.id.uber_button_white);
         whiteButton.setCallback(new SampleLoginCallback())
-                .setSessionConfiguration(configuration);
+                    .setSessionConfiguration(configuration);
 
         //Create a button using a custom AccessTokenStorage
         //Custom Scopes are set using XML for this button as well in R.layout.activity_sample
         blackButton = (LoginButton) findViewById(R.id.uber_button_black);
         blackButton.setAccessTokenStorage(accessTokenStorage)
-                .setCallback(new SampleLoginCallback())
-                .setSessionConfiguration(configuration)
-                .setRequestCode(LOGIN_BUTTON_CUSTOM_REQUEST_CODE);
+                    .setCallback(new SampleLoginCallback())
+                    .setSessionConfiguration(configuration)
+                    .setRequestCode(LOGIN_BUTTON_CUSTOM_REQUEST_CODE);
 
 
         //Use a custom button with an onClickListener to call the LoginManager directly
@@ -184,21 +184,21 @@ public class LoginSampleActivity extends AppCompatActivity {
 
         service.getUserProfile()
                 .enqueue(new Callback<UserProfile>() {
-                    @Override
-                    public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
-                        if (response.isSuccessful()) {
-                            Toast.makeText(LoginSampleActivity.this, getString(R.string.greeting, response.body().getFirstName()), Toast.LENGTH_LONG).show();
-                        } else {
-                            ApiError error = ErrorParser.parseError(response);
-                            Toast.makeText(LoginSampleActivity.this, error.getClientErrors().get(0).getTitle(), Toast.LENGTH_LONG).show();
-                        }
-                    }
+            @Override
+            public void onResponse(Call<UserProfile> call, Response<UserProfile> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(LoginSampleActivity.this, getString(R.string.greeting, response.body().getFirstName()), Toast.LENGTH_LONG).show();
+                } else {
+                    ApiError error = ErrorParser.parseError(response);
+                    Toast.makeText(LoginSampleActivity.this, error.getClientErrors().get(0).getTitle(), Toast.LENGTH_LONG).show();
+                }
+            }
 
-                    @Override
-                    public void onFailure(Call<UserProfile> call, Throwable t) {
+            @Override
+            public void onFailure(Call<UserProfile> call, Throwable t) {
 
-                    }
-                });
+            }
+        });
     }
 
     @Override

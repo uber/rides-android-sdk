@@ -1,8 +1,12 @@
 package com.uber.sdk.android.core.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.support.annotation.NonNull;
+import android.util.Log;
+
+import com.uber.sdk.android.core.UberSdk;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -26,6 +30,15 @@ public class Utility {
         return ( 0 != ( context.getApplicationInfo().flags & ApplicationInfo
                 .FLAG_DEBUGGABLE ) );
 
+    }
+
+
+    public static void logOrError(Activity activity, Exception exception) {
+        if (Utility.isDebugable(activity)) {
+            throw new IllegalStateException(exception);
+        } else {
+            Log.e(UberSdk.UBER_SDK_LOG_TAG, exception.getMessage(), exception);
+        }
     }
 
     private static String hashWithAlgorithm(String algorithm, String key) {

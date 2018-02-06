@@ -42,6 +42,7 @@ import com.uber.sdk.core.client.ServerTokenSession;
 import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
 
+import static com.uber.sdk.android.core.utils.Utility.logOrError;
 import static com.uber.sdk.core.client.utils.Preconditions.checkNotEmpty;
 import static com.uber.sdk.core.client.utils.Preconditions.checkNotNull;
 
@@ -451,13 +452,5 @@ public class LoginManager {
         }
 
         return false;
-    }
-
-    private void logOrError(Activity activity, Exception exception) {
-        if (Utility.isDebugable(activity)) {
-            throw new IllegalStateException(exception);
-        } else {
-            Log.e(UberSdk.UBER_SDK_LOG_TAG, exception.getMessage(), exception);
-        }
     }
 }
