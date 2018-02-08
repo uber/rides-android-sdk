@@ -13,6 +13,12 @@ import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.utils.Utility;
 import com.uber.sdk.core.client.SessionConfiguration;
 
+/**
+ * Manages migration problems from old style of redirect URI handling to newer version for Custom
+ * tabs support.
+ *
+ * See https://github.com/uber/rides-android-sdk#authentication-migration-version.
+ */
 class LegacyUriRedirectHandler {
 
     enum Mode {
@@ -25,7 +31,7 @@ class LegacyUriRedirectHandler {
     private Mode mode = Mode.OFF;
 
     /**
-     * Will validate that the Redirect URI $FIELD_NAME_PREFIXMode is valid {@link Mode#OFF} and return true
+     * Will validate that the Redirect URI mode is valid {@link Mode#OFF} and return true
      *
      * If false, then the app should terminate codeflow, this will happen in Debug mode for
      * unhandled migration scenarios.
