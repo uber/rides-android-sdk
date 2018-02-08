@@ -24,7 +24,6 @@ package com.uber.sdk.android.core.auth;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -33,7 +32,6 @@ import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.install.SignupDeeplink;
 import com.uber.sdk.android.core.utils.AppProtocol;
-import com.uber.sdk.android.core.utils.Utility;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
@@ -42,7 +40,6 @@ import com.uber.sdk.core.client.ServerTokenSession;
 import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
 
-import static com.uber.sdk.android.core.utils.Utility.logOrError;
 import static com.uber.sdk.core.client.utils.Preconditions.checkNotEmpty;
 import static com.uber.sdk.core.client.utils.Preconditions.checkNotNull;
 
@@ -97,11 +94,11 @@ public class LoginManager {
     private final LoginCallback callback;
     private final SessionConfiguration sessionConfiguration;
     private final int requestCode;
+    private final LegacyUriRedirectHandler legacyUriRedirectHandler;
 
     private boolean authCodeFlowEnabled = false;
     @Deprecated
     private boolean redirectForAuthorizationCode = false;
-
 
     /**
      * @param accessTokenStorage to store access token.
@@ -137,10 +134,27 @@ public class LoginManager {
             @NonNull LoginCallback loginCallback,
             @NonNull SessionConfiguration configuration,
             int requestCode) {
+        this(accessTokenStorage, loginCallback, configuration, requestCode, new LegacyUriRedirectHandler());
+    }
+
+    /**
+     * @param accessTokenStorage to store access token.
+     * @param loginCallback      callback to be called when {@link LoginManager#onActivityResult(Activity, int, int, Intent)} is called.
+     * @param configuration      to provide authentication information
+     * @param requestCode        custom code to use for Activity communication
+     * @param legacyUriRedirectHandler         Used to handle URI Redirect Migration
+     */
+    LoginManager(
+            @NonNull AccessTokenStorage accessTokenStorage,
+            @NonNull LoginCallback loginCallback,
+            @NonNull SessionConfiguration configuration,
+            int requestCode,
+            @NonNull LegacyUriRedirectHandler legacyUriRedirectHandler) {
         this.accessTokenStorage = accessTokenStorage;
         this.callback = loginCallback;
         this.sessionConfiguration = configuration;
         this.requestCode = requestCode;
+        this.legacyUriRedirectHandler = legacyUriRedirectHandler;
     }
 
     /**
@@ -148,11 +162,15 @@ public class LoginManager {
      *
      * @param activity the activity used to start the {@link LoginActivity}.
      */
-    public void login(@NonNull Activity activity) {
+    public void login(final @NonNull Activity activity) {
         checkNotEmpty(sessionConfiguration.getScopes(), "Scopes must be set in the Session " +
                 "Configuration.");
         checkNotNull(sessionConfiguration.getRedirectUri(), "Redirect URI must be set in "
                 + "Session Configuration.");
+
+        if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
+            return;
+        }
 
         SsoDeeplink ssoDeeplink = new SsoDeeplink.Builder(activity)
                 .clientId(sessionConfiguration.getClientId())
@@ -178,11 +196,13 @@ public class LoginManager {
      * @param activity to start Activity on.
      */
     public void loginForImplicitGrant(@NonNull Activity activity) {
-        boolean forceWebView =
-                isInLegacyRedirectMode(activity);
+
+        if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
+            return;
+        }
 
         Intent intent = LoginActivity.newIntent(activity, sessionConfiguration,
-                ResponseType.TOKEN, forceWebView);
+                ResponseType.TOKEN, legacyUriRedirectHandler.isLegacyMode());
         activity.startActivityForResult(intent, requestCode);
     }
 
@@ -192,10 +212,12 @@ public class LoginManager {
      * @param activity to start Activity on.
      */
     public void loginForAuthorizationCode(@NonNull Activity activity) {
-        boolean forceWebView =
-                isInLegacyRedirectMode(activity);
+        if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
+            return;
+        }
+
         Intent intent = LoginActivity.newIntent(activity, sessionConfiguration,
-                ResponseType.CODE, forceWebView);
+                ResponseType.CODE, legacyUriRedirectHandler.isLegacyMode());
         activity.startActivityForResult(intent, requestCode);
     }
 
@@ -410,47 +432,5 @@ public class LoginManager {
             callback.onLoginSuccess(accessToken);
 
         }
-    }
-
-    boolean isInLegacyRedirectMode(@NonNull Activity activity) {
-        String generatedRedirectUri = activity.getPackageName().concat(".uberauth://redirect");
-        String setRedirectUri = sessionConfiguration.getRedirectUri();
-
-        if (redirectForAuthorizationCode) {
-            String message = "The Uber Authentication Flow for the Authorization Code Flow has "
-                    + "been upgraded in 0.8.0 and a redirect URI must now be supplied to the application. "
-                    + "You are seeing this error because the use of deprecated method "
-                    + "LoginManager.setRedirectForAuthorizationCode() indicates your flow may not "
-                    + "support the recent changes. See https://github"
-                    + ".com/uber/rides-android-sdk#authentication-migration-version"
-                    + "-08-and-above for resolution steps"
-                    + "to insure your setup is correct and then migrate to the non-deprecate "
-                    + "method LoginManager.setAuthCodeFlowEnabled()";
-
-            logOrError(activity, new IllegalStateException(message));
-            return true;
-        }
-
-        if (sessionConfiguration.getRedirectUri() == null) {
-            String message = "Redirect URI must be set in "
-                    + "Session Configuration.";
-
-            logOrError(activity, new NullPointerException(message));
-            return true;
-        }
-
-        if (!generatedRedirectUri.equals(setRedirectUri) &&
-                !AuthUtils.isRedirectUriRegistered(activity, Uri.parse(setRedirectUri))) {
-            String message = "Misconfigured redirect_uri. See https://github.com/uber/rides-android-sdk#authentication-migration-version-08-and-above"
-                    + "for more info. Either 1) Register " + generatedRedirectUri + " as a "
-                    + "redirect uri for the app at https://developer.uber.com/dashboard/ and "
-                    + "specify this in your SessionConfiguration or 2) Override the default "
-                    + "redirect_uri with the current one set (" + setRedirectUri + ") in the "
-                    + "AndroidManifest.";
-            logOrError(activity, new IllegalStateException(message));
-            return true;
-        }
-
-        return false;
     }
 }

@@ -63,6 +63,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -113,46 +114,51 @@ public class LoginManagerTest extends RobolectricTestBase {
     @Mock
     AccessTokenStorage accessTokenStorage;
 
-    SessionConfiguration SessionConfigurationWithSetUri;
-    SessionConfiguration SessionConfigurationWithGeneratedUri;
+    @Mock LegacyUriRedirectHandler legacyUriRedirectHandler;
 
-    private LoginManager loginManagerWithSetUri;
-    private LoginManager loginManagerwithGeneratedUri;
+    SessionConfiguration sessionConfiguration;
 
-    private ApplicationInfo debuggableApplicationInfo;
-    private ApplicationInfo releaseApplicationInfo;
+    private LoginManager loginManager;
 
     @Before
     public void setup() {
-        SessionConfigurationWithGeneratedUri = new SessionConfiguration.Builder().setClientId(CLIENT_ID)
+        sessionConfiguration = new SessionConfiguration.Builder().setClientId(CLIENT_ID)
                 .setRedirectUri("com.example.uberauth://redirect")
                 .setScopes(MIXED_SCOPES).build();
-        loginManagerwithGeneratedUri = new LoginManager(accessTokenStorage, callback,
-                SessionConfigurationWithGeneratedUri);
+        loginManager = new LoginManager(accessTokenStorage, callback,
+                sessionConfiguration, REQUEST_CODE_LOGIN_DEFAULT,
+                legacyUriRedirectHandler);
 
-        SessionConfigurationWithSetUri = new SessionConfiguration.Builder().setClientId(CLIENT_ID)
-                .setRedirectUri("com.custom://redirect")
-                .setScopes(MIXED_SCOPES).build();
-        loginManagerWithSetUri = new LoginManager(accessTokenStorage, callback,
-                SessionConfigurationWithSetUri);
 
         when(activity.getPackageManager()).thenReturn(packageManager);
         when(activity.getApplicationInfo()).thenReturn(new ApplicationInfo());
         when(activity.getPackageName()).thenReturn("com.example");
+        when(legacyUriRedirectHandler.checkValidState(eq(activity), eq(loginManager))).thenReturn(true);
+    }
 
-        debuggableApplicationInfo = new ApplicationInfo();
-        debuggableApplicationInfo.flags = ApplicationInfo.FLAG_DEBUGGABLE;
-        releaseApplicationInfo = new ApplicationInfo();
-        releaseApplicationInfo.flags = 0;
-        when(activity.getApplicationInfo()).thenReturn(debuggableApplicationInfo);
+    @Test
+    public void login_withLegacyModeBlocking_shouldNotLogin() {
+        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_VERSION_SUPPORTED);
+        when(legacyUriRedirectHandler.checkValidState(eq(activity), eq(loginManager))).thenReturn(false);
+        loginManager.login(activity);
 
+        verify(activity, never()).startActivityForResult(any(Intent.class), anyInt());
+    }
+
+    @Test
+    public void login_withLegacyModeNotBlocking_shouldLogin() {
+        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_VERSION_SUPPORTED);
+        when(legacyUriRedirectHandler.checkValidState(eq(activity), eq(loginManager))).thenReturn(true);
+        loginManager.login(activity);
+
+        verify(activity).startActivityForResult(any(Intent.class), anyInt());
     }
 
     @Test
     public void loginWithAppInstalledPrivilegedScopes_shouldLaunchIntent() {
         stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_VERSION_SUPPORTED);
 
-        loginManagerwithGeneratedUri.login(activity);
+        loginManager.login(activity);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         ArgumentCaptor<Integer> codeCaptor = ArgumentCaptor.forClass(Integer.class);
@@ -165,12 +171,12 @@ public class LoginManagerTest extends RobolectricTestBase {
 
     @Test
     public void loginWithAppInstalledPrivilegedScopesAndRequestCode_shouldLaunchIntent() {
-        loginManagerwithGeneratedUri = new LoginManager(accessTokenStorage, callback,
-                SessionConfigurationWithGeneratedUri, REQUEST_CODE);
+        loginManager = new LoginManager(accessTokenStorage, callback,
+                sessionConfiguration, REQUEST_CODE);
 
         stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_VERSION_SUPPORTED);
 
-        loginManagerwithGeneratedUri.login(activity);
+        loginManager.login(activity);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         ArgumentCaptor<Integer> codeCaptor = ArgumentCaptor.forClass(Integer.class);
@@ -183,13 +189,13 @@ public class LoginManagerTest extends RobolectricTestBase {
 
     @Test
     public void loginWithoutAppInstalledGeneralScopes_shouldLaunchWebView() {
-        SessionConfigurationWithGeneratedUri = SessionConfigurationWithGeneratedUri.newBuilder().setScopes(GENERAL_SCOPES).build();
-        loginManagerwithGeneratedUri = new LoginManager(accessTokenStorage, callback,
-                SessionConfigurationWithGeneratedUri);
+        sessionConfiguration = sessionConfiguration.newBuilder().setScopes(GENERAL_SCOPES).build();
+        loginManager = new LoginManager(accessTokenStorage, callback,
+                sessionConfiguration);
 
         stubAppNotInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0]);
 
-        loginManagerwithGeneratedUri.login(activity);
+        loginManager.login(activity);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         ArgumentCaptor<Integer> codeCaptor = ArgumentCaptor.forClass(Integer.class);
@@ -208,14 +214,14 @@ public class LoginManagerTest extends RobolectricTestBase {
         final Activity activity = spy(Robolectric.setupActivity(Activity.class));
         when(activity.getPackageManager()).thenReturn(packageManager);
 
-        SessionConfigurationWithGeneratedUri = SessionConfigurationWithGeneratedUri.newBuilder().build();
-        loginManagerwithGeneratedUri = new LoginManager(accessTokenStorage, callback,
-                SessionConfigurationWithGeneratedUri)
+        sessionConfiguration = sessionConfiguration.newBuilder().build();
+        loginManager = new LoginManager(accessTokenStorage, callback,
+                sessionConfiguration)
                 .setAuthCodeFlowEnabled(false);
 
         stubAppNotInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0]);
 
-        loginManagerwithGeneratedUri.login(activity);
+        loginManager.login(activity);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
 
@@ -233,7 +239,7 @@ public class LoginManagerTest extends RobolectricTestBase {
                 .putExtra(EXTRA_EXPIRES_IN, ACCESS_TOKEN.getExpiresIn())
                 .putExtra(EXTRA_TOKEN_TYPE, ACCESS_TOKEN.getTokenType());
 
-        loginManagerwithGeneratedUri.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_OK, intent);
+        loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_OK, intent);
 
         ArgumentCaptor<AccessToken> storedToken = ArgumentCaptor.forClass(AccessToken.class);
         ArgumentCaptor<AccessToken> returnedToken = ArgumentCaptor.forClass(AccessToken.class);
@@ -249,7 +255,7 @@ public class LoginManagerTest extends RobolectricTestBase {
         Intent intent = new Intent()
                 .putExtra(EXTRA_CODE_RECEIVED, AUTHORIZATION_CODE);
 
-        loginManagerwithGeneratedUri.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_OK, intent);
+        loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_OK, intent);
 
         ArgumentCaptor<String> capturedCode = ArgumentCaptor.forClass(String.class);
         verify(callback).onAuthorizationCodeReceived(capturedCode.capture());
@@ -259,7 +265,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
     @Test
     public void onActivityResult_whenResultCanceledAndNoData_shouldCallbackCancel() {
-        loginManagerwithGeneratedUri.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, null);
+        loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, null);
         verify(callback).onLoginCancel();
     }
 
@@ -268,26 +274,26 @@ public class LoginManagerTest extends RobolectricTestBase {
         Intent intent = new Intent().putExtra(EXTRA_ERROR, AuthenticationError.INVALID_RESPONSE
                 .toStandardString());
 
-        loginManagerwithGeneratedUri.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, intent);
+        loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, intent);
         verify(callback).onLoginError(AuthenticationError.INVALID_RESPONSE);
     }
 
     @Test
     public void onActivityResult_whenResultCanceledAndNoData_shouldCancel() {
-        loginManagerwithGeneratedUri.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, null);
+        loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, null);
         verify(callback).onLoginCancel();
     }
 
     @Test
     public void onActivityResult_whenResultOkAndNoData_shouldCallbackErrorUnknown() {
-        loginManagerwithGeneratedUri.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_OK, null);
+        loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_OK, null);
         verify(callback).onLoginError(AuthenticationError.UNKNOWN);
     }
 
     @Test
     public void onActivityResult_whenRequestCodeDoesNotMatch_nothingShouldHappen() {
         Intent intent = mock(Intent.class);
-        loginManagerwithGeneratedUri.onActivityResult(activity, 1337, Activity.RESULT_OK, intent);
+        loginManager.onActivityResult(activity, 1337, Activity.RESULT_OK, intent);
         verifyZeroInteractions(intent);
         verifyZeroInteractions(callback);
     }
@@ -295,7 +301,7 @@ public class LoginManagerTest extends RobolectricTestBase {
     @Test
     public void onActivityResult_whenResultCanceledAndDataButNoCallback_nothingShouldHappen() {
         Intent intent = mock(Intent.class);
-        loginManagerwithGeneratedUri.onActivityResult(activity, 1337, Activity.RESULT_OK, intent);
+        loginManager.onActivityResult(activity, 1337, Activity.RESULT_OK, intent);
         verifyZeroInteractions(intent);
     }
 
@@ -303,8 +309,8 @@ public class LoginManagerTest extends RobolectricTestBase {
     public void onActivityResult_whenUnavailableAndPrivilegedScopes_shouldTriggerAuthorizationCode() {
         Intent intent = new Intent().putExtra(EXTRA_ERROR, AuthenticationError.UNAVAILABLE.toStandardString());
 
-        loginManagerwithGeneratedUri.setAuthCodeFlowEnabled(true);
-        loginManagerwithGeneratedUri.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, intent);
+        loginManager.setAuthCodeFlowEnabled(true);
+        loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, intent);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
 
@@ -323,25 +329,25 @@ public class LoginManagerTest extends RobolectricTestBase {
     @Test
     public void onActivityResult_whenUnavailableAndPrivilegedScopesNoRedirect_shouldError() {
         Intent intent = new Intent().putExtra(EXTRA_ERROR, AuthenticationError.UNAVAILABLE.toStandardString());
-        SessionConfigurationWithGeneratedUri = SessionConfigurationWithGeneratedUri.newBuilder().build();
-        loginManagerwithGeneratedUri = new LoginManager(accessTokenStorage, callback,
-                SessionConfigurationWithGeneratedUri)
+        sessionConfiguration = sessionConfiguration.newBuilder().build();
+        loginManager = new LoginManager(accessTokenStorage, callback,
+                sessionConfiguration)
                 .setAuthCodeFlowEnabled(false);
 
-        loginManagerwithGeneratedUri.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, intent);
+        loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, intent);
 
         verify(callback).onLoginError(AuthenticationError.UNAVAILABLE);
     }
 
     @Test
     public void onActivityResult_whenUnavailableAndPrivilegedScopes_shouldTriggerImplicitGrant() {
-        SessionConfigurationWithGeneratedUri = SessionConfigurationWithGeneratedUri.newBuilder().setScopes(GENERAL_SCOPES).build();
-        loginManagerwithGeneratedUri = new LoginManager(accessTokenStorage, callback,
-                SessionConfigurationWithGeneratedUri);
+        sessionConfiguration = sessionConfiguration.newBuilder().setScopes(GENERAL_SCOPES).build();
+        loginManager = new LoginManager(accessTokenStorage, callback,
+                sessionConfiguration);
 
         Intent intent = new Intent().putExtra(EXTRA_ERROR, AuthenticationError.UNAVAILABLE.toStandardString());
 
-        loginManagerwithGeneratedUri.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, intent);
+        loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, intent);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
 
@@ -360,74 +366,43 @@ public class LoginManagerTest extends RobolectricTestBase {
     @Test
     public void isAuthenticated_withServerToken_true() {
         when(accessTokenStorage.getAccessToken()).thenReturn(null);
-        loginManagerwithGeneratedUri = new LoginManager(accessTokenStorage, callback, SessionConfigurationWithGeneratedUri
+        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration
                 .newBuilder().setServerToken("serverToken").build());
-        assertTrue(loginManagerwithGeneratedUri.isAuthenticated());
+        assertTrue(loginManager.isAuthenticated());
     }
 
     @Test
     public void isAuthenticated_withAccessToken_true() {
         when(accessTokenStorage.getAccessToken()).thenReturn(ACCESS_TOKEN);
-        assertTrue(loginManagerwithGeneratedUri.isAuthenticated());
+        assertTrue(loginManager.isAuthenticated());
     }
 
     @Test
     public void isAuthenticated_withoutAccessOrServerToken_false() {
         when(accessTokenStorage.getAccessToken()).thenReturn(null);
-        assertFalse(loginManagerwithGeneratedUri.isAuthenticated());
+        assertFalse(loginManager.isAuthenticated());
     }
 
     @Test
     public void getSession_withServerToken_successful() {
         when(accessTokenStorage.getAccessToken()).thenReturn(null);
-        loginManagerwithGeneratedUri = new LoginManager(accessTokenStorage, callback, SessionConfigurationWithGeneratedUri
+        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration
                 .newBuilder().setServerToken("serverToken").build());
-        Session session = loginManagerwithGeneratedUri.getSession();
+        Session session = loginManager.getSession();
         assertEquals("serverToken", session.getAuthenticator().getSessionConfiguration().getServerToken());
     }
 
     @Test
     public void getSession_withAccessToken_successful() {
         when(accessTokenStorage.getAccessToken()).thenReturn(ACCESS_TOKEN);
-        Session session = loginManagerwithGeneratedUri.getSession();
+        Session session = loginManager.getSession();
         assertEquals(ACCESS_TOKEN, ((AccessTokenAuthenticator)session.getAuthenticator()).getTokenStorage().getAccessToken());
     }
 
     @Test(expected = IllegalStateException.class)
     public void getSession_withoutAccessTokenOrToken_fails() {
         when(accessTokenStorage.getAccessToken()).thenReturn(null);
-        loginManagerwithGeneratedUri.getSession();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void isInLegacyRedirectMode_whenMismatchingUriInDebug_throwsException() {
-        loginManagerWithSetUri.isInLegacyRedirectMode(activity);
-    }
-
-    @Test()
-    public void isInLegacyRedirectMode_whenMismatchingUriInRelease_logsErrorAndReturnsTrue() {
-        when(activity.getApplicationInfo()).thenReturn(releaseApplicationInfo);
-        assertThat(loginManagerWithSetUri.isInLegacyRedirectMode(activity)).isTrue();
-    }
-
-
-    @Test(expected = IllegalStateException.class)
-    public void isInLegacyRedirectMode_whenLegacyAuthCodeFlowInDebug_throwsException() {
-        loginManagerwithGeneratedUri.setRedirectForAuthorizationCode(true);
-        loginManagerwithGeneratedUri.isInLegacyRedirectMode(activity);
-
-    }
-
-    @Test()
-    public void isInLegacyRedirectMode_whenLegacyAuthCodeFlowInRelease_logsErrorAndReturnsTrue() {
-        when(activity.getApplicationInfo()).thenReturn(releaseApplicationInfo);
-        loginManagerwithGeneratedUri.setRedirectForAuthorizationCode(true);
-        assertThat(loginManagerwithGeneratedUri.isInLegacyRedirectMode(activity)).isTrue();
-    }
-
-    @Test()
-    public void isInLegacyRedirectMode_whenMatchingUri_returnsFalse() {
-        assertThat(loginManagerwithGeneratedUri.isInLegacyRedirectMode(activity)).isFalse();
+        loginManager.getSession();
     }
 
     private static PackageManager stubAppInstalled(PackageManager packageManager, String packageName, int versionCode) {
