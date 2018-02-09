@@ -112,7 +112,7 @@ You can also add your button through XML:
 
 To use the `uber` XML namespace, be sure to add `xmlns:uber="http://schemas.android.com/apk/res-auto"` to your root view element.
 
-### Color Style
+### Customization
 
 The default color has a black background with white text:
 ```xml
@@ -127,6 +127,14 @@ For a button with a white background and black text:
       android:layout_height="wrap_content"
       uber:ub__style="white"/>
 ```
+
+To specify the mobile web deeplink fallback over app installation when using the 
+`RideRequestButton`:
+
+```java
+rideRequestButton.setDeeplinkFallback(Deeplink.Fallback.MOBILE_WEB);
+```
+
 
 With all the necessary parameters set, pressing the button will seamlessly prompt a ride request confirmation screen.
 
