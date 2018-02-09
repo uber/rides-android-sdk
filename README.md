@@ -1,11 +1,12 @@
 # Uber Rides Android SDK (beta) [![Build Status](https://travis-ci.org/uber/rides-android-sdk.svg?branch=master)](https://travis-ci.org/uber/rides-android-sdk)
 
-Official Android SDK (beta) to support:
+Official Android SDK to support:
  - Ride Request Button
- - Ride Request Widget
+ - RIde Request Deeplinks
+ - Uber Authentication
  - REST APIs
 
-At a minimum, this SDK is designed to work with Android SDK 14.
+At a minimum, this SDK is designed to work with Android SDK 15.
 
 ## Before you begin
 
@@ -30,17 +31,60 @@ dependencies {
 In order for the SDK to function correctly, you need to add some information about your app. In your application, create a `SessionConfiguration` to use with the various components of the library. If you prefer the set it and forget it model, use the `UberSdk` class to initialize with a default `SessionConfiguration`.
 
 ```java
-
 SessionConfiguration config = new SessionConfiguration.Builder()
     .setClientId("YOUR_CLIENT_ID") //This is necessary
     .setRedirectUri("YOUR_REDIRECT_URI") //This is necessary if you'll be using implicit grant
     .setEnvironment(Environment.SANDBOX) //Useful for testing your app in the sandbox environment
     .setScopes(Arrays.asList(Scope.PROFILE, Scope.RIDE_WIDGETS)) //Your scopes for authentication here
     .build();
-
-//This is a convenience method and will set the default config to be used in other components without passing it directly.
-UberSdk.initialize(config);
 ```
+## Ride Request Deeplink
+The Ride Request Deeplink provides an easy to use method to provide ride functionality against 
+the install Uber app or the mobile web experience.
+
+
+Without any extra configuration, the `RideRequestDeeplink` will deeplink to the Uber app. We 
+suggest passing additional parameters to make the Uber experience even more seamless for your users. For example, dropoff location parameters can be used to automatically pass the user’s destination information over to the driver:
+
+```java
+RideParameters rideParams = new RideParameters.Builder()
+  .setProductId("a1111c8c-c720-46c3-8534-2fcdd730040d")
+  .setPickupLocation(37.775304, -122.417522, "Uber HQ", "1455 Market Street, San Francisco")
+  .setDropoffLocation(37.795079, -122.4397805, "Embarcadero", "One Embarcadero Center, San Francisco")
+  .build();
+requestButton.setRideParameters(rideParams);
+```
+
+After configuring the Ride Parameters, pass them into the `RideRequestDeeplink` builder object to
+ construct and execute the deeplink.
+
+```java
+RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context)
+                        .setSessionConfiguration(config))
+                        .setRideParameters(rideParameters)
+                        .build();
+                deeplink.execute();
+
+```
+
+### Deeplink Fallbacks
+The Ride Request Deeplink will prefer to use deferred deeplinking by default, where the user is 
+taken to the Play Store to download the app, and then continue the deeplink behavior in the app 
+after installation. However, an alternate fallback may be used to prefer the mobile web 
+experience instead.
+
+To prefer mobile web over an app installation, set the fallback on the builder:
+
+```java
+RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context)
+                        .setSessionConfiguration(config)
+                        .setFallback(Deeplink.Fallback.MOBILE_WEB)
+                        .setRideParameters(rideParameters)
+                        .build();
+                deeplink.execute();
+
+```
+
 
 ## Ride Request Button
 
@@ -49,7 +93,7 @@ The `RideRequestButton` offers the quickest ways to integrate Uber into your app
 RideRequestButton requestButton = new RideRequestButton(context);
 layout.addView(requestButton);
 ```
-This will create a request button with default deeplinking behavior, with the pickup pin set to the user’s current location. The user will need to select a product and input additional information when they are switched over to the Uber application.
+This will create a request button with deeplinking behavior, with the pickup pin set to the user’s current location. The user will need to select a product and input additional information when they are switched over to the Uber application.
 
 You can also add your button through XML:
 ```xml
@@ -84,31 +128,7 @@ For a button with a white background and black text:
       uber:ub__style="white"/>
 ```
 
-### Deep linking parameters
-Without any extra configuration, the `RideRequestButton` will deeplink to the Uber app. We suggest passing additional parameters to make the Uber experience even more seamless for your users. For example, dropoff location parameters can be used to automatically pass the user’s destination information over to the driver:
-
-```java
-RideParameters rideParams = new RideParameters.Builder()
-  .setProductId("a1111c8c-c720-46c3-8534-2fcdd730040d")
-  .setPickupLocation(37.775304, -122.417522, "Uber HQ", "1455 Market Street, San Francisco")
-  .setDropoffLocation(37.795079, -122.4397805, "Embarcadero", "One Embarcadero Center, San Francisco")
-  .build();
-requestButton.setRideParameters(rideParams);
-```
-
 With all the necessary parameters set, pressing the button will seamlessly prompt a ride request confirmation screen.
-
-## Ride Request Widget
-The Uber Rides SDK provides a simple way to integrate the Ride Request View using the `RideRequestButton` via the `RideRequestActivityBehavior`. The button can be configured with this behavior object to show the `RideRequestActivity` on click, rather than deeplinking to the Uber app. Without any ride parameters, it will attempt to use the user's current location for pickup - for this, you must ask your user for location permissions. Otherwise, any pickup/dropoff location information passed via `RideParameters` to the button will be pre-filled in the Ride Request View.
-
-```java
-// The REQUEST_CODE is used to pass back error information in onActivityResult
-requestButton.setRequestBehavior(new RideRequestActivityBehavior(this, REQUEST_CODE));
-```
-
-That's it! With this configuration, when a user clicks on the request button, an activity will be launched that contains a login view (on first launch) where the user can authorize your app. After authorization, this activity will contain the Ride Request View. If any unexpected errors occur that the SDK can't handle, the activity will finish with an error in the result Intent using either the key `RideRequestActivity.AUTHENTICATION_ERROR` or `RideRequestActivity.RIDE_REQUEST_ERROR` depending on where the error occurred.
-
-> **Note:** The environment ([sandbox](https://developer.uber.com/docs/rides/sandbox) or production) is considered by the Ride Request Widget. If you use the sample source code from above, your calls will be issued to the Sandbox. The widget will display a `sandbox` badge to indicate that. To change the mode, set environment to `Environment.PRODUCTION`.
 
 ## Ride Request Button with ETA and price
 To further enhance the button with destination and price information, add a Session to it and call `loadRideInformation()` function.
@@ -312,28 +332,6 @@ user1Manager.setAccessToken(accessToken);
 user2Manager.setAccessToken(accessToken2);
 ```
 
-### RideRequestView
-The `RideRequestView` is like any other view you'd add to your app. Create a new instance in your XML layout or programmatically. You can optionally add custom `RideParameters` or a custom `AccessTokenSession`. When you're ready to show the Ride Request View, just call `load()`.
-
-```java
-RideRequestView rideRequestView = new RideRequestView(context);
-
-//Optionally set Session, will use default session from UberSDK otherwise
-//rideRequestView.setSession(session);
-
-rideRequestView.setRideParameters(rideParameters)
-rideRequestView.setRideRequestViewCallback(new RideRequestViewErrorCallback() {
-    @Override
-    public void onErrorReceived(RideRequestViewError error) {
-        switch (error) {
-            // Handle errors
-        }
-    }
-});
-layout.addView(rideRequestView);
-rideRequestView.load();
-```
-
 ## Making an API Request
 The Android Uber SDK uses a dependency on the Java Uber SDK for API requests.
 After authentication is complete, create a `Session` to use the Uber API.
@@ -410,11 +408,11 @@ Uber developers actively monitor the `uber-api` tag on StackOverflow. If you nee
 
 For full documentation about our API, visit our Developer Site.
 
-## Migrating from a previous version
-As the Uber Android SDK get closer to a 1.0 release, the API's will become more stable. In the meantime, be sure to check out the changelog to know what differs!
-
 ## Contributing
 
-We :heart: contributions. Found a bug or looking for a new feature? Open an issue and we'll respond as fast as we can. Or, better yet, implement it yourself and open a pull request! We ask that you include tests to show the bug was fixed or the feature works as expected.
+We :heart: contributions. Found a bug or looking for a new feature? Open an issue and we'll 
+respond as fast as we can. Or, better yet, implement it yourself and open a pull request! We ask 
+that you open an issue to discuss feature development prior to undertaking the work and that you 
+include tests to show the bug was fixed or the feature works as expected.
 
 ## MIT Licensed

@@ -107,12 +107,7 @@ public class SampleActivity extends AppCompatActivity implements RideRequestButt
                 .setDropoffLocation(DROPOFF_LAT, DROPOFF_LONG, DROPOFF_NICK, DROPOFF_ADDR)
                 .build();
 
-        // This button demonstrates launching the RideRequestActivity (customized button behavior).
-        // You can optionally setRideParameters for pre-filled pickup and dropoff locations.
         RideRequestButton uberButtonWhite = (RideRequestButton) findViewById(R.id.uber_button_white);
-        RideRequestActivityBehavior rideRequestActivityBehavior = new RideRequestActivityBehavior(this,
-                WIDGET_REQUEST_CODE, configuration);
-        uberButtonWhite.setRequestBehavior(rideRequestActivityBehavior);
         uberButtonWhite.setRideParameters(rideParametersForProduct);
         uberButtonWhite.setSession(session);
         uberButtonWhite.loadRideInformation();
@@ -132,24 +127,6 @@ public class SampleActivity extends AppCompatActivity implements RideRequestButt
     public void onError(Throwable throwable) {
         Log.e("SampleActivity", "Error obtaining Metadata", throwable);
         Toast.makeText(this, "Connection error", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == WIDGET_REQUEST_CODE && resultCode == Activity.RESULT_CANCELED && data != null) {
-            if (data.getSerializableExtra(RideRequestActivity.AUTHENTICATION_ERROR) != null) {
-                AuthenticationError error = (AuthenticationError) data.getSerializableExtra(RideRequestActivity
-                        .AUTHENTICATION_ERROR);
-                Toast.makeText(SampleActivity.this, "Auth error " + error.name(), Toast.LENGTH_SHORT).show();
-                Log.d(ERROR_LOG_TAG, "Error occurred during authentication: " + error.toString
-                        ().toLowerCase());
-            } else if (data.getSerializableExtra(RideRequestActivity.RIDE_REQUEST_ERROR) != null) {
-                RideRequestViewError error = (RideRequestViewError) data.getSerializableExtra(RideRequestActivity
-                        .RIDE_REQUEST_ERROR);
-                Toast.makeText(SampleActivity.this, "RideRequest error " + error.name(), Toast.LENGTH_SHORT).show();
-                Log.d(ERROR_LOG_TAG, "Error occurred in the Ride Request Widget: " + error.toString().toLowerCase());
-            }
-        }
     }
 
     @Override

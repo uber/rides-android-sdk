@@ -52,7 +52,11 @@ import java.util.Map;
 /**
  * The Uber Ride Request View: an embeddable view that provides the end-to-end Uber experience.
  * The primary way to interact with this view after construction is to call the load() function.
+ *
+ * @deprecated in favor of directly using mobile web directly.
+ * See https://developer.uber.com/docs/riders/ride-requests/tutorials/widget/migration-to-muber
  */
+@Deprecated
 public class RideRequestView extends LinearLayout {
 
     private static final String USER_AGENT_RIDE_VIEW = String.format("rides-android-v%s-ride_request_view",
@@ -175,7 +179,7 @@ public class RideRequestView extends LinearLayout {
             rideParameters.setUserAgent(USER_AGENT_RIDE_VIEW);
         }
 
-        RequestDeeplink deeplink = new RequestDeeplink.Builder(context)
+        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context)
                 .setSessionConfiguration(loginConfiguration)
                 .setRideParameters(rideParameters).build();
         Uri uri = deeplink.getUri();

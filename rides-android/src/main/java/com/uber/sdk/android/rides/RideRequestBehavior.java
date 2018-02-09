@@ -26,7 +26,10 @@ import android.content.Context;
 
 /**
  * Interface to implement that describes actions for the {@link RideRequestButton}.
+ *
+ * @deprecated Use RideRequestDeeplink directly.
  */
+@Deprecated
 public interface RideRequestBehavior {
 
     /**

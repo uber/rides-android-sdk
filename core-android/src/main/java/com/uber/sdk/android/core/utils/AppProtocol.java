@@ -8,19 +8,16 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Base64;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
-
-import javax.annotation.Nullable;
 
 public class AppProtocol {
     public static final String[] UBER_PACKAGE_NAMES =
             {"com.ubercab", "com.ubercab.presidio.app", "com.ubercab.presidio.exo",
                     "com.ubercab.presidio.development"};
-    public static final String DEEPLINK_SCHEME = "uber";
     public static final String PLATFORM = "android";
 
     private static final String UBER_RIDER_HASH = "411c40b31f6d01dac68d711df99b6eafeec8e73b";
@@ -43,6 +40,29 @@ public class AppProtocol {
         }
 
         return packageInfo.versionCode >= minimumVersion;
+    }
+
+    public boolean isUberInstalled(@NonNull Context context) {
+        return getInstalledUberAppPackage(context) != null;
+    }
+
+    @Nullable
+    PackageInfo getInstalledUberAppPackage(@NonNull Context context) {
+        PackageInfo packageInfo = null;
+        for (String installedPackage : AppProtocol.UBER_PACKAGE_NAMES) {
+            if (PackageManagers.isPackageAvailable(context, installedPackage)) {
+                packageInfo = PackageManagers.getPackageInfo(context, installedPackage);
+                break;
+            }
+        }
+        return packageInfo;
+    }
+
+    /**
+     * @return true if the device supports App Links
+     */
+    public boolean isAppLinkSupported() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
     }
 
     /**

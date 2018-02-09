@@ -24,6 +24,10 @@ package com.uber.sdk.android.core;
 
 public interface Deeplink {
 
+    String DEEPLINK_SCHEME = "uber";
+    String APP_LINK_URI = "https://m.uber.com/ul/";
+    String MOBILE_WEB_URI = "https://m.uber.com/";
+
     /**
      * Actually send the deeplink.
      */
@@ -34,4 +38,8 @@ public interface Deeplink {
      */
     boolean isSupported();
 
+    enum Fallback {
+        APP_INSTALL,
+        MOBILE_WEB
+    }
 }

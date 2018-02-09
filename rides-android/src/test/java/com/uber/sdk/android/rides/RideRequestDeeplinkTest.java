@@ -26,10 +26,17 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.net.Uri;
 
+import com.uber.sdk.android.core.Deeplink;
+import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.core.client.SessionConfiguration;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.res.builder.RobolectricPackageManager;
@@ -38,13 +45,17 @@ import org.robolectric.shadows.ShadowActivity;
 import java.io.IOException;
 
 import static com.uber.sdk.android.rides.TestUtils.readUriResourceWithUserAgentParam;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
 /**
- * Tests {@link RequestDeeplink}
+ * Tests {@link RideRequestDeeplink}
  */
-public class RequestDeeplinkTest extends RobolectricTestBase {
+public class RideRequestDeeplinkTest extends RobolectricTestBase {
 
     private static final String UBER_PACKAGE_NAME = "com.ubercab";
     private static final String CLIENT_ID = "clientId";
@@ -60,7 +71,17 @@ public class RequestDeeplinkTest extends RobolectricTestBase {
     private static final String USER_AGENT_DEEPLINK = String
             .format("rides-android-v%s-deeplink", BuildConfig.VERSION_NAME);
 
-    private Context context;
+    @Mock
+    Context context;
+
+    @Mock AppProtocol appProtocol;
+
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+        when(appProtocol.isUberInstalled(eq(context))).thenReturn(true);
+        when(appProtocol.isAppLinkSupported()).thenReturn(false);
+    }
 
     @Test
     public void onBuildDeeplink_whenClientIdAndDefaultRideParamsProvided_shouldHaveDefaults() throws IOException {
@@ -68,7 +89,7 @@ public class RequestDeeplinkTest extends RobolectricTestBase {
                 USER_AGENT_DEEPLINK);
 
         RideParameters rideParameters = new RideParameters.Builder().build();
-        RequestDeeplink deeplink = new RequestDeeplink.Builder(context)
+        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context, appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .build();
@@ -86,7 +107,7 @@ public class RequestDeeplinkTest extends RobolectricTestBase {
                 .setDropoffLocation(DROPOFF_LAT, DROPOFF_LONG, DROPOFF_NICK, DROPOFF_ADDR)
                 .setProductId(PRODUCT_ID)
                 .build();
-        RequestDeeplink deeplink = new RequestDeeplink.Builder(context)
+        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context, appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .build();
@@ -103,7 +124,7 @@ public class RequestDeeplinkTest extends RobolectricTestBase {
         RideParameters rideParameters = new RideParameters.Builder()
                 .setPickupLocation(PICKUP_LAT, PICKUP_LONG, PICKUP_NICK, PICKUP_ADDR)
                 .build();
-        RequestDeeplink deeplink = new RequestDeeplink.Builder(context)
+        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context, appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .build();
@@ -121,7 +142,7 @@ public class RequestDeeplinkTest extends RobolectricTestBase {
                 .setProductId(PRODUCT_ID)
                 .setDropoffLocation(DROPOFF_LAT, DROPOFF_LONG, DROPOFF_NICK, DROPOFF_ADDR)
                 .build();
-        RequestDeeplink deeplink = new RequestDeeplink.Builder(context)
+        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context, appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .build();
@@ -140,7 +161,7 @@ public class RequestDeeplinkTest extends RobolectricTestBase {
                 .setPickupLocation(PICKUP_LAT, PICKUP_LONG, null, null)
                 .setDropoffLocation(DROPOFF_LAT, DROPOFF_LONG, null, null)
                 .build();
-        RequestDeeplink deeplink = new RequestDeeplink.Builder(context)
+        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context, appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .build();
@@ -150,53 +171,113 @@ public class RequestDeeplinkTest extends RobolectricTestBase {
 
     @Test(expected = NullPointerException.class)
     public void onBuildDeeplink_whenNoRideParams_shouldNotBuild() {
-        new RequestDeeplink.Builder(context).build();
+        new RideRequestDeeplink.Builder(context, appProtocol).build();
     }
 
     @Test
-    public void execute_whenNoUberApp_shouldPointToMobileSite() throws IOException {
-        String expectedUri = readUriResourceWithUserAgentParam("src/test/resources/deeplinkuris/no_app_installed",
+    public void getUri_whenUberAppInstalledAndAppLinkSupported_shouldUseAppLink() throws IOException {
+        String expectedUri = readUriResourceWithUserAgentParam
+                ("src/test/resources/deeplinkuris/mobile_web_ul_just_client_provided",
                 USER_AGENT_DEEPLINK);
 
-        Activity activity = Robolectric.setupActivity(Activity.class);
-        ShadowActivity shadowActivity = shadowOf(activity);
+        when(appProtocol.isUberInstalled(eq(context))).thenReturn(true);
+        when(appProtocol.isAppLinkSupported()).thenReturn(true);
 
         RideParameters rideParameters = new RideParameters.Builder().build();
 
-        RequestDeeplink requestDeeplink = new RequestDeeplink.Builder(activity)
-                .setRideParameters(rideParameters)
-                .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
-                .build();
-        requestDeeplink.execute();
-
-        Intent startedIntent = shadowActivity.getNextStartedActivity();
-        assertEquals(expectedUri, startedIntent.getData().toString());
-    }
-
-    @Test
-    public void execute_whenUberAppInsalled_shouldPointToUberApp() throws IOException {
-        String expectedUri = readUriResourceWithUserAgentParam("src/test/resources/deeplinkuris/just_client_provided",
-                USER_AGENT_DEEPLINK);
-
-        Activity activity = Robolectric.setupActivity(Activity.class);
-        ShadowActivity shadowActivity = shadowOf(activity);
-
-        RobolectricPackageManager packageManager = RuntimeEnvironment.getRobolectricPackageManager();
-
-        PackageInfo uberPackage = new PackageInfo();
-        uberPackage.packageName = UBER_PACKAGE_NAME;
-        packageManager.addPackage(uberPackage);
-
-        RideParameters rideParameters = new RideParameters.Builder().build();
-
-        RequestDeeplink requestDeeplink = new RequestDeeplink.Builder(activity)
+        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context, appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .build();
 
-        requestDeeplink.execute();
+        assertThat(rideRequestDeeplink.getUri().toString()).isEqualTo(expectedUri);
+    }
 
-        Intent startedIntent = shadowActivity.getNextStartedActivity();
-        assertEquals(expectedUri, startedIntent.getData().toString());
+    @Test
+    public void getUri_whenUberAppInstalledAndAppLinkNotSupported_shouldUseNativeLink() throws IOException {
+        String expectedUri = readUriResourceWithUserAgentParam
+                ("src/test/resources/deeplinkuris/just_client_provided",
+                        USER_AGENT_DEEPLINK);
+
+        when(appProtocol.isUberInstalled(eq(context))).thenReturn(true);
+        when(appProtocol.isAppLinkSupported()).thenReturn(false);
+
+        RideParameters rideParameters = new RideParameters.Builder().build();
+        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+                .setRideParameters(rideParameters)
+                .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
+                .build();
+
+        assertThat(rideRequestDeeplink.getUri().toString()).isEqualTo(expectedUri);
+    }
+
+    @Test
+    public void getUri_whenUberAppNotInstalledAndFallbackMobileWeb_shouldUseMobileWeb() throws IOException {
+        String expectedUri = readUriResourceWithUserAgentParam
+                ("src/test/resources/deeplinkuris/mobile_web_just_client_provided",
+                        USER_AGENT_DEEPLINK);
+
+        when(appProtocol.isUberInstalled(eq(context))).thenReturn(false);
+
+        RideParameters rideParameters = new RideParameters.Builder().build();
+        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+                .setRideParameters(rideParameters)
+                .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
+                .setFallback(Deeplink.Fallback.MOBILE_WEB)
+                .build();
+
+        assertThat(rideRequestDeeplink.getUri().toString()).isEqualTo(expectedUri);
+    }
+
+    @Test
+    public void getUri_whenUberAppNotInstalledAndFallbackAppInstall_shouldUseAppInstall() throws IOException {
+        String expectedUri = readUriResourceWithUserAgentParam
+                ("src/test/resources/deeplinkuris/mobile_web_ul_just_client_provided",
+                        USER_AGENT_DEEPLINK);
+
+        when(appProtocol.isUberInstalled(eq(context))).thenReturn(false);
+
+        RideParameters rideParameters = new RideParameters.Builder().build();
+        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+                .setRideParameters(rideParameters)
+                .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
+                .setFallback(Deeplink.Fallback.APP_INSTALL)
+                .build();
+
+        assertThat(rideRequestDeeplink.getUri().toString()).isEqualTo(expectedUri);
+    }
+
+    @Test
+    public void getUri_whenUberAppNotInstalledAndFallbackNotSet_shouldUseAppInstall() throws IOException {
+        String expectedUri = readUriResourceWithUserAgentParam
+                ("src/test/resources/deeplinkuris/mobile_web_ul_just_client_provided",
+                        USER_AGENT_DEEPLINK);
+
+        when(appProtocol.isUberInstalled(eq(context))).thenReturn(false);
+
+        RideParameters rideParameters = new RideParameters.Builder().build();
+        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+                .setRideParameters(rideParameters)
+                .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
+                .build();
+
+        assertThat(rideRequestDeeplink.getUri().toString()).isEqualTo(expectedUri);
+    }
+
+    @Test
+    public void getUri_callsStartActivity() {
+        RideParameters rideParameters = new RideParameters.Builder().build();
+
+        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+                .setRideParameters(rideParameters)
+                .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
+                .build();
+
+
+        ArgumentCaptor<Intent> argumentCaptor = ArgumentCaptor.forClass(Intent.class);
+        rideRequestDeeplink.execute();
+        verify(context).startActivity(argumentCaptor.capture());
+        Intent intent = argumentCaptor.getValue();
+        assertThat(intent.getData()).isEqualTo(rideRequestDeeplink.getUri());
     }
 }
