@@ -211,7 +211,8 @@ public class LoginActivity extends Activity {
 
     protected void loadChrometab(String url) {
         final CustomTabsIntent intent = new CustomTabsIntent.Builder().build();
-        CustomTabsHelper.openCustomTab(this, intent, Uri.parse(url), new CustomTabsHelper
+        CustomTabsHelper customTabsHelper = new CustomTabsHelper();
+        customTabsHelper.openCustomTab(this, intent, Uri.parse(url), new CustomTabsHelper
                 .BrowserFallback());
     }
 

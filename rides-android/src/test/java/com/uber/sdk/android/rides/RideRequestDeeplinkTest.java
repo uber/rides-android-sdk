@@ -26,10 +26,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.support.customtabs.CustomTabsIntent;
 
 import com.uber.sdk.android.core.Deeplink;
 import com.uber.sdk.android.core.utils.AppProtocol;
+import com.uber.sdk.android.core.utils.CustomTabsHelper;
+import com.uber.sdk.android.core.utils.PackageManagers;
 import com.uber.sdk.core.client.SessionConfiguration;
 
 import org.junit.Before;
@@ -47,6 +52,7 @@ import java.io.IOException;
 import static com.uber.sdk.android.rides.TestUtils.readUriResourceWithUserAgentParam;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,10 +77,9 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
     private static final String USER_AGENT_DEEPLINK = String
             .format("rides-android-v%s-deeplink", BuildConfig.VERSION_NAME);
 
-    @Mock
-    Context context;
-
+    @Mock Context context;
     @Mock AppProtocol appProtocol;
+    @Mock CustomTabsHelper customTabsHelper;
 
     @Before
     public void setup() {
@@ -89,7 +94,8 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
                 USER_AGENT_DEEPLINK);
 
         RideParameters rideParameters = new RideParameters.Builder().build();
-        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context)
+                .setAppProtocol(appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .build();
@@ -107,7 +113,8 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
                 .setDropoffLocation(DROPOFF_LAT, DROPOFF_LONG, DROPOFF_NICK, DROPOFF_ADDR)
                 .setProductId(PRODUCT_ID)
                 .build();
-        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context)
+                .setAppProtocol(appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .build();
@@ -124,7 +131,8 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
         RideParameters rideParameters = new RideParameters.Builder()
                 .setPickupLocation(PICKUP_LAT, PICKUP_LONG, PICKUP_NICK, PICKUP_ADDR)
                 .build();
-        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context)
+                .setAppProtocol(appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .build();
@@ -142,7 +150,8 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
                 .setProductId(PRODUCT_ID)
                 .setDropoffLocation(DROPOFF_LAT, DROPOFF_LONG, DROPOFF_NICK, DROPOFF_ADDR)
                 .build();
-        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context)
+                .setAppProtocol(appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .build();
@@ -161,7 +170,8 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
                 .setPickupLocation(PICKUP_LAT, PICKUP_LONG, null, null)
                 .setDropoffLocation(DROPOFF_LAT, DROPOFF_LONG, null, null)
                 .build();
-        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context)
+                .setAppProtocol(appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .build();
@@ -171,7 +181,7 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
 
     @Test(expected = NullPointerException.class)
     public void onBuildDeeplink_whenNoRideParams_shouldNotBuild() {
-        new RideRequestDeeplink.Builder(context, appProtocol).build();
+        new RideRequestDeeplink.Builder(context).build();
     }
 
     @Test
@@ -185,7 +195,8 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
 
         RideParameters rideParameters = new RideParameters.Builder().build();
 
-        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context)
+                .setAppProtocol(appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .build();
@@ -203,7 +214,8 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
         when(appProtocol.isAppLinkSupported()).thenReturn(false);
 
         RideParameters rideParameters = new RideParameters.Builder().build();
-        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context)
+                .setAppProtocol(appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .build();
@@ -220,7 +232,8 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
         when(appProtocol.isUberInstalled(eq(context))).thenReturn(false);
 
         RideParameters rideParameters = new RideParameters.Builder().build();
-        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context)
+                .setAppProtocol(appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .setFallback(Deeplink.Fallback.MOBILE_WEB)
@@ -238,7 +251,8 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
         when(appProtocol.isUberInstalled(eq(context))).thenReturn(false);
 
         RideParameters rideParameters = new RideParameters.Builder().build();
-        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context)
+                .setAppProtocol(appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .setFallback(Deeplink.Fallback.APP_INSTALL)
@@ -256,7 +270,8 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
         when(appProtocol.isUberInstalled(eq(context))).thenReturn(false);
 
         RideParameters rideParameters = new RideParameters.Builder().build();
-        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context)
+                .setAppProtocol(appProtocol)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .build();
@@ -265,19 +280,23 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
     }
 
     @Test
-    public void getUri_callsStartActivity() {
+    public void getUri_withCustomTab_callsCustomTabHelper() {
         RideParameters rideParameters = new RideParameters.Builder().build();
 
-        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context, appProtocol)
+
+        RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context)
+                .setAppProtocol(appProtocol)
+                .setCustomTabsHelper(customTabsHelper)
                 .setRideParameters(rideParameters)
                 .setSessionConfiguration(new SessionConfiguration.Builder().setClientId("clientId").build())
                 .build();
 
-
-        ArgumentCaptor<Intent> argumentCaptor = ArgumentCaptor.forClass(Intent.class);
         rideRequestDeeplink.execute();
-        verify(context).startActivity(argumentCaptor.capture());
-        Intent intent = argumentCaptor.getValue();
-        assertThat(intent.getData()).isEqualTo(rideRequestDeeplink.getUri());
+        ArgumentCaptor<Uri> argumentCaptor = ArgumentCaptor.forClass(Uri.class);
+        verify(customTabsHelper).openCustomTab(eq(context), any(CustomTabsIntent.class),
+                argumentCaptor.capture(), any(CustomTabsHelper.BrowserFallback.class));
+
+        Uri uri = argumentCaptor.getValue();
+        assertThat(uri).isEqualTo(rideRequestDeeplink.getUri());
     }
 }

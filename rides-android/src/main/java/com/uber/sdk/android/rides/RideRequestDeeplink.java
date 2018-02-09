@@ -23,10 +23,10 @@
 package com.uber.sdk.android.rides;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.customtabs.CustomTabsIntent;
 
 import com.uber.sdk.android.core.Deeplink;
@@ -49,15 +49,21 @@ public class RideRequestDeeplink implements Deeplink {
 
     @NonNull
     private final Uri uri;
-
     @NonNull
     private final Context context;
+    @NonNull
     private final AppProtocol appProtocol;
+    @NonNull
+    private final CustomTabsHelper customTabsHelper;
 
-    RideRequestDeeplink(@NonNull Context context, @NonNull Uri uri) {
+    RideRequestDeeplink(@NonNull Context context,
+            @NonNull Uri uri,
+            @NonNull AppProtocol appProtocol,
+            @NonNull CustomTabsHelper customTabsHelper) {
         this.uri = uri;
         this.context = context;
-        appProtocol = new AppProtocol();
+        this.appProtocol = appProtocol;
+        this.customTabsHelper = customTabsHelper;
     }
 
     /**
@@ -65,7 +71,7 @@ public class RideRequestDeeplink implements Deeplink {
      */
     public void execute() {
         final CustomTabsIntent intent = new CustomTabsIntent.Builder().build();
-        CustomTabsHelper.openCustomTab(context, intent, uri, new CustomTabsHelper.BrowserFallback());
+        customTabsHelper.openCustomTab(context, intent, uri, new CustomTabsHelper.BrowserFallback());
     }
 
     @Override
@@ -103,17 +109,13 @@ public class RideRequestDeeplink implements Deeplink {
         private Fallback fallback = Fallback.APP_INSTALL;
         private final Context context;
         private AppProtocol appProtocol;
+        private CustomTabsHelper customTabsHelper;
 
         /**
          * @param context to execute the deeplink.
          */
         public Builder(Context context) {
-            this(context, new AppProtocol());
-        }
-
-        Builder(Context context, AppProtocol appProtocol) {
             this.context = context;
-            this.appProtocol = appProtocol;
         }
 
         /**
@@ -147,6 +149,18 @@ public class RideRequestDeeplink implements Deeplink {
             return this;
         }
 
+        @VisibleForTesting
+        RideRequestDeeplink.Builder setCustomTabsHelper(@NonNull CustomTabsHelper customTabsHelper) {
+            this.customTabsHelper = customTabsHelper;
+            return this;
+        }
+
+        @VisibleForTesting
+        RideRequestDeeplink.Builder setAppProtocol(@NonNull AppProtocol appProtocol){
+            this.appProtocol = appProtocol;
+            return this;
+        }
+
         /**
          * Builds an {@link RideRequestDeeplink} object.
          *
@@ -157,6 +171,13 @@ public class RideRequestDeeplink implements Deeplink {
             checkNotNull(rideParameters, "Must supply ride parameters.");
             checkNotNull(sessionConfiguration, "Must supply a Session Configuration");
             checkNotNull(sessionConfiguration.getClientId(), "Must supply client Id on Login Configuration");
+
+            if (appProtocol == null) {
+                appProtocol = new AppProtocol();
+            }
+            if (customTabsHelper == null) {
+                customTabsHelper = new CustomTabsHelper();
+            }
 
             final Uri.Builder builder = getUriBuilder(context, fallback);
 
@@ -185,7 +206,7 @@ public class RideRequestDeeplink implements Deeplink {
             }
             builder.appendQueryParameter(USER_AGENT, userAgent);
 
-            return new RideRequestDeeplink(context, builder.build());
+            return new RideRequestDeeplink(context, builder.build(), appProtocol, customTabsHelper);
         }
 
         private void addLocation(

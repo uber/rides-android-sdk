@@ -51,17 +51,17 @@ public class CustomTabsHelper {
 
     private static String packageNameToUse;
 
-    private CustomTabsHelper() {}
+    public CustomTabsHelper() {}
 
     /**
      * Opens the URL on a Custom Tab if possible. Otherwise fallsback to opening it on a WebView.
      *
-     * @param activity The host activity.
+     * @param context The host context.
      * @param customTabsIntent a CustomTabsIntent to be used if Custom Tabs is available.
      * @param uri the Uri to be opened.
      * @param fallback a CustomTabFallback to be used if Custom Tabs is not available.
      */
-    public static void openCustomTab(
+    public void openCustomTab(
             final Context context,
             final CustomTabsIntent customTabsIntent,
             final Uri uri,
@@ -101,7 +101,7 @@ public class CustomTabsHelper {
      * @return The package name recommended to use for connecting to custom tabs related components.
      */
     @Nullable
-    public static String getPackageNameToUse(Context context) {
+    public String getPackageNameToUse(Context context) {
         if (packageNameToUse != null) return packageNameToUse;
 
         PackageManager pm = context.getPackageManager();
@@ -152,7 +152,7 @@ public class CustomTabsHelper {
      * @param intent The intent to check with.
      * @return Whether there is a specialized handler for the given intent.
      */
-    private static boolean hasSpecializedHandlerIntents(Context context, Intent intent) {
+    private boolean hasSpecializedHandlerIntents(Context context, Intent intent) {
         try {
             PackageManager pm = context.getPackageManager();
             List<ResolveInfo> handlers = pm.queryIntentActivities(
@@ -177,7 +177,7 @@ public class CustomTabsHelper {
     /**
      * @return All possible chrome package names that provide custom tabs feature.
      */
-    public static String[] getPackages() {
+    public String[] getPackages() {
         return new String[]{"", STABLE_PACKAGE, BETA_PACKAGE, DEV_PACKAGE, LOCAL_PACKAGE};
     }
 
@@ -196,7 +196,7 @@ public class CustomTabsHelper {
     /**
      * To be used as a fallback to open the Uri when Custom Tabs is not available.
      */
-    interface CustomTabFallback {
+    public interface CustomTabFallback {
         /**
          *
          * @param context The Context that wants to open the Uri.

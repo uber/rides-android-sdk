@@ -26,13 +26,20 @@ import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
+import com.uber.sdk.android.core.utils.AppProtocol;
+import com.uber.sdk.android.core.utils.CustomTabsHelper;
+
 /**
  * @Deprecated use {@link RideRequestDeeplink} directly
  */
 @Deprecated
 public class RequestDeeplink extends RideRequestDeeplink {
 
-    RequestDeeplink(@NonNull Context context, @NonNull Uri uri) {
-        super(context, uri);
+    RequestDeeplink(
+            @NonNull Context context,
+            @NonNull Uri uri,
+            @NonNull AppProtocol appProtocol,
+            @NonNull CustomTabsHelper customTabsHelper) {
+        super(context, uri, appProtocol, customTabsHelper);
     }
 }
