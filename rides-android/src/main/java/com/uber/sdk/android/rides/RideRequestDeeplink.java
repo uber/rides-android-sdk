@@ -27,9 +27,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.customtabs.CustomTabsIntent;
 
 import com.uber.sdk.android.core.Deeplink;
 import com.uber.sdk.android.core.utils.AppProtocol;
+import com.uber.sdk.android.core.utils.CustomTabsHelper;
 import com.uber.sdk.core.client.SessionConfiguration;
 
 import static com.uber.sdk.android.core.utils.Preconditions.checkNotNull;
@@ -62,8 +64,8 @@ public class RideRequestDeeplink implements Deeplink {
      * Executes the deeplink to launch the Uber app.  If the app is not installed redirects to the play store.
      */
     public void execute() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        context.startActivity(intent);
+        final CustomTabsIntent intent = new CustomTabsIntent.Builder().build();
+        CustomTabsHelper.openCustomTab(context, intent, uri, new CustomTabsHelper.BrowserFallback());
     }
 
     @Override

@@ -38,6 +38,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.uber.sdk.android.core.R;
+import com.uber.sdk.android.core.utils.CustomTabsHelper;
 import com.uber.sdk.core.client.SessionConfiguration;
 
 /**

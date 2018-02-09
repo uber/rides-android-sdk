@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.uber.sdk.android.core.auth;
+package com.uber.sdk.android.core.utils;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -62,11 +62,11 @@ public class CustomTabsHelper {
      * @param fallback a CustomTabFallback to be used if Custom Tabs is not available.
      */
     public static void openCustomTab(
-            final Activity activity,
+            final Context context,
             final CustomTabsIntent customTabsIntent,
             final Uri uri,
             CustomTabFallback fallback) {
-        final String packageName = getPackageNameToUse(activity);
+        final String packageName = getPackageNameToUse(context);
 
         if (packageName != null) {
             final CustomTabsServiceConnection connection = new CustomTabsServiceConnection() {
@@ -76,14 +76,14 @@ public class CustomTabsHelper {
 
                     customTabsIntent.intent.setPackage(packageName);
                     customTabsIntent.intent.setData(uri);
-                    customTabsIntent.launchUrl(activity, uri);
+                    customTabsIntent.launchUrl(context, uri);
                 }
                 @Override
                 public void onServiceDisconnected(ComponentName name) {}
             };
-            CustomTabsClient.bindCustomTabsService(activity, packageName, connection);
+            CustomTabsClient.bindCustomTabsService(context, packageName, connection);
         } else if (fallback != null) {
-            fallback.openUri(activity, uri);
+            fallback.openUri(context, uri);
         } else {
             Log.e(UberSdk.UBER_SDK_LOG_TAG,
                     "Use of openCustomTab without Customtab support or a fallback set");
@@ -184,12 +184,12 @@ public class CustomTabsHelper {
     /**
      * Fallback that uses browser
      */
-    static class BrowserFallback implements CustomTabFallback {
+    public static class BrowserFallback implements CustomTabFallback {
         @Override
-        public void openUri(Activity activity, Uri uri) {
+        public void openUri(@NonNull Context context, Uri uri) {
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            activity.startActivity(intent);
+            context.startActivity(intent);
         }
     }
 
@@ -199,9 +199,9 @@ public class CustomTabsHelper {
     interface CustomTabFallback {
         /**
          *
-         * @param activity The Activity that wants to open the Uri.
+         * @param context The Context that wants to open the Uri.
          * @param uri The uri to be opened by the fallback.
          */
-        void openUri(Activity activity, Uri uri);
+        void openUri(@NonNull Context context, Uri uri);
     }
 }

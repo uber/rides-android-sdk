@@ -34,6 +34,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.uber.sdk.android.core.Deeplink;
 import com.uber.sdk.android.core.auth.AccessTokenManager;
 import com.uber.sdk.android.core.auth.AuthenticationError;
 import com.uber.sdk.android.rides.RideParameters;
@@ -110,6 +111,7 @@ public class SampleActivity extends AppCompatActivity implements RideRequestButt
         RideRequestButton uberButtonWhite = (RideRequestButton) findViewById(R.id.uber_button_white);
         uberButtonWhite.setRideParameters(rideParametersForProduct);
         uberButtonWhite.setSession(session);
+        uberButtonWhite.setDeeplinkFallback(Deeplink.Fallback.MOBILE_WEB);
         uberButtonWhite.loadRideInformation();
     }
 

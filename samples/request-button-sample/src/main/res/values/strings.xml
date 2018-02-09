@@ -28,6 +28,6 @@
     <string name="copy_access_token_to_clipboard">Copy Access Token to Clipboard</string>
     <string name="clear_access_token">Clear Access Token</string>
     <string name="refresh_estimates">Refresh Estimates</string>
-    <string name="deep_link">Deep Link into Uber App</string>
-    <string name="ride_request_widget">Ride Request Widget</string>
+    <string name="deep_link">Deeplink with app install fallback</string>
+    <string name="mobile_web_fallback">Deeplink with mobile web fallback</string>
 </resources>
