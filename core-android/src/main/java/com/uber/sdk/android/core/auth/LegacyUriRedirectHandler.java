@@ -1,15 +1,12 @@
 package com.uber.sdk.android.core.auth;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
-import android.util.Log;
 
-import com.uber.sdk.android.core.UberSdk;
+import com.uber.sdk.android.core.R;
 import com.uber.sdk.android.core.utils.Utility;
 import com.uber.sdk.core.client.SessionConfiguration;
 
@@ -23,9 +20,9 @@ class LegacyUriRedirectHandler {
 
     enum Mode {
         OFF,
-        OLD_AUTH_CODE_FLOW,
+        MISCONFIGURED_AUTH_CODE_FLOW,
         MISSING_REDIRECT,
-        MISCONFIGURED_URI;
+        MISMATCHING_URI;
     }
 
     private Mode mode = Mode.OFF;
@@ -44,28 +41,16 @@ class LegacyUriRedirectHandler {
     boolean checkValidState(@NonNull Activity activity, @NonNull LoginManager
             loginManager) {
         initState(activity, loginManager);
-
+        boolean validToContinueExecution = true;
         if (isLegacyMode()) {
-            final Pair<String, String> titleAndMessage = getLegacyModeMessage(activity, loginManager);
-            final IllegalStateException exception = new IllegalStateException(titleAndMessage
-                    .second);
-            Log.e(UberSdk.UBER_SDK_LOG_TAG, titleAndMessage.first,
-                    exception);
+            String logMessage = activity.getString(getLegacyModeErrorMessage());
+            String uiTitle = activity.getString(R.string.ub__misconfigured_redirect_uri_title);
+            String uiMessage = activity.getString(R.string.ub__misconfigured_redirect_uri_message);
 
-            if(Utility.isDebugable(activity)) {
-                new AlertDialog.Builder(activity)
-                        .setTitle(titleAndMessage.first)
-                        .setMessage(titleAndMessage.second)
-                        .setNeutralButton("Exit", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                throw exception;
-                            }
-                        }).show();
-                return false;
-            }
+            validToContinueExecution = !Utility.logAndShowBlockingDebugUIAlert(activity,
+                    logMessage, uiTitle, uiMessage, new IllegalStateException(logMessage));
         }
-        return true;
+        return validToContinueExecution;
     }
 
     boolean isLegacyMode() {
@@ -81,12 +66,13 @@ class LegacyUriRedirectHandler {
         String setRedirectUri = sessionConfiguration.getRedirectUri();
 
         if (redirectForAuthorizationCode) {
-            mode = Mode.OLD_AUTH_CODE_FLOW;
+            mode = Mode.MISCONFIGURED_AUTH_CODE_FLOW;
         } else if (sessionConfiguration.getRedirectUri() == null) {
             mode = Mode.MISSING_REDIRECT;
         } else if (!generatedRedirectUri.equals(setRedirectUri) &&
-                !AuthUtils.isRedirectUriRegistered(activity, Uri.parse(setRedirectUri))) {
-            mode = Mode.MISCONFIGURED_URI;
+                !AuthUtils.isRedirectUriRegistered(activity, Uri.parse(setRedirectUri)) &&
+                !loginManager.isAuthCodeFlowEnabled()) {
+            mode = Mode.MISMATCHING_URI;
         } else {
             mode = Mode.OFF;
         }
@@ -101,8 +87,8 @@ class LegacyUriRedirectHandler {
 
         final Pair<String, String> titleAndMessage;
         switch (mode) {
-            case OLD_AUTH_CODE_FLOW:
-                titleAndMessage = new Pair<>("Misconfigured SessionConfiguration, see log.",
+            case MISCONFIGURED_AUTH_CODE_FLOW:
+                titleAndMessage = new Pair<>("Misconfigured Redirect URI - See log.",
                         "The Uber Authentication Flow for the Authorization Code Flow has "
                                 + "been upgraded in 0.8.0 and a redirect URI must now be supplied to the application. "
                                 + "You are seeing this error because the use of deprecated method "
@@ -114,14 +100,15 @@ class LegacyUriRedirectHandler {
                                 + "method LoginManager.setAuthCodeFlowEnabled()");
                 break;
             case MISSING_REDIRECT:
-                titleAndMessage = new Pair<>("Misconfigured SessionConfiguration, see log.", "Redirect URI must be set in "
+                titleAndMessage = new Pair<>("Null Redirect URI - See log.",
+                        "Redirect URI must be set in "
                         + "Session Configuration.");
                 break;
-            case MISCONFIGURED_URI:
+            case MISMATCHING_URI:
                 String generatedRedirectUri = context.getPackageName().concat(""
                         + ".uberauth://redirect");
                 String setRedirectUri = loginManager.getSessionConfiguration().getRedirectUri();
-                titleAndMessage = new Pair<>("Misconfigured redirect uri, see log.",
+                titleAndMessage = new Pair<>("Misconfigured Redirect URI - See log.",
                         "Misconfigured redirect_uri. See https://github"
                                 + ".com/uber/rides-android-sdk#authentication-migration-version-08-and-above"
                                 + "for more info. Either 1) Register " + generatedRedirectUri + " as a "
@@ -137,5 +124,18 @@ class LegacyUriRedirectHandler {
 
         return titleAndMessage;
 
+    }
+
+    private int getLegacyModeErrorMessage() {
+        switch (mode) {
+            case MISCONFIGURED_AUTH_CODE_FLOW:
+                return R.string.ub__misconfigured_auth_code_flow_log;
+            case MISSING_REDIRECT:
+                return R.string.ub__missing_redirect_uri_log;
+            case MISMATCHING_URI:
+                return R.string.ub__mismatching_redirect_uri_log;
+            default:
+                return 0;
+        }
     }
 }

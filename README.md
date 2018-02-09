@@ -216,10 +216,14 @@ With Version 0.8 and above of the SDK, the redirect URI is more strongly enforce
 standards [IETF RFC](https://tools.ietf.org/html/draft-ietf-oauth-native-apps-12).
 
 The SDK will automatically created a redirect URI to be used in the oauth callbacks with
-the format "applicationId.uberauth", ex "com.example.uberauth". If this differs from the previous
-specified redirect URI configured in the SessionConfiguration, there are two options.
+the format "applicationId.uberauth", ex "com.example.uberauth". **This URI must be registered in 
+the [developer dashboard](https://developer.uber.com/dashboard)**
 
- 1. Change the redirect URI to match the new scheme in the configuration of the Session. If this is left out entirely, the default will be used.
+If this differs from the previous specified redirect URI configured in the SessionConfiguration, 
+there are a few options.
+
+ 1. Change the redirect URI to match the new scheme in the configuration of the Session. If this 
+ is left out entirely, the default will be used. 
 
 ```java
 SessionConfiguration config = new SessionConfiguration.Builder()
@@ -228,7 +232,7 @@ SessionConfiguration config = new SessionConfiguration.Builder()
 ```
 
  2. Override the LoginRedirectReceiverActivity in your main manifest and provide a custom intent
-filter.
+filter. Register this custom URI in the developer dashboard for your application.
 
 ```xml
 <activity
@@ -238,16 +242,42 @@ filter.
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="com.example.app"/>
+        <data android:scheme="com.example.app"
+                android:host="redirect" />
     </intent-filter>
 </activity>
 ```
+
+3. If using [Authorization Code Flow](https://developer.uber.com/docs/riders/guides/authentication/user-access-token), you will need to configure your server to redirect to 
+   the Mobile Application with an access token either via the generated URI or a custom URI as defined in steps 1 and 2.
+
+The Session should be configured to redirect to the server to do a code exchange and the login 
+manager should indicate the SDK is operating in the Authorization Code Flow.
+
+```java
+SessionConfiguration config = new SessionConfiguration.Builder()
+    .setRedirectUri("example.com/redirect") //Where this is your configured server
+    .build();
+
+loginManager.setAuthCodeEnabled(true);
+loginManager.login(this);
+
+```
+   
+ Once the code is exchanged, the server should redirect to a URI in the standard OAUTH format of 
+ `com.example.uberauth://redirect#access_token=ACCESS_TOKEN&token_type=Bearer&expires_in=TTL&scope=SCOPES`
+  for the SDK to receive the access token and continue operation.`` 
+  
+
+##### Authorization Code Flow
+
 
 The default behavior of calling   `LoginManager.login(activity)` is to activate Single Sign On, 
 and if SSO is unavailable, fallback to Implicit Grant if privileged scopes are not requested, 
 otherwise redirect to the Play Store. If Authorization Code Grant is required, set `LoginManager
 .setAuthCodeEnabled(true)` to prevent the redirect to the Play Store. Implicit Grant will allow 
 access to all non-privileged scopes, where as the other two both grant access to privileged scopes. [Read more about scopes](https://developer.uber.com/docs/scopes).
+
 
 #### Login Errors
 Upon a failure to login, an `AuthenticationError` will be provided in the `LoginCallback`. This enum provides a series of values that provide more information on the type of error.
