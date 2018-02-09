@@ -312,6 +312,8 @@ public class LoginManagerTest extends RobolectricTestBase {
         loginManager.setAuthCodeFlowEnabled(true);
         loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, intent);
 
+        verify(callback, never()).onLoginError(AuthenticationError.UNAVAILABLE);
+
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
 
         verify(activity).startActivityForResult(intentCaptor.capture(), eq(REQUEST_CODE_LOGIN_DEFAULT));
@@ -348,6 +350,8 @@ public class LoginManagerTest extends RobolectricTestBase {
         Intent intent = new Intent().putExtra(EXTRA_ERROR, AuthenticationError.UNAVAILABLE.toStandardString());
 
         loginManager.onActivityResult(activity, REQUEST_CODE_LOGIN_DEFAULT, Activity.RESULT_CANCELED, intent);
+
+        verify(callback, never()).onLoginError(AuthenticationError.UNAVAILABLE);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
 

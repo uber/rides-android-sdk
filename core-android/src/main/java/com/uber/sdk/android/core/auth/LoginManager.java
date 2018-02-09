@@ -399,6 +399,7 @@ public class LoginManager {
         } else if (authenticationError.equals(AuthenticationError.UNAVAILABLE)
                 && isAuthCodeFlowEnabled()) {
             loginForAuthorizationCode(activity);
+            return;
         } else if (AuthenticationError.INVALID_APP_SIGNATURE.equals(authenticationError)) {
             AppProtocol appProtocol = new AppProtocol();
             String appSignature = appProtocol.getAppSignature(activity);
