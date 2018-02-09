@@ -30,8 +30,5 @@
         <activity android:name=".RideRequestActivity"
             android:exported="false"
             android:screenOrientation="portrait"/>
-        <activity android:name="com.uber.sdk.android.core.auth.LoginActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"/>
     </application>
 </manifest>

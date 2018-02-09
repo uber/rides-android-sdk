@@ -29,6 +29,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
+import android.support.customtabs.CustomTabsIntent;
 import android.text.TextUtils;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -39,8 +40,6 @@ import android.webkit.WebViewClient;
 import com.uber.sdk.android.core.R;
 import com.uber.sdk.core.client.SessionConfiguration;
 
-import java.util.Locale;
-
 /**
  * {@link android.app.Activity} that shows web view for Uber user authentication and authorization.
  */
@@ -48,10 +47,15 @@ public class LoginActivity extends Activity {
 
     static final String EXTRA_RESPONSE_TYPE = "RESPONSE_TYPE";
     static final String EXTRA_SESSION_CONFIGURATION = "SESSION_CONFIGURATION";
+    static final String EXTRA_FORCE_WEBVIEW = "FORCE_WEBVIEW";
+
+    static final String ERROR = "error";
 
     private WebView webView;
     private ResponseType responseType;
     private SessionConfiguration sessionConfiguration;
+    private LoginManager loginManager;
+    private boolean authStarted;
 
     /**
      * Create an {@link Intent} to pass to this activity
@@ -67,20 +71,84 @@ public class LoginActivity extends Activity {
             @NonNull SessionConfiguration sessionConfiguration,
             @NonNull ResponseType responseType) {
 
+        return newIntent(context, sessionConfiguration, responseType, false);
+    }
+
+    /**
+     * Create an {@link Intent} to pass to this activity
+     *
+     * @param context the {@link Context} for the intent
+     * @param sessionConfiguration to be used for gather clientId
+     * @param responseType that is expected
+     * @param forceWebview Forced to use old webview instead of chrometabs
+     * @return an intent that can be passed to this activity
+     */
+    @NonNull
+    public static Intent newIntent(
+            @NonNull Context context,
+            @NonNull SessionConfiguration sessionConfiguration,
+            @NonNull ResponseType responseType,
+            boolean forceWebview) {
+
         final Intent data = new Intent(context, LoginActivity.class)
                 .putExtra(EXTRA_SESSION_CONFIGURATION, sessionConfiguration)
-                .putExtra(EXTRA_RESPONSE_TYPE, responseType);
+                .putExtra(EXTRA_RESPONSE_TYPE, responseType)
+                .putExtra(EXTRA_FORCE_WEBVIEW, forceWebview);
 
         return data;
+    }
+
+    /**
+     * Used to handle Redirect URI response from customtab or browser
+     *
+     * @param context
+     * @param responseUri
+     * @return
+     */
+    public static Intent newResponseIntent(Context context, Uri responseUri) {
+        Intent intent = new Intent(context, LoginActivity.class);
+        intent.setData(responseUri);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        return intent;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.ub__login_activity);
+        init();
+    }
 
-        webView = (WebView) findViewById(R.id.ub__login_webview);
+    @Override
+    protected void onResume() {
+        super.onResume();
 
+        if(webView == null) {
+            if(!authStarted) {
+                authStarted = true;
+                return;
+            }
+
+            finish();
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        authStarted = false;
+        setIntent(intent);
+        init();
+    }
+
+    protected void init() {
+        if(getIntent().getData() != null) {
+            handleResponse(getIntent().getData());
+        } else {
+            loadUrl();
+        }
+    }
+
+    protected void loadUrl() {
         sessionConfiguration = (SessionConfiguration) getIntent().getSerializableExtra(EXTRA_SESSION_CONFIGURATION);
         if (sessionConfiguration == null) {
             onError(AuthenticationError.UNAVAILABLE);
@@ -98,17 +166,52 @@ public class LoginActivity extends Activity {
             onError(AuthenticationError.UNAVAILABLE);
         }
 
-        final String redirectUri = sessionConfiguration.getRedirectUri();
-        if (redirectUri == null) {
-            onError(AuthenticationError.INVALID_REDIRECT_URI);
-            return;
+        String redirectUri = sessionConfiguration.getRedirectUri() != null ? sessionConfiguration
+                .getRedirectUri() : getApplicationContext().getPackageName() + "uberauth";
+
+        String url = AuthUtils.buildUrl(redirectUri, responseType, sessionConfiguration);
+        if (getIntent().getBooleanExtra(EXTRA_FORCE_WEBVIEW, false)) {
+            loadWebview(url, redirectUri);
+        } else {
+            loadChrometab(url);
+        }
+    }
+
+    protected boolean handleResponse(@NonNull Uri uri) {
+        final String fragment = uri.getFragment();
+
+        if (fragment == null) {
+            onError(AuthenticationError.INVALID_RESPONSE);
+            return true;
         }
 
+        final Uri fragmentUri = new Uri.Builder().encodedQuery(fragment).build();
+
+        // In case fragment contains error, we want to handle that too.
+        final String error = fragmentUri.getQueryParameter(ERROR);
+        if (!TextUtils.isEmpty(error)) {
+            onError(AuthenticationError.fromString(error));
+            return true;
+        }
+
+        onTokenReceived(fragmentUri);
+        return true;
+    }
+
+    protected void loadWebview(String url, String redirectUri) {
+        setContentView(R.layout.ub__login_activity);
+        webView = (WebView) findViewById(R.id.ub__login_webview);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setAppCacheEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
         webView.setWebViewClient(createOAuthClient(redirectUri));
-        webView.loadUrl(buildUrl(redirectUri, responseType, sessionConfiguration));
+        webView.loadUrl(url);
+    }
+
+    protected void loadChrometab(String url) {
+        final CustomTabsIntent intent = new CustomTabsIntent.Builder().build();
+        CustomTabsHelper.openCustomTab(this, intent, Uri.parse(url), new CustomTabsHelper
+                .BrowserFallback());
     }
 
     protected OAuthWebViewClient createOAuthClient(String redirectUri) {
@@ -128,7 +231,7 @@ public class LoginActivity extends Activity {
 
     void onTokenReceived(@NonNull Uri uri) {
         try {
-            Intent data = AuthUtils.parseTokenUri(uri);
+            Intent data = AuthUtils.parseTokenUriToIntent(uri);
 
             setResult(RESULT_OK, data);
             finish();
@@ -151,60 +254,10 @@ public class LoginActivity extends Activity {
     }
 
     /**
-     * Builds a URL {@link String} using the necessary parameters to load in the {@link WebView}.
-     *
-     * @return the URL to load in the {@link WebView}
-     */
-    @NonNull
-    @VisibleForTesting
-    String buildUrl(
-            @NonNull String redirectUri,
-            @NonNull ResponseType responseType,
-            @NonNull SessionConfiguration configuration) {
-
-        final String CLIENT_ID_PARAM = "client_id";
-        final String ENDPOINT = "login";
-        final String HTTPS = "https";
-        final String PATH = "oauth/v2/authorize";
-        final String REDIRECT_PARAM = "redirect_uri";
-        final String RESPONSE_TYPE_PARAM = "response_type";
-        final String SCOPE_PARAM = "scope";
-        final String SHOW_FB_PARAM = "show_fb";
-        final String SIGNUP_PARAMS = "signup_params";
-        final String REDIRECT_LOGIN = "{\"redirect_to_login\":true}";
-
-
-
-        Uri.Builder builder = new Uri.Builder();
-        builder.scheme(HTTPS)
-                .authority(ENDPOINT + "." + configuration.getEndpointRegion().getDomain())
-                .appendEncodedPath(PATH)
-                .appendQueryParameter(CLIENT_ID_PARAM, configuration.getClientId())
-                .appendQueryParameter(REDIRECT_PARAM, redirectUri)
-                .appendQueryParameter(RESPONSE_TYPE_PARAM, responseType.toString().toLowerCase(Locale.US))
-                .appendQueryParameter(SCOPE_PARAM, getScopes(configuration))
-                .appendQueryParameter(SHOW_FB_PARAM, "false")
-                .appendQueryParameter(SIGNUP_PARAMS, AuthUtils.createEncodedParam(REDIRECT_LOGIN));
-
-        return builder.build().toString();
-    }
-
-    private String getScopes(SessionConfiguration configuration) {
-        String scopes = AuthUtils.scopeCollectionToString(configuration.getScopes());
-        if (!configuration.getCustomScopes().isEmpty()) {
-            scopes =  AuthUtils.mergeScopeStrings(scopes,
-                    AuthUtils.customScopeCollectionToString(configuration.getCustomScopes()));
-        }
-        return scopes;
-    }
-
-    /**
      * Custom {@link WebViewClient} for authorization.
      */
     @VisibleForTesting
     abstract class OAuthWebViewClient extends WebViewClient {
-
-        protected static final String ERROR = "error";
 
         @NonNull
         protected final String redirectUri;
@@ -263,27 +316,7 @@ public class LoginActivity extends Activity {
             }
 
             if (url.startsWith(redirectUri)) {
-
-                //OAuth 2 spec requires the access token in URL Fragment instead of query parameters.
-                //Swap Fragment with Query to facilitate parsing.
-                final String fragment = uri.getFragment();
-
-                if (fragment == null) {
-                    onError(AuthenticationError.INVALID_RESPONSE);
-                    return true;
-                }
-
-                final Uri fragmentUri = new Uri.Builder().encodedQuery(fragment).build();
-
-                // In case fragment contains error, we want to handle that too.
-                final String error = fragmentUri.getQueryParameter(ERROR);
-                if (!TextUtils.isEmpty(error)) {
-                    onError(AuthenticationError.fromString(error));
-                    return true;
-                }
-
-                onTokenReceived(fragmentUri);
-                return true;
+                return handleResponse(uri);
             }
 
             return super.shouldOverrideUrlLoading(view, url);
