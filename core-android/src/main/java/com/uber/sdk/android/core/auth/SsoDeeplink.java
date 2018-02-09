@@ -112,8 +112,8 @@ public class SsoDeeplink implements Deeplink {
     private Uri createSsoUri() {
         String scopes = AuthUtils.scopeCollectionToString(requestedScopes);
         if (!requestedCustomScopes.isEmpty()) {
-           scopes =  AuthUtils.mergeScopeStrings(scopes,
-                   AuthUtils.customScopeCollectionToString(requestedCustomScopes));
+            scopes =  AuthUtils.mergeScopeStrings(scopes,
+                    AuthUtils.customScopeCollectionToString(requestedCustomScopes));
         }
         return new Uri.Builder().scheme(AppProtocol.DEEPLINK_SCHEME)
                 .authority(URI_HOST)

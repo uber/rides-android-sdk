@@ -41,6 +41,7 @@ import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
 
 import static com.uber.sdk.core.client.utils.Preconditions.checkNotEmpty;
+import static com.uber.sdk.core.client.utils.Preconditions.checkNotNull;
 
 /**
  * Manages user login via OAuth 2.0 Implicit Grant.  Be sure to call
@@ -93,7 +94,10 @@ public class LoginManager {
     private final LoginCallback callback;
     private final SessionConfiguration sessionConfiguration;
     private final int requestCode;
+    private final LegacyUriRedirectHandler legacyUriRedirectHandler;
 
+    private boolean authCodeFlowEnabled = false;
+    @Deprecated
     private boolean redirectForAuthorizationCode = false;
 
     /**
@@ -130,10 +134,27 @@ public class LoginManager {
             @NonNull LoginCallback loginCallback,
             @NonNull SessionConfiguration configuration,
             int requestCode) {
+        this(accessTokenStorage, loginCallback, configuration, requestCode, new LegacyUriRedirectHandler());
+    }
+
+    /**
+     * @param accessTokenStorage to store access token.
+     * @param loginCallback      callback to be called when {@link LoginManager#onActivityResult(Activity, int, int, Intent)} is called.
+     * @param configuration      to provide authentication information
+     * @param requestCode        custom code to use for Activity communication
+     * @param legacyUriRedirectHandler         Used to handle URI Redirect Migration
+     */
+    LoginManager(
+            @NonNull AccessTokenStorage accessTokenStorage,
+            @NonNull LoginCallback loginCallback,
+            @NonNull SessionConfiguration configuration,
+            int requestCode,
+            @NonNull LegacyUriRedirectHandler legacyUriRedirectHandler) {
         this.accessTokenStorage = accessTokenStorage;
         this.callback = loginCallback;
         this.sessionConfiguration = configuration;
         this.requestCode = requestCode;
+        this.legacyUriRedirectHandler = legacyUriRedirectHandler;
     }
 
     /**
@@ -141,9 +162,15 @@ public class LoginManager {
      *
      * @param activity the activity used to start the {@link LoginActivity}.
      */
-    public void login(@NonNull Activity activity) {
+    public void login(final @NonNull Activity activity) {
         checkNotEmpty(sessionConfiguration.getScopes(), "Scopes must be set in the Session " +
                 "Configuration.");
+        checkNotNull(sessionConfiguration.getRedirectUri(), "Redirect URI must be set in "
+                + "Session Configuration.");
+
+        if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
+            return;
+        }
 
         SsoDeeplink ssoDeeplink = new SsoDeeplink.Builder(activity)
                 .clientId(sessionConfiguration.getClientId())
@@ -156,7 +183,7 @@ public class LoginManager {
             ssoDeeplink.execute();
         } else if (!AuthUtils.isPrivilegeScopeRequired(sessionConfiguration.getScopes())) {
             loginForImplicitGrant(activity);
-        } else if (redirectForAuthorizationCode) {
+        } else if (isAuthCodeFlowEnabled()) {
             loginForAuthorizationCode(activity);
         } else {
             redirectToInstallApp(activity);
@@ -170,7 +197,12 @@ public class LoginManager {
      */
     public void loginForImplicitGrant(@NonNull Activity activity) {
 
-        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, ResponseType.TOKEN);
+        if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
+            return;
+        }
+
+        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration,
+                ResponseType.TOKEN, legacyUriRedirectHandler.isLegacyMode());
         activity.startActivityForResult(intent, requestCode);
     }
 
@@ -180,8 +212,12 @@ public class LoginManager {
      * @param activity to start Activity on.
      */
     public void loginForAuthorizationCode(@NonNull Activity activity) {
+        if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
+            return;
+        }
 
-        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, ResponseType.CODE);
+        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration,
+                ResponseType.CODE, legacyUriRedirectHandler.isLegacyMode());
         activity.startActivityForResult(intent, requestCode);
     }
 
@@ -254,9 +290,12 @@ public class LoginManager {
      *
      * @param redirectForAuthorizationCode true if should redirect, otherwise false
      * @return this instance of {@link LoginManager}
+     * @deprecated, See Authorization Migration guide https://github.com/uber/rides-android-sdk#authentication-migration-version-08-and-above
      */
+    @Deprecated
     public LoginManager setRedirectForAuthorizationCode(boolean redirectForAuthorizationCode) {
         this.redirectForAuthorizationCode = redirectForAuthorizationCode;
+        setAuthCodeFlowEnabled(true);
         return this;
     }
 
@@ -270,9 +309,40 @@ public class LoginManager {
      * update Uber app instead.
      *
      * @return true if redirect by default, otherwise false
+     * @deprecated, See Authorization Migration guide https://github.com/uber/rides-android-sdk#authentication-migration-version-08-and-above
      */
+    @Deprecated
     public boolean isRedirectForAuthorizationCode() {
         return redirectForAuthorizationCode;
+    }
+
+
+    /**
+     * Enable the use of the Authorization Code Flow
+     * (https://developer.uber.com/docs/authentication#section-step-one-authorize) instead of an
+     * installation prompt for the Uber app as a login fallback mechanism.
+     *
+     * Requires that the app's backend system is configured to support this flow and the redirect
+     * URI is pointed correctly.
+     *
+     * @param authCodeFlowEnabled true for use of auth code flow, false to fallback to Uber app
+     * installation
+     * @return this instace of {@link LoginManager}
+     */
+    public LoginManager setAuthCodeFlowEnabled(boolean authCodeFlowEnabled) {
+        this.authCodeFlowEnabled = authCodeFlowEnabled;
+        return this;
+    }
+
+    /**
+     * Indicates the use of the Authorization Code Flow
+     * (https://developer.uber.com/docs/authentication#section-step-one-authorize) instead of an
+     * installation prompt for the Uber app as a login fallback mechanism.
+     *
+     * @return true if Auth Code Flow is enabled, otherwise false
+     */
+    public boolean isAuthCodeFlowEnabled() {
+        return authCodeFlowEnabled;
     }
 
     private void redirectToInstallApp(@NonNull Activity activity) {
@@ -327,7 +397,7 @@ public class LoginManager {
             loginForImplicitGrant(activity);
             return;
         } else if (authenticationError.equals(AuthenticationError.UNAVAILABLE)
-                && redirectForAuthorizationCode) {
+                && isAuthCodeFlowEnabled()) {
             loginForAuthorizationCode(activity);
         } else if (AuthenticationError.INVALID_APP_SIGNATURE.equals(authenticationError)) {
             AppProtocol appProtocol = new AppProtocol();

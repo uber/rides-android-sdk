@@ -18,7 +18,8 @@ import javax.annotation.Nullable;
 
 public class AppProtocol {
     public static final String[] UBER_PACKAGE_NAMES =
-            {"com.ubercab", "com.ubercab.presidio.app", "com.ubercab.presidio.exo"};
+            {"com.ubercab", "com.ubercab.presidio.app", "com.ubercab.presidio.exo",
+                    "com.ubercab.presidio.development"};
     public static final String DEEPLINK_SCHEME = "uber";
     public static final String PLATFORM = "android";
 

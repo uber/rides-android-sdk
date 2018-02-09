@@ -94,9 +94,9 @@ public class RideRequestActivity extends Activity implements LoginCallback, Ride
      */
     @NonNull
     public static Intent newIntent(@NonNull Context context,
-                                   @Nullable RideParameters rideParameters,
-                                   @NonNull SessionConfiguration loginConfiguration,
-                                   @Nullable String accessTokenStorageKey) {
+            @Nullable RideParameters rideParameters,
+            @NonNull SessionConfiguration loginConfiguration,
+            @Nullable String accessTokenStorageKey) {
         Intent data = new Intent(context, RideRequestActivity.class);
 
         if (rideParameters == null) {

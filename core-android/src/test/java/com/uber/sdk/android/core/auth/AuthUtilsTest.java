@@ -27,10 +27,12 @@ import android.net.Uri;
 import com.uber.sdk.android.core.RobolectricTestBase;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.Scope;
+import com.uber.sdk.core.client.SessionConfiguration;
 
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
@@ -117,7 +119,7 @@ public class AuthUtilsTest extends RobolectricTestBase {
     public void generateAccessTokenFromUrl_whenNullFragment_shouldThrowInvalidResponseError() {
         String redirectUri = "http://localhost:1234/";
         try {
-            AuthUtils.parseTokenUri(Uri.parse(redirectUri));
+            AuthUtils.parseTokenUriToIntent(Uri.parse(redirectUri));
             fail("Should throw an exception");
         } catch (LoginAuthenticationException e) {
             assertEquals(AuthenticationError.INVALID_RESPONSE, e.getAuthenticationError());
@@ -128,7 +130,7 @@ public class AuthUtilsTest extends RobolectricTestBase {
     public void generateAccessTokenFromUrl_whenValidErrorInQueryParameter_shouldThrowAuthenticationError() {
         String redirectUri = "http://localhost:1234?error=mismatching_redirect_uri";
         try {
-            AuthUtils.parseTokenUri(Uri.parse(redirectUri));
+            AuthUtils.parseTokenUriToIntent(Uri.parse(redirectUri));
             fail("Should throw an exception");
         } catch (LoginAuthenticationException e) {
             assertEquals(AuthenticationError.INVALID_RESPONSE, e.getAuthenticationError());
@@ -139,7 +141,7 @@ public class AuthUtilsTest extends RobolectricTestBase {
     public void generateAccessTokenFromUrl_whenInvalidErrorInQueryParameter_shouldThrowAuthenticationError() {
         String redirectUri = "http://localhost:1234?error=bogus_error";
         try {
-            AuthUtils.parseTokenUri(Uri.parse(redirectUri));
+            AuthUtils.parseTokenUriToIntent(Uri.parse(redirectUri));
             fail("Should throw an exception");
         } catch (LoginAuthenticationException e) {
             assertEquals(AuthenticationError.INVALID_RESPONSE, e.getAuthenticationError());
@@ -150,7 +152,7 @@ public class AuthUtilsTest extends RobolectricTestBase {
     public void generateAccessTokenFromUrl_whenNoToken_shouldThrowAuthenticationError() {
         String redirectUrl = "http://localhost:1234?expires_in=" + EXPIRATION_TIME + "&scope=history";
         try {
-            AuthUtils.parseTokenUri(Uri.parse(redirectUrl));
+            AuthUtils.parseTokenUriToIntent(Uri.parse(redirectUrl));
             fail("Should throw an exception");
         } catch (LoginAuthenticationException e) {
             assertEquals(AuthenticationError.INVALID_RESPONSE, e.getAuthenticationError());
@@ -161,7 +163,7 @@ public class AuthUtilsTest extends RobolectricTestBase {
     public void generateAccessTokenFromUrl_whenNoExpirationTime_shouldThrowAuthenticationError() {
         String redirectUrl = "http://localhost:1234?access_token=" + ACCESS_TOKEN_STRING + "&scope=history";
         try {
-            AuthUtils.parseTokenUri(Uri.parse(redirectUrl));
+            AuthUtils.parseTokenUriToIntent(Uri.parse(redirectUrl));
             fail("Should throw an exception");
         } catch (LoginAuthenticationException e) {
             assertEquals(AuthenticationError.INVALID_RESPONSE, e.getAuthenticationError());
@@ -173,7 +175,7 @@ public class AuthUtilsTest extends RobolectricTestBase {
         String redirectUrl = "http://localhost:1234?access_token=" + ACCESS_TOKEN_STRING
                 + "&expires_in=" + EXPIRATION_TIME;
         try {
-            AuthUtils.parseTokenUri(Uri.parse(redirectUrl));
+            AuthUtils.parseTokenUriToIntent(Uri.parse(redirectUrl));
             fail("Should throw an exception");
         } catch (LoginAuthenticationException e) {
             assertEquals(AuthenticationError.INVALID_RESPONSE, e.getAuthenticationError());
@@ -185,7 +187,7 @@ public class AuthUtilsTest extends RobolectricTestBase {
         String redirectUrl = "http://localhost:1234?access_token=" + ACCESS_TOKEN_STRING + "&expires_in=notALong"
                 + "&scope=history";
         try {
-            AuthUtils.parseTokenUri(Uri.parse(redirectUrl));
+            AuthUtils.parseTokenUriToIntent(Uri.parse(redirectUrl));
             fail("Should throw an exception");
         } catch (LoginAuthenticationException e) {
             assertEquals(AuthenticationError.INVALID_RESPONSE, e.getAuthenticationError());
@@ -198,7 +200,7 @@ public class AuthUtilsTest extends RobolectricTestBase {
                 EXPIRATION_TIME
                 + "&scope=history notAScopeAtAll";
         try {
-            AuthUtils.parseTokenUri(Uri.parse(redirectUrl));
+            AuthUtils.parseTokenUriToIntent(Uri.parse(redirectUrl));
             fail("Should throw an exception");
         } catch (LoginAuthenticationException e) {
             assertEquals(AuthenticationError.INVALID_RESPONSE, e.getAuthenticationError());
@@ -211,7 +213,7 @@ public class AuthUtilsTest extends RobolectricTestBase {
         String redirectUrl = "http://localhost:1234?access_token=" + ACCESS_TOKEN_STRING
                 + "&expires_in=" + EXPIRATION_TIME + "&scope=history" + "&token_type=" + BEARER;
 
-        AccessToken accessToken = AuthUtils.createAccessToken(AuthUtils.parseTokenUri(Uri.parse(redirectUrl)));
+        AccessToken accessToken = AuthUtils.createAccessToken(AuthUtils.parseTokenUriToIntent(Uri.parse(redirectUrl)));
         assertNotNull(accessToken);
         assertEquals(accessToken.getToken(), ACCESS_TOKEN_STRING);
         assertEquals(accessToken.getScopes().size(), 1);
@@ -225,7 +227,7 @@ public class AuthUtilsTest extends RobolectricTestBase {
         String redirectUrl = "http://localhost:1234?access_token=" + ACCESS_TOKEN_STRING
                 + "&expires_in=" + EXPIRATION_TIME + "&scope=history profile" + "&token_type=" + BEARER;
 
-        AccessToken accessToken = AuthUtils.createAccessToken(AuthUtils.parseTokenUri(Uri.parse(redirectUrl)));
+        AccessToken accessToken = AuthUtils.createAccessToken(AuthUtils.parseTokenUriToIntent(Uri.parse(redirectUrl)));
         assertNotNull(accessToken);
         assertEquals(accessToken.getToken(), ACCESS_TOKEN_STRING);
         assertEquals(accessToken.getScopes().size(), 2);
@@ -259,5 +261,22 @@ public class AuthUtilsTest extends RobolectricTestBase {
     @Test
     public void testCreateEncodedParam() {
         assertThat(AuthUtils.createEncodedParam("{\"redirect_to_login\":true}")).isEqualTo("eyJyZWRpcmVjdF90b19sb2dpbiI6dHJ1ZX0=\n");
+    }
+
+    @Test
+    public void onBuildUrl_withDefaultRegion_shouldHaveDefaultUberDomain() {
+        String clientId = "clientId1234";
+        String redirectUri = "localHost1234";
+
+        SessionConfiguration loginConfiguration = new SessionConfiguration.Builder()
+                .setRedirectUri(redirectUri)
+                .setScopes(Arrays.asList(Scope.HISTORY))
+                .setClientId(clientId)
+                .build();
+
+        String url = AuthUtils.buildUrl(redirectUri, ResponseType.TOKEN, loginConfiguration);
+        assertEquals("https://login.uber.com/oauth/v2/authorize?client_id=" + clientId +
+                "&redirect_uri=" + redirectUri + "&response_type=token&scope=history&" +
+                "show_fb=false&signup_params=eyJyZWRpcmVjdF90b19sb2dpbiI6dHJ1ZX0%3D%0A", url);
     }
 }
