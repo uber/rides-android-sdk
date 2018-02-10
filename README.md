@@ -2,7 +2,7 @@
 
 Official Android SDK to support:
  - Ride Request Button
- - RIde Request Deeplinks
+ - Ride Request Deeplinks
  - Uber Authentication
  - REST APIs
 
