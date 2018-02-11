@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.uber.sdk.android.core.auth;
+package com.uber.sdk.android.core.utils;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -51,22 +51,22 @@ public class CustomTabsHelper {
 
     private static String packageNameToUse;
 
-    private CustomTabsHelper() {}
+    public CustomTabsHelper() {}
 
     /**
      * Opens the URL on a Custom Tab if possible. Otherwise fallsback to opening it on a WebView.
      *
-     * @param activity The host activity.
+     * @param context The host context.
      * @param customTabsIntent a CustomTabsIntent to be used if Custom Tabs is available.
      * @param uri the Uri to be opened.
      * @param fallback a CustomTabFallback to be used if Custom Tabs is not available.
      */
-    public static void openCustomTab(
-            final Activity activity,
+    public void openCustomTab(
+            final Context context,
             final CustomTabsIntent customTabsIntent,
             final Uri uri,
             CustomTabFallback fallback) {
-        final String packageName = getPackageNameToUse(activity);
+        final String packageName = getPackageNameToUse(context);
 
         if (packageName != null) {
             final CustomTabsServiceConnection connection = new CustomTabsServiceConnection() {
@@ -76,14 +76,14 @@ public class CustomTabsHelper {
 
                     customTabsIntent.intent.setPackage(packageName);
                     customTabsIntent.intent.setData(uri);
-                    customTabsIntent.launchUrl(activity, uri);
+                    customTabsIntent.launchUrl(context, uri);
                 }
                 @Override
                 public void onServiceDisconnected(ComponentName name) {}
             };
-            CustomTabsClient.bindCustomTabsService(activity, packageName, connection);
+            CustomTabsClient.bindCustomTabsService(context, packageName, connection);
         } else if (fallback != null) {
-            fallback.openUri(activity, uri);
+            fallback.openUri(context, uri);
         } else {
             Log.e(UberSdk.UBER_SDK_LOG_TAG,
                     "Use of openCustomTab without Customtab support or a fallback set");
@@ -101,7 +101,7 @@ public class CustomTabsHelper {
      * @return The package name recommended to use for connecting to custom tabs related components.
      */
     @Nullable
-    public static String getPackageNameToUse(Context context) {
+    public String getPackageNameToUse(Context context) {
         if (packageNameToUse != null) return packageNameToUse;
 
         PackageManager pm = context.getPackageManager();
@@ -152,7 +152,7 @@ public class CustomTabsHelper {
      * @param intent The intent to check with.
      * @return Whether there is a specialized handler for the given intent.
      */
-    private static boolean hasSpecializedHandlerIntents(Context context, Intent intent) {
+    private boolean hasSpecializedHandlerIntents(Context context, Intent intent) {
         try {
             PackageManager pm = context.getPackageManager();
             List<ResolveInfo> handlers = pm.queryIntentActivities(
@@ -177,31 +177,31 @@ public class CustomTabsHelper {
     /**
      * @return All possible chrome package names that provide custom tabs feature.
      */
-    public static String[] getPackages() {
+    public String[] getPackages() {
         return new String[]{"", STABLE_PACKAGE, BETA_PACKAGE, DEV_PACKAGE, LOCAL_PACKAGE};
     }
 
     /**
      * Fallback that uses browser
      */
-    static class BrowserFallback implements CustomTabFallback {
+    public static class BrowserFallback implements CustomTabFallback {
         @Override
-        public void openUri(Activity activity, Uri uri) {
+        public void openUri(@NonNull Context context, Uri uri) {
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            activity.startActivity(intent);
+            context.startActivity(intent);
         }
     }
 
     /**
      * To be used as a fallback to open the Uri when Custom Tabs is not available.
      */
-    interface CustomTabFallback {
+    public interface CustomTabFallback {
         /**
          *
-         * @param activity The Activity that wants to open the Uri.
+         * @param context The Context that wants to open the Uri.
          * @param uri The uri to be opened by the fallback.
          */
-        void openUri(Activity activity, Uri uri);
+        void openUri(@NonNull Context context, Uri uri);
     }
 }

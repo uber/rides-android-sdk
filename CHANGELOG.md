@@ -1,6 +1,10 @@
 v0.8.1 - TBD
 ------------
 
+### Added
+- [Issue #111](https://github.com/uber/rides-android-sdk/issues/111) Add Uber Mobile Web support
+  over deprecated Ride Request Widget
+
 v0.8.0 - 02/09/2018
 ------------
 

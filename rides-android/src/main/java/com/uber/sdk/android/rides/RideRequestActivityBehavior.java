@@ -33,7 +33,11 @@ import com.uber.sdk.core.client.SessionConfiguration;
 
 /**
  * The {@link RideRequestBehavior} to pass to the {@link RideRequestButton} to have it launch a {@link RideRequestActivity}.
+
+ * @deprecated in favor of directly using mobile web directly.
+ * See https://developer.uber.com/docs/riders/ride-requests/tutorials/widget/migration-to-muber
  */
+@Deprecated
 public class RideRequestActivityBehavior implements RideRequestBehavior {
 
     @NonNull private final Activity activity;

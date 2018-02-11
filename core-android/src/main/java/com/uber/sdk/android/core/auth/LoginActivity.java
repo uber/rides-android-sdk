@@ -38,6 +38,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.uber.sdk.android.core.R;
+import com.uber.sdk.android.core.utils.CustomTabsHelper;
 import com.uber.sdk.core.client.SessionConfiguration;
 
 /**
@@ -210,7 +211,8 @@ public class LoginActivity extends Activity {
 
     protected void loadChrometab(String url) {
         final CustomTabsIntent intent = new CustomTabsIntent.Builder().build();
-        CustomTabsHelper.openCustomTab(this, intent, Uri.parse(url), new CustomTabsHelper
+        CustomTabsHelper customTabsHelper = new CustomTabsHelper();
+        customTabsHelper.openCustomTab(this, intent, Uri.parse(url), new CustomTabsHelper
                 .BrowserFallback());
     }
 

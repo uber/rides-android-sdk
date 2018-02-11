@@ -29,8 +29,9 @@ import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.core.client.SessionConfiguration;
 
 /**
- * The {@link RideRequestBehavior} to pass to the {@link RideRequestButton} to have it execute a {@link RequestDeeplink}.
+ * The {@link RideRequestBehavior} to pass to the {@link RideRequestButton} to have it execute a {@link RideRequestDeeplink}.
  */
+@Deprecated
 public class RequestDeeplinkBehavior implements RideRequestBehavior {
 
     final SessionConfiguration sessionConfiguration;
@@ -51,14 +52,14 @@ public class RequestDeeplinkBehavior implements RideRequestBehavior {
     }
 
     /**
-     * Requests a ride using a {@link RequestDeeplink} that is constructed using the provided {@link RideParameters}.
+     * Requests a ride using a {@link RideRequestDeeplink} that is constructed using the provided {@link RideParameters}.
      *
-     * @param context {@link Context} to pass to launch the {@link RequestDeeplink} from
-     * @param params the {@link RideParameters} to use for building and executing the {@link RequestDeeplink}
+     * @param context {@link Context} to pass to launch the {@link RideRequestDeeplink} from
+     * @param params the {@link RideParameters} to use for building and executing the {@link RideRequestDeeplink}
      */
     @Override
     public void requestRide(@NonNull Context context, @NonNull RideParameters params) {
-        RequestDeeplink deeplink = new RequestDeeplink.Builder(context)
+        RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context)
                 .setSessionConfiguration(sessionConfiguration)
                 .setRideParameters(params).build();
         deeplink.execute();
