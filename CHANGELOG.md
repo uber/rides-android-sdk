@@ -5,6 +5,9 @@ v0.8.1 - TBD
 - [Issue #111](https://github.com/uber/rides-android-sdk/issues/111) Add Uber Mobile Web support
   over deprecated Ride Request Widget
 
+### Fixed
+ - [Issue #105](https://github.com/uber/rides-android-sdk/issues/105) onReceivedError and onReceivedHttpError does not work on API level < 23
+
 v0.8.0 - 02/09/2018
 ------------
 
