@@ -276,15 +276,16 @@ public class RideRequestView extends LinearLayout {
          */
         @Override
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-            if(Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M){
                 receivedError();
             }
         }
 
         @TargetApi(23)
         @Override
-        public void onReceivedError(
-                WebView view, WebResourceRequest request, WebResourceError error) {
+        public void onReceivedError(WebView view,
+                WebResourceRequest request,
+                WebResourceError error) {
             receivedError();
         }
 

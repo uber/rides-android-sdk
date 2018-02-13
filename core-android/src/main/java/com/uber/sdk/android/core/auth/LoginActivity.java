@@ -284,7 +284,7 @@ public class LoginActivity extends Activity {
          */
         @Override
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-            if(Build.VERSION.SDK_INT<Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                 receivedError();
             }
         }
