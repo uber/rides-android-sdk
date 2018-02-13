@@ -295,12 +295,12 @@ public class LoginActivity extends Activity {
             receivedError();
         }
 
-        private void receivedError(){
-            onError(AuthenticationError.CONNECTIVITY_ISSUE);
-        }
-
         @Override
         public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
+            receivedError();
+        }
+
+        private void receivedError(){
             onError(AuthenticationError.CONNECTIVITY_ISSUE);
         }
     }
