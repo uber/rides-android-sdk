@@ -88,11 +88,13 @@ task updateNewVersionChangelog() << {
     }
 }
 
-afterReleaseBuild.dependsOn(":core-android:uploadArchives", ":rides-android:uploadArchives")
 updateVersion.dependsOn ":githubRelease"
-preTagCommit.dependsOn ':updateReleaseVersionChangelog'
-commitNewVersion.dependsOn ':updateNewVersionChangelog'
+githubRelease.mustRunAfter ":createReleaseTag"
 githubRelease.dependsOn project(":samples").subprojects.collect { it.path + ":githubReleaseZip" }
+updateReleaseVersionChangelog.mustRunAfter ":afterReleaseBuild"
+preTagCommit.dependsOn ':updateReleaseVersionChangelog'
+updateNewVersionChangelog.mustRunAfter ":updateVersion"
+commitNewVersion.dependsOn ':updateNewVersionChangelog'
 
 release {
     failOnCommitNeeded = false
