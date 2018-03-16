@@ -120,44 +120,44 @@ github {
 }
 
 subprojects {
-    configure(subprojects.findAll {it.parent.name == 'samples'}) {
-        task githubReleaseZip(type: Zip) << {
-            version = "v${rootProject.version}"
+    if (parent.name == 'samples') {
+            task githubReleaseZip(type: Zip) {
+                version = "v${rootProject.version}"
 
-            from('.') {
-                filesNotMatching("**/*.png") {
-                    filter { String line ->
-                        line.replaceAll("compile project\\(':rides-android'\\)",
-                                "compile '${groupId}:rides-android:${rootProject.version}'")
+                from('.') {
+                    filesNotMatching("**/*.png") {
+                        filter { String line ->
+                            line.replaceAll("compile project\\(':rides-android'\\)",
+                                    "compile '${GROUP}:rides-android:${rootProject.version}'")
+                        }
+                        filter { String line ->
+                            line.replaceAll("compile project\\(':core-android'\\)",
+                                    "compile '${GROUP}:core-android:${rootProject.version}'")
+                        }
+                    }
+                    into '.'
+                    exclude 'build'
+                    exclude '*.iml'
+                }
+
+                from(rootProject.projectDir.absolutePath) {
+                    include 'gradle/'
+                    include 'gradlew'
+                    include 'gradlew.bat'
+                    include 'LICENSE'
+                    into '.'
+                }
+
+                from('build/poms') {
+                    include 'pom-default.xml'
+                    rename { String fileName ->
+                        fileName.replaceAll('-default', '')
                     }
                     filter { String line ->
-                        line.replaceAll("compile project\\(':core-android'\\)",
-                                "compile '${groupId}:core-android:${rootProject.version}'")
+                        line.replaceAll('-SNAPSHOT', '')
                     }
+                    into '.'
                 }
-                into '.'
-                exclude 'build'
-                exclude '*.iml'
             }
-
-            from(rootProject.projectDir.absolutePath) {
-                include 'gradle/'
-                include 'gradlew'
-                include 'gradlew.bat'
-                include 'LICENSE'
-                into '.'
-            }
-
-            from('build/poms') {
-                include 'pom-default.xml'
-                rename { String fileName ->
-                    fileName.replaceAll('-default', '')
-                }
-                filter { String line ->
-                    line.replaceAll('-SNAPSHOT', '')
-                }
-                into '.'
-            }
-        }
     }
 }

@@ -15,6 +15,7 @@
  */
 
 buildscript {
+    apply from: rootProject.file('gradle/dependencies.gradle')
     repositories {
         jcenter()
         google()
