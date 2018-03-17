@@ -109,6 +109,8 @@ configureGithub.mustRunAfter ":createReleaseTag"
 updateVersion.dependsOn ":githubRelease"
 githubRelease.mustRunAfter ":configureGithub"
 
+afterReleaseBuild.dependsOn(":core-android:uploadArchives", ":rides-android:uploadArchives")
+
 updateReleaseVersionChangelog.mustRunAfter ":afterReleaseBuild"
 preTagCommit.dependsOn ':updateReleaseVersionChangelog'
 updateNewVersionChangelog.mustRunAfter ":updateVersion"
