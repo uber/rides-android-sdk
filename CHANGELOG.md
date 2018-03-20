@@ -3,6 +3,7 @@ v0.9.1 - TBD
 
 ### Fixed
  - [Issue #115](https://github.com/uber/rides-android-sdk/issues/115) Release Script is creating invalid release notes/download artifacts.
+ - Updated to Java SDK 0.8.0 to fix Token Refresh NPE
 
 
 v0.9.0 - 02/13/2018
