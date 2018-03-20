@@ -1,6 +1,10 @@
 v0.9.1 - TBD
 ------------
 
+### Fixed
+ - [Issue #115](https://github.com/uber/rides-android-sdk/issues/115) Release Script is creating invalid release notes/download artifacts.
+
+
 v0.9.0 - 02/13/2018
 ------------
 

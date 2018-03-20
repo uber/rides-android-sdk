@@ -15,7 +15,7 @@
  */
 
 buildscript {
-    apply from: 'gradle/dependencies.gradle'
+    apply from: rootProject.file('gradle/dependencies.gradle')
 
     repositories {
         jcenter()
@@ -32,5 +32,5 @@ task wrapper(type: Wrapper) {
     distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 }
 
-apply from: 'gradle/github-release.gradle'
-apply from: 'gradle/verification.gradle'
+apply from: rootProject.file('gradle/github-release.gradle')
+apply from: rootProject.file('gradle/verification.gradle')
