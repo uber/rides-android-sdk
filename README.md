@@ -244,7 +244,7 @@ With Version 0.8 and above of the SDK, the redirect URI is more strongly enforce
 standards [IETF RFC](https://tools.ietf.org/html/draft-ietf-oauth-native-apps-12).
 
 The SDK will automatically created a redirect URI to be used in the oauth callbacks with
-the format "applicationId.uberauth", ex "com.example.uberauth". **This URI must be registered in 
+the format "applicationId.uberauth://redirect", ex "com.example.app.uberauth://redirect". **This URI must be registered in 
 the [developer dashboard](https://developer.uber.com/dashboard)**
 
 If this differs from the previous specified redirect URI configured in the SessionConfiguration, 
@@ -255,7 +255,7 @@ there are a few options.
 
 ```java
 SessionConfiguration config = new SessionConfiguration.Builder()
-    .setRedirectUri("com.example.app.uberauth")
+    .setRedirectUri("com.example.app.uberauth://redirect")
     .build();
 ```
 
@@ -284,7 +284,7 @@ manager should indicate the SDK is operating in the Authorization Code Flow.
 
 ```java
 SessionConfiguration config = new SessionConfiguration.Builder()
-    .setRedirectUri("example.com/redirect") //Where this is your configured server
+    .setRedirectUri("https://example.com/redirect") //Where this is your configured server
     .build();
 
 loginManager.setAuthCodeEnabled(true);
@@ -293,7 +293,7 @@ loginManager.login(this);
 ```
    
  Once the code is exchanged, the server should redirect to a URI in the standard OAUTH format of 
- `com.example.uberauth://redirect#access_token=ACCESS_TOKEN&token_type=Bearer&expires_in=TTL&scope=SCOPES`
+ `com.example.app.uberauth://redirect#access_token=ACCESS_TOKEN&token_type=Bearer&expires_in=TTL&scope=SCOPES`
   for the SDK to receive the access token and continue operation.`` 
   
 
