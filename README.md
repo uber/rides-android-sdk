@@ -255,7 +255,7 @@ there are a few options.
 
 ```java
 SessionConfiguration config = new SessionConfiguration.Builder()
-    .setRedirectUri("com.example.app.uberauth://redirecturi")
+    .setRedirectUri("com.example.app.uberauth://redirect")
     .build();
 ```
 
