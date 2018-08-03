@@ -29,17 +29,19 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
-
+import android.util.Pair;
 import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.Deeplink;
+import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.utils.AppProtocol;
-import com.uber.sdk.android.core.utils.PackageManagers;
 import com.uber.sdk.core.auth.Scope;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static com.uber.sdk.android.core.SupportedAppType.UBER;
+import static com.uber.sdk.android.core.SupportedAppType.UBER_EATS;
 import static com.uber.sdk.android.core.UberSdk.UBER_SDK_LOG_TAG;
 import static com.uber.sdk.android.core.utils.Preconditions.checkNotEmpty;
 import static com.uber.sdk.android.core.utils.Preconditions.checkNotNull;
@@ -54,7 +56,9 @@ public class SsoDeeplink implements Deeplink {
     public static final int DEFAULT_REQUEST_CODE = LoginManager.REQUEST_CODE_LOGIN_DEFAULT;
 
     @VisibleForTesting
-    static final int MIN_VERSION_SUPPORTED = 31302;
+    static final int MIN_UBER_RIDES_VERSION_SUPPORTED = 31302;
+    @VisibleForTesting
+    static final int MIN_UBER_EATS_VERSION_SUPPORTED = 983;
 
     private static final String URI_QUERY_CLIENT_ID = "client_id";
     private static final String URI_QUERY_SCOPE = "scope";
@@ -63,25 +67,25 @@ public class SsoDeeplink implements Deeplink {
     private static final String URI_HOST = "connect";
 
     private final Activity activity;
+    private final AppProtocol appProtocol;
     private final String clientId;
     private final Collection<Scope> requestedScopes;
     private final Collection<String> requestedCustomScopes;
     private final int requestCode;
 
-    AppProtocol appProtocol;
-
-    SsoDeeplink(
+    private SsoDeeplink(
             @NonNull Activity activity,
+            @NonNull AppProtocol appProtocol,
             @NonNull String clientId,
             @NonNull Collection<Scope> requestedScopes,
             @NonNull Collection<String> requestedCustomScopes,
             int requestCode) {
         this.activity = activity;
+        this.appProtocol = appProtocol;
         this.clientId = clientId;
         this.requestCode = requestCode;
         this.requestedScopes = requestedScopes;
         this.requestedCustomScopes = requestedCustomScopes;
-        appProtocol = new AppProtocol();
     }
 
     /**
@@ -95,16 +99,13 @@ public class SsoDeeplink implements Deeplink {
         checkState(isSupported(), "Single sign on is not supported on the device. " +
                 "Please install or update to the latest version of Uber app.");
 
-
         Intent intent = new Intent(Intent.ACTION_VIEW);
         final Uri deepLinkUri = createSsoUri();
         intent.setData(deepLinkUri);
 
-        for (String installedPackage : AppProtocol.UBER_PACKAGE_NAMES) {
-            if (PackageManagers.isPackageAvailable(activity, installedPackage)) {
-                intent.setPackage(installedPackage);
-                break;
-            }
+        PackageInfo installedPackage = appProtocol.getInstalledUberAppPackage(activity);
+        if (installedPackage != null) {
+            intent.setPackage(installedPackage.packageName);
         }
         activity.startActivityForResult(intent, requestCode);
     }
@@ -112,7 +113,7 @@ public class SsoDeeplink implements Deeplink {
     private Uri createSsoUri() {
         String scopes = AuthUtils.scopeCollectionToString(requestedScopes);
         if (!requestedCustomScopes.isEmpty()) {
-            scopes =  AuthUtils.mergeScopeStrings(scopes,
+            scopes = AuthUtils.mergeScopeStrings(scopes,
                     AuthUtils.customScopeCollectionToString(requestedCustomScopes));
         }
         return new Uri.Builder().scheme(Deeplink.DEEPLINK_SCHEME)
@@ -131,24 +132,31 @@ public class SsoDeeplink implements Deeplink {
      */
     @Override
     public boolean isSupported() {
-
-        PackageInfo packageInfo = null;
-        for (String installedPackage : AppProtocol.UBER_PACKAGE_NAMES) {
-            if (PackageManagers.isPackageAvailable(activity, installedPackage)) {
-                packageInfo = PackageManagers.getPackageInfo(activity, installedPackage);
-                break;
-            }
+        Pair<SupportedAppType, PackageInfo> installedUberAppPackage = appProtocol.getInstalledUberApp(activity);
+        if (installedUberAppPackage == null) {
+            return false;
         }
 
-        return (packageInfo != null)
-                && appProtocol.validateMinimumVersion(activity, packageInfo, MIN_VERSION_SUPPORTED)
+        SupportedAppType supportedApp = installedUberAppPackage.first;
+        int minimumVersion;
+        if (UBER == supportedApp) {
+            minimumVersion = MIN_UBER_RIDES_VERSION_SUPPORTED;
+        } else if (UBER_EATS == supportedApp) {
+            minimumVersion = MIN_UBER_EATS_VERSION_SUPPORTED;
+        } else {
+            return false;
+        }
+
+        PackageInfo packageInfo = installedUberAppPackage.second;
+        return packageInfo != null
+                && appProtocol.validateMinimumVersion(activity, packageInfo, minimumVersion)
                 && appProtocol.validateSignature(activity, packageInfo.packageName);
     }
 
     public static class Builder {
 
         private final Activity activity;
-
+        private AppProtocol appProtocol;
         private String clientId;
         private Collection<Scope> requestedScopes;
         private Collection<String> requestedCustomScopes;
@@ -183,6 +191,12 @@ public class SsoDeeplink implements Deeplink {
             return this;
         }
 
+        @VisibleForTesting
+        Builder appProtocol(@NonNull AppProtocol appProtocol) {
+            this.appProtocol = appProtocol;
+            return this;
+        }
+
         public SsoDeeplink build() {
             checkNotNull(clientId, "Client Id must be set");
 
@@ -195,7 +209,17 @@ public class SsoDeeplink implements Deeplink {
             if (requestCode == DEFAULT_REQUEST_CODE) {
                 Log.i(UBER_SDK_LOG_TAG, "Request code is not set, using default request code");
             }
-            return new SsoDeeplink(activity, clientId, requestedScopes, requestedCustomScopes, requestCode);
+
+            if (appProtocol == null) {
+                appProtocol = new AppProtocol();
+            }
+
+            return new SsoDeeplink(activity,
+                    appProtocol,
+                    clientId,
+                    requestedScopes,
+                    requestedCustomScopes,
+                    requestCode);
         }
     }
 }

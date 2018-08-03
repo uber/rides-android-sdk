@@ -138,7 +138,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
     @Test
     public void login_withLegacyModeBlocking_shouldNotLogin() {
-        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_VERSION_SUPPORTED);
+        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED);
         when(legacyUriRedirectHandler.checkValidState(eq(activity), eq(loginManager))).thenReturn(false);
         loginManager.login(activity);
 
@@ -147,7 +147,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
     @Test
     public void login_withLegacyModeNotBlocking_shouldLogin() {
-        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_VERSION_SUPPORTED);
+        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED);
         when(legacyUriRedirectHandler.checkValidState(eq(activity), eq(loginManager))).thenReturn(true);
         loginManager.login(activity);
 
@@ -156,7 +156,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
     @Test
     public void loginWithAppInstalledPrivilegedScopes_shouldLaunchIntent() {
-        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_VERSION_SUPPORTED);
+        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED);
 
         loginManager.login(activity);
 
@@ -174,7 +174,7 @@ public class LoginManagerTest extends RobolectricTestBase {
         loginManager = new LoginManager(accessTokenStorage, callback,
                 sessionConfiguration, REQUEST_CODE);
 
-        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_VERSION_SUPPORTED);
+        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED);
 
         loginManager.login(activity);
 

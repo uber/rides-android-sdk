@@ -22,19 +22,13 @@
 
 package com.uber.sdk.android.rides;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.support.customtabs.CustomTabsIntent;
 
 import com.uber.sdk.android.core.Deeplink;
 import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.android.core.utils.CustomTabsHelper;
-import com.uber.sdk.android.core.utils.PackageManagers;
 import com.uber.sdk.core.client.SessionConfiguration;
 
 import org.junit.Before;
@@ -42,13 +36,10 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.res.builder.RobolectricPackageManager;
-import org.robolectric.shadows.ShadowActivity;
 
 import java.io.IOException;
 
+import static com.uber.sdk.android.core.SupportedAppType.UBER;
 import static com.uber.sdk.android.rides.TestUtils.readUriResourceWithUserAgentParam;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -56,15 +47,12 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.Shadows.shadowOf;
 
 /**
  * Tests {@link RideRequestDeeplink}
  */
 public class RideRequestDeeplinkTest extends RobolectricTestBase {
 
-    private static final String UBER_PACKAGE_NAME = "com.ubercab";
-    private static final String CLIENT_ID = "clientId";
     private static final String PRODUCT_ID = "productId";
     private static final Double PICKUP_LAT = 32.1234;
     private static final Double PICKUP_LONG = -122.3456;
@@ -84,7 +72,7 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(appProtocol.isUberInstalled(eq(context))).thenReturn(true);
+        when(appProtocol.isInstalled(eq(context), eq(UBER))).thenReturn(true);
         when(appProtocol.isAppLinkSupported()).thenReturn(false);
     }
 
@@ -190,7 +178,6 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
                 ("src/test/resources/deeplinkuris/mobile_web_ul_just_client_provided",
                 USER_AGENT_DEEPLINK);
 
-        when(appProtocol.isUberInstalled(eq(context))).thenReturn(true);
         when(appProtocol.isAppLinkSupported()).thenReturn(true);
 
         RideParameters rideParameters = new RideParameters.Builder().build();
@@ -210,7 +197,6 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
                 ("src/test/resources/deeplinkuris/just_client_provided",
                         USER_AGENT_DEEPLINK);
 
-        when(appProtocol.isUberInstalled(eq(context))).thenReturn(true);
         when(appProtocol.isAppLinkSupported()).thenReturn(false);
 
         RideParameters rideParameters = new RideParameters.Builder().build();
@@ -229,7 +215,7 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
                 ("src/test/resources/deeplinkuris/mobile_web_just_client_provided",
                         USER_AGENT_DEEPLINK);
 
-        when(appProtocol.isUberInstalled(eq(context))).thenReturn(false);
+        when(appProtocol.isInstalled(eq(context), eq(UBER))).thenReturn(false);
 
         RideParameters rideParameters = new RideParameters.Builder().build();
         RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context)
@@ -248,7 +234,7 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
                 ("src/test/resources/deeplinkuris/mobile_web_ul_just_client_provided",
                         USER_AGENT_DEEPLINK);
 
-        when(appProtocol.isUberInstalled(eq(context))).thenReturn(false);
+        when(appProtocol.isInstalled(eq(context), eq(UBER))).thenReturn(false);
 
         RideParameters rideParameters = new RideParameters.Builder().build();
         RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context)
@@ -267,7 +253,7 @@ public class RideRequestDeeplinkTest extends RobolectricTestBase {
                 ("src/test/resources/deeplinkuris/mobile_web_ul_just_client_provided",
                         USER_AGENT_DEEPLINK);
 
-        when(appProtocol.isUberInstalled(eq(context))).thenReturn(false);
+        when(appProtocol.isInstalled(eq(context), eq(UBER))).thenReturn(false);
 
         RideParameters rideParameters = new RideParameters.Builder().build();
         RideRequestDeeplink rideRequestDeeplink = new RideRequestDeeplink.Builder(context)

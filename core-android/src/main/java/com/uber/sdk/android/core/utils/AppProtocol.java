@@ -1,6 +1,5 @@
 package com.uber.sdk.android.core.utils;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -9,32 +8,67 @@ import android.content.pm.Signature;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.util.Base64;
+import android.util.Pair;
+import com.uber.sdk.android.core.SupportedAppType;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import static com.uber.sdk.android.core.SupportedAppType.UBER;
+import static com.uber.sdk.android.core.SupportedAppType.UBER_EATS;
 
 public class AppProtocol {
+    @Deprecated
     public static final String[] UBER_PACKAGE_NAMES =
-            {"com.ubercab", "com.ubercab.presidio.app", "com.ubercab.presidio.exo",
-                    "com.ubercab.presidio.development"};
+            {"com.ubercab", "com.ubercab.presidio.app", "com.ubercab.presidio.exo", "com.ubercab.presidio.development"};
+
+    @VisibleForTesting
+    static final String[] RIDER_PACKAGE_NAMES =
+            {"com.ubercab.presidio.development", "com.ubercab.presidio.exo", "com.ubercab.presidio.app", "com.ubercab"};
+    @VisibleForTesting
+    static final String[] EATS_PACKAGE_NAMES =
+            {"com.ubercab.eats.debug", "com.ubercab.eats.exo", "com.ubercab.eats"};
     public static final String PLATFORM = "android";
 
     private static final String UBER_RIDER_HASH = "411c40b31f6d01dac68d711df99b6eafeec8e73b";
+    private static final String UBER_EATS_HASH = "ae0b86995f174533b423067837beba13d922fbb0";
     private static final String HASH_ALGORITHM_SHA1 = "SHA-1";
 
     private static final HashSet<String> validAppSignatureHashes = buildAppSignatureHashes();
 
+    @NonNull
     private static HashSet<String> buildAppSignatureHashes() {
         HashSet<String> set = new HashSet<>();
         set.add(UBER_RIDER_HASH);
+        set.add(UBER_EATS_HASH);
         return set;
+    }
+
+    /**
+     * @return Map of SupportedAppType and their respective package names.
+     */
+    @NonNull
+    private static Map<SupportedAppType, List<String>> getSupportedPackageNames() {
+        Map<SupportedAppType, List<String>> packageNames = new HashMap<>();
+        packageNames.put(UBER, Arrays.asList(RIDER_PACKAGE_NAMES));
+        packageNames.put(UBER_EATS, Arrays.asList(EATS_PACKAGE_NAMES));
+        return packageNames;
     }
 
     /**
      * Validates minimum version of app required or returns true if in debug.
      */
-    public boolean validateMinimumVersion(Context context, PackageInfo packageInfo, int minimumVersion) {
+    public boolean validateMinimumVersion(
+            @NonNull Context context, @NonNull PackageInfo packageInfo, int minimumVersion) {
         if (isDebug(context)) {
             return true;
         }
@@ -42,20 +76,47 @@ public class AppProtocol {
         return packageInfo.versionCode >= minimumVersion;
     }
 
+    /**
+     * @deprecated Use {@link #isInstalled(Context, SupportedAppType)}.
+     */
+    @Deprecated
     public boolean isUberInstalled(@NonNull Context context) {
-        return getInstalledUberAppPackage(context) != null;
+        return isInstalled(context, UBER);
+    }
+
+    /**
+     * Check if the {@link SupportedAppType} is installed.
+     *
+     * @param context
+     * @param supportedApp
+     * @return
+     */
+    public boolean isInstalled(@NonNull Context context, SupportedAppType supportedApp) {
+        return getInstalledUberAppPackage(context, Collections.singletonList(supportedApp)) != null;
     }
 
     @Nullable
-    PackageInfo getInstalledUberAppPackage(@NonNull Context context) {
-        PackageInfo packageInfo = null;
-        for (String installedPackage : AppProtocol.UBER_PACKAGE_NAMES) {
-            if (PackageManagers.isPackageAvailable(context, installedPackage)) {
-                packageInfo = PackageManagers.getPackageInfo(context, installedPackage);
-                break;
+    public PackageInfo getInstalledUberAppPackage(@NonNull Context context) {
+        Pair<SupportedAppType, PackageInfo> installedApp = getInstalledUberApp(context);
+        return installedApp != null ? installedApp.second : null;
+    }
+
+    @Nullable
+    public Pair<SupportedAppType, PackageInfo> getInstalledUberApp(@NonNull Context context) {
+        return getInstalledUberAppPackage(context, Arrays.asList(SupportedAppType.values()));
+    }
+
+    @Nullable
+    private Pair<SupportedAppType, PackageInfo> getInstalledUberAppPackage(
+            @NonNull Context context, @NonNull Collection<SupportedAppType> selectedApps) {
+        for (SupportedAppType app : selectedApps) {
+            for (String installedPackage : getSupportedPackageNames().get(app)) {
+                if (PackageManagers.isPackageAvailable(context, installedPackage)) {
+                    return new Pair<>(app, PackageManagers.getPackageInfo(context, installedPackage));
+                }
             }
         }
-        return packageInfo;
+        return null;
     }
 
     /**
@@ -68,8 +129,7 @@ public class AppProtocol {
     /**
      * Validates the app signature required or returns true if in debug.
      */
-    @SuppressLint("PackageManagerGetSignatures")
-    public boolean validateSignature(Context context, String packageName) {
+    public boolean validateSignature(@NonNull Context context, @NonNull String packageName) {
         if (isDebug(context)) {
             return true;
         }
@@ -130,7 +190,7 @@ public class AppProtocol {
         return MessageDigest.getInstance(HASH_ALGORITHM_SHA1);
     }
 
-    private boolean isDebug(Context context) {
+    private boolean isDebug(@NonNull Context context) {
         String brand = Build.BRAND;
         int applicationFlags = context.getApplicationInfo().flags;
         if ((brand.startsWith("Android") || brand.startsWith("generic")) &&
