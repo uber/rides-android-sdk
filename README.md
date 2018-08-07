@@ -287,14 +287,14 @@ SessionConfiguration config = new SessionConfiguration.Builder()
     .setRedirectUri("https://example.com/redirect") //Where this is your configured server
     .build();
 
-loginManager.setAuthCodeFlowEnabled(true);
+loginManager.setAuthCodeFlowEnabled(true); // or loginManager.setForceAuthCodeFlowEnabled(true) (see below)
 loginManager.login(this);
 
 ```
    
  Once the code is exchanged, the server should redirect to a URI in the standard OAUTH format of 
- `com.example.app.uberauth://redirect#access_token=ACCESS_TOKEN&token_type=Bearer&expires_in=TTL&scope=SCOPES`
-  for the SDK to receive the access token and continue operation.`` 
+ `com.example.app.uberauth://redirect#access_token=ACCESS_TOKEN&token_type=Bearer&expires_in=TTL&scope=SCOPES&refresh_token=REFRESH_TOKEN`
+  for the SDK to receive the access token and continue operation.``
   
 
 ##### Authorization Code Flow
@@ -302,9 +302,11 @@ loginManager.login(this);
 
 The default behavior of calling   `LoginManager.login(activity)` is to activate Single Sign On, 
 and if SSO is unavailable, fallback to Implicit Grant if privileged scopes are not requested, 
-otherwise redirect to the Play Store. If Authorization Code Grant is required, set `LoginManager
-.setAuthCodeFlowEnabled(true)` to prevent the redirect to the Play Store. Implicit Grant will allow 
-access to all non-privileged scopes, where as the other two both grant access to privileged scopes. [Read more about scopes](https://developer.uber.com/docs/scopes).
+otherwise redirect to the Play Store. If you require Authorization Code Grant, you have two options 
+for overriding this behavior: set `LoginManager.setAuthCodeFlowEnabled(true)` to use the Authorization Code Flow only for 
+requesting privileged scopes (and fallback to ImplicitGrant otherwise) or set `LoginManager.setForceAuthCodeFlowEnabled(true)`
+to prefer the Authorization Code Flow regardless of scope. Either option will prevent the redirect to the Play Store.
+Implicit Grant will allow access to all non-privileged scopes (and will not grant a refresh token), whereas the other options grant access to privileged scopes. [Read more about scopes](https://developer.uber.com/docs/scopes).
 
 
 #### Login Errors

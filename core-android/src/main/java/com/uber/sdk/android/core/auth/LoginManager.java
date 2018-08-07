@@ -97,6 +97,7 @@ public class LoginManager {
     private final LegacyUriRedirectHandler legacyUriRedirectHandler;
 
     private boolean authCodeFlowEnabled = false;
+    private boolean forceAuthCodeFlowEnabled = false;
     @Deprecated
     private boolean redirectForAuthorizationCode = false;
 
@@ -181,6 +182,8 @@ public class LoginManager {
 
         if (ssoDeeplink.isSupported()) {
             ssoDeeplink.execute();
+        } else if (isForceAuthCodeFlowEnabled()) {
+            loginForAuthorizationCode(activity);
         } else if (!AuthUtils.isPrivilegeScopeRequired(sessionConfiguration.getScopes())) {
             loginForImplicitGrant(activity);
         } else if (isAuthCodeFlowEnabled()) {
@@ -345,6 +348,37 @@ public class LoginManager {
         return authCodeFlowEnabled;
     }
 
+    /**
+     * Force the use of the Authorization Code Flow
+     * (See <a href="https://developer.uber.com/docs/authentication#section-step-one-authorize" />
+     * https://developer.uber.com/docs/authentication#section-step-one-authorize</a>)
+     * instead of falling back to Implicit Grant (WebView) if the user doesn't have the Uber app installed regardless
+     * of the user's requested scopes. This takes precedence over {@link #setAuthCodeFlowEnabled(boolean)}.
+     *
+     * Requires that the app's backend system is configured to support this flow and the redirect
+     * URI is pointed correctly.
+     *
+     *
+     * @param forceAuthCodeFlowEnabled true for use of auth code flow, false to fallback to Implicit Grant
+     * @return this instace of {@link LoginManager}
+     */
+    public LoginManager setForceAuthCodeFlowEnabled(boolean forceAuthCodeFlowEnabled) {
+        this.forceAuthCodeFlowEnabled = forceAuthCodeFlowEnabled;
+        return this;
+    }
+
+    /**
+     * Indicates whether to force use of the Authorization Code Flow
+     * (See <a href="https://developer.uber.com/docs/authentication#section-step-one-authorize" />
+     * https://developer.uber.com/docs/authentication#section-step-one-authorize</a>)
+     * instead of Implicit Grant (WebView) as a login mechanism in the event that the Uber app is not installed.
+     *
+     * @return true if Auth Code Flow is attempted before Implicit Grant, otherwise false
+     */
+    public boolean isForceAuthCodeFlowEnabled() {
+        return this.forceAuthCodeFlowEnabled;
+    }
+
     private void redirectToInstallApp(@NonNull Activity activity) {
         new SignupDeeplink(activity, sessionConfiguration.getClientId(), USER_AGENT).execute();
     }
@@ -391,6 +425,9 @@ public class LoginManager {
         if (authenticationError.equals(AuthenticationError.CANCELLED)) {
             // User canceled login
             callback.onLoginCancel();
+            return;
+        } else if (authenticationError.equals(AuthenticationError.UNAVAILABLE) && isForceAuthCodeFlowEnabled()) {
+            loginForAuthorizationCode(activity);
             return;
         } else if (authenticationError.equals(AuthenticationError.UNAVAILABLE) &&
                 !AuthUtils.isPrivilegeScopeRequired(sessionConfiguration.getScopes())) {
