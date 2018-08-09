@@ -71,7 +71,7 @@ class LegacyUriRedirectHandler {
             mode = Mode.MISSING_REDIRECT;
         } else if (!generatedRedirectUri.equals(setRedirectUri) &&
                 !AuthUtils.isRedirectUriRegistered(activity, Uri.parse(setRedirectUri)) &&
-                !loginManager.isAuthCodeFlowEnabled() && !loginManager .isForceAuthCodeFlowEnabled()) {
+                !loginManager.isAuthCodeFlowEnabled()) {
             mode = Mode.MISMATCHING_URI;
         } else {
             mode = Mode.OFF;

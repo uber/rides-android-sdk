@@ -185,20 +185,6 @@ public class LegacyUriRedirectHandlerTest extends RobolectricTestBase {
     }
 
     @Test
-    public void handleInvalidState_withForceAuthCodeFlowAndMisMatchingRedirectUriInDebug_validState() {
-        when(sessionConfiguration.getRedirectUri())
-                .thenReturn("com.example2.uberauth://redirect-uri");
-        when(loginManager.isForceAuthCodeFlowEnabled()).thenReturn(true);
-
-        assertThat(legacyUriRedirectHandler.checkValidState(activity,
-                loginManager)).isTrue();
-        assertThat(legacyUriRedirectHandler.isLegacyMode()).isFalse();
-
-        assertNoDialogShown();
-        assertNoLogs();
-    }
-
-    @Test
     public void handleInvalidState_withAuthCodeFlowAndMisMatchingRedirectUriInRelease_validState() {
         when(sessionConfiguration.getRedirectUri())
                 .thenReturn("com.example2.uberauth://redirect-uri");
@@ -206,23 +192,6 @@ public class LegacyUriRedirectHandlerTest extends RobolectricTestBase {
         applicationInfo.flags = 0;
 
         assertThat(legacyUriRedirectHandler.checkValidState(activity,
-                loginManager)).isTrue();
-        assertThat(legacyUriRedirectHandler.isLegacyMode()).isFalse();
-
-        assertNoDialogShown();
-        assertNoLogs();
-    }
-
-    @Test
-    public void handleInvalidState_withForceAuthCodeFlowAndMisMatchingRedirectUriInRelease_validState() {
-        when(sessionConfiguration.getRedirectUri())
-                .thenReturn("com.example2.uberauth://redirect-uri");
-        when(loginManager.isForceAuthCodeFlowEnabled()).thenReturn(true);
-        applicationInfo.flags = 0;
-
-        assertThat(legacyUriRedirectHandler.
-
-                checkValidState(activity,
                 loginManager)).isTrue();
         assertThat(legacyUriRedirectHandler.isLegacyMode()).isFalse();
 
