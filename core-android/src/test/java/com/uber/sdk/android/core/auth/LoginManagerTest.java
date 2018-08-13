@@ -188,7 +188,7 @@ public class LoginManagerTest extends RobolectricTestBase {
     }
 
     @Test
-    public void loginWithoutAppInstalledGeneralScopes_shouldLaunchImplicitGrant() {
+    public void loginWithoutAppInstalledGeneralScopesAndAuthCodeFlowDisabled_shouldLaunchImplicitGrant() {
         sessionConfiguration = sessionConfiguration.newBuilder().setScopes(GENERAL_SCOPES).build();
         loginManager = new LoginManager(accessTokenStorage, callback,
                 sessionConfiguration);
