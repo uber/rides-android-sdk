@@ -287,7 +287,7 @@ SessionConfiguration config = new SessionConfiguration.Builder()
     .setRedirectUri("https://example.com/redirect") //Where this is your configured server
     .build();
 
-loginManager.setAuthCodeEnabled(true);
+loginManager.setAuthCodeFlowEnabled(true);
 loginManager.login(this);
 
 ```
@@ -303,7 +303,7 @@ loginManager.login(this);
 The default behavior of calling   `LoginManager.login(activity)` is to activate Single Sign On, 
 and if SSO is unavailable, fallback to Implicit Grant if privileged scopes are not requested, 
 otherwise redirect to the Play Store. If Authorization Code Grant is required, set `LoginManager
-.setAuthCodeEnabled(true)` to prevent the redirect to the Play Store. Implicit Grant will allow 
+.setAuthCodeFlowEnabled(true)` to prevent the redirect to the Play Store. Implicit Grant will allow 
 access to all non-privileged scopes, where as the other two both grant access to privileged scopes. [Read more about scopes](https://developer.uber.com/docs/scopes).
 
 
