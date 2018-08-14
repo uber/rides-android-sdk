@@ -23,10 +23,10 @@ def versions = [
 def build = [
         gradleVersion: '4.9',
         buildToolsVersion: '26.0.2',
-        compileSdkVersion: 26,
+        compileSdkVersion: 27,
         ci: 'true' == System.getenv('CI'),
         minSdkVersion: 15,
-        targetSdkVersion: 26,
+        targetSdkVersion: 27,
 
         repositories: [
                 plugins: 'https://plugins.gradle.org/m2/'
