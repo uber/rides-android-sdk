@@ -43,11 +43,20 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
-    compile project(':rides-android')
-    compile deps.support.appCompat
+    implementation (deps.uber.uberRides) {
+        exclude module: 'slf4j-log4j12'
+    }
+    implementation project(':core-android')
+    implementation project(':rides-android')
+    implementation deps.support.appCompat
 }
 
 /**
