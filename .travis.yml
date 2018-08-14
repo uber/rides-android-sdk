@@ -15,7 +15,7 @@ before_install:
   - echo "$LICENSES_HASH" > "$ANDROID_HOME/licenses/android-sdk-license"
   - echo "$LICENSES_HASH_TWO" >> "$ANDROID_HOME/licenses/android-sdk-license"
   # Install the rest of tools (e.g., avdmanager)
-  - sdkmanager tools
+  - yes | sdkmanager tools
   # Install the system image
   - sdkmanager "system-images;android-18;default;armeabi-v7a"
   # Create and start emulator for the script. Meant to race the install task.
