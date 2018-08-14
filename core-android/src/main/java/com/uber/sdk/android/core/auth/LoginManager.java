@@ -181,10 +181,10 @@ public class LoginManager {
 
         if (ssoDeeplink.isSupported()) {
             ssoDeeplink.execute();
-        } else if (!AuthUtils.isPrivilegeScopeRequired(sessionConfiguration.getScopes())) {
-            loginForImplicitGrant(activity);
         } else if (isAuthCodeFlowEnabled()) {
             loginForAuthorizationCode(activity);
+        } else if (!AuthUtils.isPrivilegeScopeRequired(sessionConfiguration.getScopes())) {
+            loginForImplicitGrant(activity);
         } else {
             redirectToInstallApp(activity);
         }
@@ -319,8 +319,9 @@ public class LoginManager {
 
     /**
      * Enable the use of the Authorization Code Flow
-     * (https://developer.uber.com/docs/authentication#section-step-one-authorize) instead of an
-     * installation prompt for the Uber app as a login fallback mechanism.
+     * (See <a href="https://developer.uber.com/docs/authentication#section-step-one-authorize">
+     * https://developer.uber.com/docs/authentication#section-step-one-authorize</a>) instead of an
+     * installation prompt for the Uber app  or Implicit Grant (WebView) as a login fallback mechanism.
      *
      * Requires that the app's backend system is configured to support this flow and the redirect
      * URI is pointed correctly.
@@ -336,8 +337,9 @@ public class LoginManager {
 
     /**
      * Indicates the use of the Authorization Code Flow
-     * (https://developer.uber.com/docs/authentication#section-step-one-authorize) instead of an
-     * installation prompt for the Uber app as a login fallback mechanism.
+     * (See <a href="https://developer.uber.com/docs/authentication#section-step-one-authorize">
+     * https://developer.uber.com/docs/authentication#section-step-one-authorize</a>) instead of an
+     * installation prompt for the Uber app  or Implicit Grant (WebView) as a login fallback mechanism.
      *
      * @return true if Auth Code Flow is enabled, otherwise false
      */
@@ -392,13 +394,12 @@ public class LoginManager {
             // User canceled login
             callback.onLoginCancel();
             return;
+        } else if (authenticationError.equals(AuthenticationError.UNAVAILABLE) && isAuthCodeFlowEnabled()) {
+            loginForAuthorizationCode(activity);
+            return;
         } else if (authenticationError.equals(AuthenticationError.UNAVAILABLE) &&
                 !AuthUtils.isPrivilegeScopeRequired(sessionConfiguration.getScopes())) {
             loginForImplicitGrant(activity);
-            return;
-        } else if (authenticationError.equals(AuthenticationError.UNAVAILABLE)
-                && isAuthCodeFlowEnabled()) {
-            loginForAuthorizationCode(activity);
             return;
         } else if (AuthenticationError.INVALID_APP_SIGNATURE.equals(authenticationError)) {
             AppProtocol appProtocol = new AppProtocol();

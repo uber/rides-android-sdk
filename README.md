@@ -293,8 +293,8 @@ loginManager.login(this);
 ```
    
  Once the code is exchanged, the server should redirect to a URI in the standard OAUTH format of 
- `com.example.app.uberauth://redirect#access_token=ACCESS_TOKEN&token_type=Bearer&expires_in=TTL&scope=SCOPES`
-  for the SDK to receive the access token and continue operation.`` 
+ `com.example.app.uberauth://redirect#access_token=ACCESS_TOKEN&token_type=Bearer&expires_in=TTL&scope=SCOPES&refresh_token=REFRESH_TOKEN`
+  for the SDK to receive the access token and continue operation.``
   
 
 ##### Authorization Code Flow
@@ -302,9 +302,9 @@ loginManager.login(this);
 
 The default behavior of calling   `LoginManager.login(activity)` is to activate Single Sign On, 
 and if SSO is unavailable, fallback to Implicit Grant if privileged scopes are not requested, 
-otherwise redirect to the Play Store. If Authorization Code Grant is required, set `LoginManager
-.setAuthCodeFlowEnabled(true)` to prevent the redirect to the Play Store. Implicit Grant will allow 
-access to all non-privileged scopes, where as the other two both grant access to privileged scopes. [Read more about scopes](https://developer.uber.com/docs/scopes).
+otherwise redirect to the Play Store. If you require Authorization Code Grant, set `LoginManager.setAuthCodeFlowEnabled(true)` 
+to use the Authorization Code Flow as the fallback mechanism instead of Implicit Grant or redirecting to the Play Store (regardless of scope).
+Implicit Grant will allow access to all non-privileged scopes (and will not grant a refresh token), whereas the other options grant access to privileged scopes. [Read more about scopes](https://developer.uber.com/docs/scopes).
 
 
 #### Login Errors
