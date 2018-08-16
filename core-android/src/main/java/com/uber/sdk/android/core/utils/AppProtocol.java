@@ -15,9 +15,8 @@ import com.uber.sdk.android.core.SupportedAppType;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +41,7 @@ public class AppProtocol {
     private static final String UBER_RIDER_HASH = "411c40b31f6d01dac68d711df99b6eafeec8e73b";
     private static final String UBER_EATS_HASH = "ae0b86995f174533b423067837beba13d922fbb0";
     private static final String HASH_ALGORITHM_SHA1 = "SHA-1";
+    private static final int DEFAULT_MIN_VERSION = 0;
 
     private static final HashSet<String> validAppSignatureHashes = buildAppSignatureHashes();
 
@@ -85,38 +85,69 @@ public class AppProtocol {
     }
 
     /**
-     * Check if the {@link SupportedAppType} is installed.
+     * Verify if any version of the app has been installed on this device.
      *
-     * @param context
-     * @param supportedApp
-     * @return
+     * @param context      A {@link Context}.
+     * @param supportedApp The {@link SupportedAppType}.
+     * @return {@code true} if any version of the app is installed (min version of 0).
      */
-    public boolean isInstalled(@NonNull Context context, SupportedAppType supportedApp) {
-        return getInstalledUberAppPackage(context, Collections.singletonList(supportedApp)) != null;
+    public boolean isInstalled(@NonNull Context context, @NonNull SupportedAppType supportedApp) {
+        return isInstalled(context, supportedApp, DEFAULT_MIN_VERSION);
     }
 
-    @Nullable
-    public PackageInfo getInstalledUberAppPackage(@NonNull Context context) {
-        Pair<SupportedAppType, PackageInfo> installedApp = getInstalledUberApp(context);
-        return installedApp != null ? installedApp.second : null;
+    /**
+     * Check if the minimum version of {@link SupportedAppType} is installed.
+     *
+     * @param context        A {@link Context}.
+     * @param supportedApp   The {@link SupportedAppType}.
+     * @param minimumVersion The minimum version of {@link SupportedAppType} that must be installed.
+     * @return {@code true} if any valid package for the app is installed.
+     */
+    public boolean isInstalled(@NonNull Context context, @NonNull SupportedAppType supportedApp, int minimumVersion) {
+        return !getInstalledPackages(context, supportedApp, minimumVersion).isEmpty();
+
     }
 
-    @Nullable
-    public Pair<SupportedAppType, PackageInfo> getInstalledUberApp(@NonNull Context context) {
-        return getInstalledUberAppPackage(context, Arrays.asList(SupportedAppType.values()));
-    }
+    /**
+     * Find the installed and validated packages for a {@link SupportedAppType}.
+     * <p>
+     * This will validate the signature and minimum version of the installed package or exclude it from returned list.
+     *
+     * @param context         A {@link Context}.
+     * @param supportedApp   The {@link SupportedAppType}.
+     * @param minimumVersion The minimum version of {@link SupportedAppType} that must be installed.
+     * @return A list of {@link PackageInfo} which is installed and has been validated.
+     */
+    @NonNull
+    public List<PackageInfo> getInstalledPackages(
+            @NonNull Context context, @NonNull SupportedAppType supportedApp, int minimumVersion) {
+        List<PackageInfo> packageInfos = new ArrayList<>();
 
-    @Nullable
-    private Pair<SupportedAppType, PackageInfo> getInstalledUberAppPackage(
-            @NonNull Context context, @NonNull Collection<SupportedAppType> selectedApps) {
-        for (SupportedAppType app : selectedApps) {
-            for (String installedPackage : getSupportedPackageNames().get(app)) {
-                if (PackageManagers.isPackageAvailable(context, installedPackage)) {
-                    return new Pair<>(app, PackageManagers.getPackageInfo(context, installedPackage));
-                }
+        List<Pair<SupportedAppType, PackageInfo>> installedApps = getInstalledPackagesByApp(context, supportedApp);
+
+        for (Pair<SupportedAppType, PackageInfo> installedApp : installedApps) {
+            PackageInfo packageInfo = installedApp.second;
+            if (packageInfo != null
+                    && validateSignature(context, packageInfo.packageName)
+                    && validateMinimumVersion(context, packageInfo, minimumVersion)) {
+                packageInfos.add(packageInfo);
             }
         }
-        return null;
+        return packageInfos;
+    }
+
+    @NonNull
+    private List<Pair<SupportedAppType, PackageInfo>> getInstalledPackagesByApp(
+            @NonNull Context context, @NonNull SupportedAppType selectedApp) {
+        List<Pair<SupportedAppType, PackageInfo>> installedPackages = new ArrayList<>();
+
+        for (String installedPackage : getSupportedPackageNames().get(selectedApp)) {
+            if (PackageManagers.isPackageAvailable(context, installedPackage)) {
+                installedPackages.add(
+                        Pair.create(selectedApp, PackageManagers.getPackageInfo(context, installedPackage)));
+            }
+        }
+        return installedPackages;
     }
 
     /**
@@ -183,7 +214,7 @@ public class AppProtocol {
      * Gets an instance of {@link MessageDigest} with the SHA-1 Algorithm.
      *
      * @return the message digest.
-     * @throws NoSuchAlgorithmException
+     * @throws NoSuchAlgorithmException thrown by {@link MessageDigest#getInstance(String)}.
      */
     @NonNull
     MessageDigest getSha1MessageDigest() throws NoSuchAlgorithmException {
@@ -193,11 +224,8 @@ public class AppProtocol {
     private boolean isDebug(@NonNull Context context) {
         String brand = Build.BRAND;
         int applicationFlags = context.getApplicationInfo().flags;
-        if ((brand.startsWith("Android") || brand.startsWith("generic")) &&
-                (applicationFlags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-            // We are debugging on an emulator, don't validate package signature.
-            return true;
-        }
-        return false;
+        // We are debugging on an emulator, don't validate package signature.
+        return (brand.startsWith("Android") || brand.startsWith("generic")) &&
+                (applicationFlags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
     }
 }

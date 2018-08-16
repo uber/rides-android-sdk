@@ -39,6 +39,8 @@ import com.uber.sdk.core.auth.Scope;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import static com.uber.sdk.android.core.SupportedAppType.UBER;
 import static com.uber.sdk.android.core.SupportedAppType.UBER_EATS;
@@ -103,9 +105,12 @@ public class SsoDeeplink implements Deeplink {
         final Uri deepLinkUri = createSsoUri();
         intent.setData(deepLinkUri);
 
-        PackageInfo installedPackage = appProtocol.getInstalledUberAppPackage(activity);
-        if (installedPackage != null) {
-            intent.setPackage(installedPackage.packageName);
+        List<PackageInfo> validatedPackages = new ArrayList<>();
+        validatedPackages.addAll(appProtocol.getInstalledPackages(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED));
+        validatedPackages.addAll(appProtocol.getInstalledPackages(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED));
+
+        if(!validatedPackages.isEmpty()) {
+            intent.setPackage(validatedPackages.get(0).packageName);
         }
         activity.startActivityForResult(intent, requestCode);
     }
@@ -128,29 +133,12 @@ public class SsoDeeplink implements Deeplink {
     /**
      * Check if SSO deep linking is supported in this device.
      *
-     * @return
+     * @return true if package name and minimum version conditions are met.
      */
     @Override
     public boolean isSupported() {
-        Pair<SupportedAppType, PackageInfo> installedUberAppPackage = appProtocol.getInstalledUberApp(activity);
-        if (installedUberAppPackage == null) {
-            return false;
-        }
-
-        SupportedAppType supportedApp = installedUberAppPackage.first;
-        int minimumVersion;
-        if (UBER == supportedApp) {
-            minimumVersion = MIN_UBER_RIDES_VERSION_SUPPORTED;
-        } else if (UBER_EATS == supportedApp) {
-            minimumVersion = MIN_UBER_EATS_VERSION_SUPPORTED;
-        } else {
-            return false;
-        }
-
-        PackageInfo packageInfo = installedUberAppPackage.second;
-        return packageInfo != null
-                && appProtocol.validateMinimumVersion(activity, packageInfo, minimumVersion)
-                && appProtocol.validateSignature(activity, packageInfo.packageName);
+        return appProtocol.isInstalled(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED)
+            || appProtocol.isInstalled(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED);
     }
 
     public static class Builder {

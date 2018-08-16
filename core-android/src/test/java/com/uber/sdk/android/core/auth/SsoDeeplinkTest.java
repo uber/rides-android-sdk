@@ -23,15 +23,12 @@
 package com.uber.sdk.android.core.auth;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.net.Uri;
-import android.util.Pair;
 import com.google.common.collect.Sets;
 import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.RobolectricTestBase;
-import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.core.auth.Scope;
 import org.junit.Before;
@@ -42,15 +39,15 @@ import org.robolectric.Robolectric;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import static com.uber.sdk.android.core.SupportedAppType.UBER;
 import static com.uber.sdk.android.core.SupportedAppType.UBER_EATS;
+import static com.uber.sdk.android.core.auth.SsoDeeplink.MIN_UBER_EATS_VERSION_SUPPORTED;
 import static com.uber.sdk.android.core.auth.SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -77,8 +74,9 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     }
 
     @Test
-    public void testIsSupported_appInstalled_shouldBeTrue() {
-        enableSupport(UBER, MIN_UBER_RIDES_VERSION_SUPPORTED);
+    public void isSupported_appInstalled_shouldBeTrue() {
+        when(appProtocol.isInstalled(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED)).thenReturn(true);
+        when(appProtocol.isInstalled(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED)).thenReturn(false);
 
         final SsoDeeplink link = new SsoDeeplink.Builder(activity)
                 .clientId(CLIENT_ID)
@@ -90,8 +88,9 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     }
 
     @Test
-    public void testIsSupported_eatsAppInstalled_shouldBeTrue() {
-        enableSupport(UBER_EATS, SsoDeeplink.MIN_UBER_EATS_VERSION_SUPPORTED);
+    public void isSupported_eatsAppInstalled_shouldBeTrue() {
+        when(appProtocol.isInstalled(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED)).thenReturn(false);
+        when(appProtocol.isInstalled(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED)).thenReturn(true);
 
         final SsoDeeplink link = new SsoDeeplink.Builder(activity)
                 .clientId(CLIENT_ID)
@@ -103,9 +102,9 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     }
 
     @Test
-    public void testIsSupported_appInstalledWithBadSignature_shouldBeFalse() {
-        enableSupport();
-        when(appProtocol.validateSignature(any(Context.class), anyString())).thenReturn(false);
+    public void isSupported_appNotInstalled_shouldBeFalse() {
+        when(appProtocol.isInstalled(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED)).thenReturn(false);
+        when(appProtocol.isInstalled(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED)).thenReturn(false);
 
         final SsoDeeplink link = new SsoDeeplink.Builder(activity)
                 .clientId(CLIENT_ID)
@@ -113,44 +112,36 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
                 .appProtocol(appProtocol)
                 .build();
 
-        final boolean isSupported = link.isSupported();
-
-        assertThat(isSupported).isFalse();
+        assertThat(link.isSupported()).isFalse();
     }
 
     @Test
-    public void testIsSupported_appInstalledButOldVersion_shouldBeFalse() {
+    public void execute_withInstalledPackage_shouldSetPackage() {
+        String packageName = "PACKAGE_NAME";
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.versionCode = 0;
-        when(appProtocol.getInstalledUberAppPackage(activity)).thenReturn(packageInfo);
-        when(appProtocol.getInstalledUberApp(activity)).thenReturn(Pair.create(UBER, packageInfo));
-        when(appProtocol.validateSignature(any(Context.class), anyString())).thenReturn(true);
-        when(appProtocol.validateMinimumVersion(eq(activity), any(PackageInfo.class), eq(0))).thenReturn(false);
+        packageInfo.packageName = packageName;
 
-        SsoDeeplink link = new SsoDeeplink.Builder(activity)
+        when(appProtocol.isInstalled(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED)).thenReturn(true);
+        when(appProtocol.getInstalledPackages(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED))
+                .thenReturn(Collections.singletonList(packageInfo));
+
+        new SsoDeeplink.Builder(activity)
                 .clientId(CLIENT_ID)
-                .scopes(GENERAL_SCOPES)
+                .scopes(Scope.HISTORY, Scope.PROFILE)
+                .activityRequestCode(REQUEST_CODE)
                 .appProtocol(appProtocol)
-                .build();
+                .build()
+                .execute();
 
-        assertThat(link.isSupported()).isFalse();
+        final ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(activity).startActivityForResult(intentCaptor.capture(), eq(REQUEST_CODE));
+        Intent intent = intentCaptor.getValue();
+
+        assertThat(intent.getPackage()).isEqualTo(packageName);
     }
 
     @Test
-    public void testIsSupported_noAppInstalled_shouldBeFalse() {
-        when(appProtocol.getInstalledUberApp(activity)).thenReturn(null);
-
-        SsoDeeplink link = new SsoDeeplink.Builder(activity)
-                .clientId(CLIENT_ID)
-                .scopes(GENERAL_SCOPES)
-                .appProtocol(appProtocol)
-                .build();
-
-        assertThat(link.isSupported()).isFalse();
-    }
-
-    @Test
-    public void testInvokeWithoutRegion_shouldUseWorld() {
+    public void execute_withoutRegion_shouldUseWorld() {
         enableSupport();
 
         new SsoDeeplink.Builder(activity)
@@ -172,7 +163,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     }
 
     @Test
-    public void testInvokeWithoutRequestCode_shouldUseDefaultRequstCode() {
+    public void execute_withoutRequestCode_shouldUseDefaultRequstCode() {
         enableSupport();
 
         new SsoDeeplink.Builder(activity)
@@ -194,7 +185,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
 
 
     @Test(expected = IllegalStateException.class)
-    public void testInvokeWithoutScopes_shouldFail() {
+    public void execute_withoutScopes_shouldFail() {
         enableSupport();
 
         new SsoDeeplink.Builder(activity)
@@ -206,7 +197,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     }
 
     @Test
-    public void testInvokeWithScopesAndCustomScopes_shouldSucceed() {
+    public void execute_withScopesAndCustomScopes_shouldSucceed() {
         enableSupport();
 
         Collection<String> collection = Arrays.asList("sample", "test");
@@ -228,7 +219,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testInvokeWithoutClientId_shouldFail() {
+    public void execute_withoutClientId_shouldFail() {
         enableSupport();
 
         new SsoDeeplink.Builder(activity)
@@ -240,8 +231,9 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testInvokeWithoutAppInstalled_shouldFail() {
-        when(appProtocol.getInstalledUberApp(activity)).thenReturn(null);
+    public void execute_withoutAppInstalled_shouldFail() {
+        when(appProtocol.isInstalled(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED)).thenReturn(false);
+        when(appProtocol.isInstalled(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED)).thenReturn(false);
 
         new SsoDeeplink.Builder(activity)
                 .clientId(CLIENT_ID)
@@ -251,15 +243,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     }
 
     private void enableSupport() {
-        enableSupport(UBER, MIN_UBER_RIDES_VERSION_SUPPORTED);
-    }
-
-    private void enableSupport(SupportedAppType appType, int versionCode) {
-        PackageInfo packageInfo = new PackageInfo();
-        packageInfo.versionCode = versionCode;
-        when(appProtocol.getInstalledUberAppPackage(activity)).thenReturn(packageInfo);
-        when(appProtocol.getInstalledUberApp(activity)).thenReturn(Pair.create(appType, packageInfo));
-        when(appProtocol.validateSignature(any(Context.class), anyString())).thenReturn(true);
-        when(appProtocol.validateMinimumVersion(eq(activity), any(PackageInfo.class), eq(versionCode))).thenReturn(true);
+        when(appProtocol.isInstalled(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED)).thenReturn(true);
+        when(appProtocol.isInstalled(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED)).thenReturn(true);
     }
 }
