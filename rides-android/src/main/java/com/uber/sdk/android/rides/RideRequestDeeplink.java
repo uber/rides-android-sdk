@@ -34,6 +34,7 @@ import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.android.core.utils.CustomTabsHelper;
 import com.uber.sdk.core.client.SessionConfiguration;
 
+import static com.uber.sdk.android.core.SupportedAppType.UBER;
 import static com.uber.sdk.android.core.utils.Preconditions.checkNotNull;
 
 
@@ -76,7 +77,7 @@ public class RideRequestDeeplink implements Deeplink {
 
     @Override
     public boolean isSupported() {
-        return appProtocol.isUberInstalled(context);
+        return appProtocol.isInstalled(context, UBER);
     }
 
     /**
@@ -226,7 +227,7 @@ public class RideRequestDeeplink implements Deeplink {
         Uri.Builder getUriBuilder(@NonNull Context context, @NonNull Deeplink.Fallback
                 fallback) {
             final Uri.Builder builder;
-            if (appProtocol.isUberInstalled(context)) {
+            if (appProtocol.isInstalled(context, UBER)) {
                 if (appProtocol.isAppLinkSupported()) {
                     builder = Uri.parse(Deeplink.APP_LINK_URI).buildUpon();
                 } else {

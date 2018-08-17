@@ -33,9 +33,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -266,7 +268,8 @@ public class AccessTokenManagerTest extends RobolectricTestBase {
         assertAccessTokensEqual(ACCESS_TOKEN_SECOND, tokenPreferences.getAccessToken(CUSTOM_ACCESS_TOKEN_KEY));
     }
 
-    private void assertAccessTokensEqual(AccessToken accessTokenExpected, AccessToken accessTokenActual) {
+    private void assertAccessTokensEqual(AccessToken accessTokenExpected, @Nullable AccessToken accessTokenActual) {
+        assertNotNull(accessTokenActual);
         assertEquals(accessTokenExpected.getExpiresIn(),
                 accessTokenActual.getExpiresIn());
         assertEquals(accessTokenExpected.getToken(), accessTokenActual.getToken());
