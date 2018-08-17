@@ -16,24 +16,24 @@
 
 def versions = [
         androidTest: '0.5',
-        support: '26.1.0',
+        support: '27.1.1',
         uberJava: '0.8.0',
 ]
 
 def build = [
-        gradleVersion: '4.3.1',
-        buildToolsVersion: '26.0.2',
-        compileSdkVersion: 26,
+        gradleVersion: '4.9',
+        buildToolsVersion: '27.0.3',
+        compileSdkVersion: 27,
         ci: 'true' == System.getenv('CI'),
         minSdkVersion: 15,
-        targetSdkVersion: 26,
+        targetSdkVersion: 27,
 
         repositories: [
                 plugins: 'https://plugins.gradle.org/m2/'
         ],
 
         gradlePlugins: [
-                android: 'com.android.tools.build:gradle:2.3.0',
+                android: 'com.android.tools.build:gradle:3.1.0',
                 release: 'net.researchgate:gradle-release:2.1.2',
                 github: 'co.riiid:gradle-github-plugin:0.4.2',
                 cobertura: 'net.saliman:gradle-cobertura-plugin:2.3.1',

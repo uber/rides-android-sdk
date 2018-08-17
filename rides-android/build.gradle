@@ -17,6 +17,7 @@
 buildscript {
     repositories {
         jcenter()
+        google()
         maven { url deps.build.repositories.plugins }
     }
 
@@ -43,24 +44,31 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
-    compile project(':core-android')
-
-    compile (deps.uber.uberRides) {
+    implementation (deps.uber.uberRides) {
         exclude module: 'slf4j-log4j12'
     }
-    compile deps.misc.jsr305
-    compile deps.support.appCompat
-    compile deps.support.annotations
+    implementation project(':core-android')
 
-    testCompile deps.test.junit
-    testCompile deps.test.assertj
-    testCompile deps.test.mockito
-    testCompile deps.test.robolectric
-    testCompile deps.test.guava
-    testCompile deps.test.wiremock
+    implementation deps.misc.jsr305
+    implementation deps.support.appCompat
+    implementation deps.support.annotations
+    implementation deps.support.chrometabs
+
+    testImplementation deps.test.junit
+    testImplementation deps.test.assertj
+    testImplementation deps.test.mockito
+    testImplementation deps.test.robolectric
+    testImplementation deps.test.guava
+    testImplementation deps.test.wiremock
 }
 
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

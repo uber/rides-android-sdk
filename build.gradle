@@ -18,6 +18,7 @@ buildscript {
     apply from: rootProject.file('gradle/dependencies.gradle')
 
     repositories {
+        google()
         jcenter()
         maven { url deps.build.repositories.plugins }
     }
