@@ -24,15 +24,11 @@ package com.uber.sdk.android.core.auth;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
+import android.content.pm.*;
+
+import android.support.annotation.NonNull;
 import com.google.common.collect.ImmutableList;
-import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.RobolectricTestBase;
-import com.uber.sdk.android.core.SupportedAppType;
-import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenAuthenticator;
 import com.uber.sdk.core.auth.AccessTokenStorage;
@@ -43,12 +39,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.robolectric.Robolectric;
 
-import java.util.List;
-
-import static com.uber.sdk.android.core.SupportedAppType.UBER;
-import static com.uber.sdk.android.core.SupportedAppType.UBER_EATS;
+import static com.uber.sdk.android.core.auth.LoginActivity.EXTRA_FORCE_WEBVIEW;
+import static com.uber.sdk.android.core.auth.LoginActivity.EXTRA_RESPONSE_TYPE;
+import static com.uber.sdk.android.core.auth.LoginActivity.EXTRA_SESSION_CONFIGURATION;
+import static com.uber.sdk.android.core.auth.LoginActivity.EXTRA_SSO_ENABLED;
+import static com.uber.sdk.android.core.auth.LoginActivity.EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED;
 import static com.uber.sdk.android.core.auth.LoginManager.EXTRA_ACCESS_TOKEN;
 import static com.uber.sdk.android.core.auth.LoginManager.EXTRA_CODE_RECEIVED;
 import static com.uber.sdk.android.core.auth.LoginManager.EXTRA_ERROR;
@@ -57,11 +53,12 @@ import static com.uber.sdk.android.core.auth.LoginManager.EXTRA_REFRESH_TOKEN;
 import static com.uber.sdk.android.core.auth.LoginManager.EXTRA_SCOPE;
 import static com.uber.sdk.android.core.auth.LoginManager.EXTRA_TOKEN_TYPE;
 import static com.uber.sdk.android.core.auth.LoginManager.REQUEST_CODE_LOGIN_DEFAULT;
+import static com.uber.sdk.android.core.auth.SsoDeeplink.FlowVersion.DEFAULT;
+import static com.uber.sdk.android.core.auth.SsoDeeplink.FlowVersion.REDIRECT_TO_SDK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -73,37 +70,17 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 public class LoginManagerTest extends RobolectricTestBase {
-    private static final String PUBLIC_SIGNATURE =
-            "3082022730820190a00302010202044cb88a8e300d06092a864886f70d01010505003057311330110603550408130a43616c696" +
-                    "66f726e6961311630140603550407130d53616e204672616e636973636f3110300e060355040a130755626572436162" +
-                    "311630140603550403130d4a6f7264616e20426f6e6e65743020170d3130313031353137303833305a180f323036303" +
-                    "13030323137303833305a3057311330110603550408130a43616c69666f726e6961311630140603550407130d53616e" +
-                    "204672616e636973636f3110300e060355040a130755626572436162311630140603550403130d4a6f7264616e20426" +
-                    "f6e6e657430819f300d06092a864886f70d010101050003818d00308189028181009769b8ee7e4af5eae5bfbac410a0" +
-                    "b0daf8d58ca8c9503878cbfb9461d617b2a5695a639962492ee7f5938f036c7927e4e1a680f186d98fdebf38955fb3f" +
-                    "c23077bd3ff39551cdb35690fd451411c643b26f31d280dc4a55b501e9a0d53d8f8f72a407854516f0f2a4e4d48c02b" +
-                    "dfae408d162a5da34397f845ddfa17de57cd3d0203010001300d06092a864886f70d010105050003818100283f752dc" +
-                    "67c2d8ea2a7e47b1269b2cb37f961c53db3d1c9158af0722978f6a3c396149447557fcf63caa497a795514922f3a4e8" +
-                    "5990608c47d90955ce9cc71f93199a5f3c7624cca8fac70ff70b1e4cf9eb887a92f358aa21ba42e0e86bbecf7d030d8" +
-                    "1a383b716f22ac98746f2956e90b96e8f35d298498e55cdbe4d42a762";
-
     private static final AccessToken ACCESS_TOKEN = new AccessToken(2592000,
             ImmutableList.of(Scope.PROFILE, Scope.HISTORY), "thisIsAnAccessToken", "refreshToken",
             "tokenType");
 
-    private static final int REQUEST_CODE = 9321;
     private static final String CLIENT_ID = "Client1234";
+    private static final String REDIRECT_URI = "com.example.uberauth://redirect";
     private static final ImmutableList<Scope> MIXED_SCOPES = ImmutableList.of(Scope.PROFILE, Scope.REQUEST_RECEIPT);
     private static final ImmutableList<Scope> GENERAL_SCOPES = ImmutableList.of(Scope.PROFILE, Scope.HISTORY);
 
-    private static final String DEFAULT_REGION =
-            "uber://connect?client_id=Client1234&scope=profile%20request_receipt&sdk=android&sdk_version="
-                    + BuildConfig.VERSION_NAME;
-
-    private static final String INSTALL =
-            String.format("https://m.uber.com/sign-up?client_id=Client1234&user-agent=core-android-v%s-login_manager",
-                    BuildConfig.VERSION_NAME);
     private static final String AUTHORIZATION_CODE = "Auth123Code";
+    private static final String PACKAGE_NAME = "com.example";
 
     @Mock
     Activity activity;
@@ -120,6 +97,9 @@ public class LoginManagerTest extends RobolectricTestBase {
     @Mock
     LegacyUriRedirectHandler legacyUriRedirectHandler;
 
+    @Mock
+    SsoDeeplink ssoDeeplink;
+
     SessionConfiguration sessionConfiguration;
 
     private LoginManager loginManager;
@@ -127,141 +107,65 @@ public class LoginManagerTest extends RobolectricTestBase {
     @Before
     public void setup() {
         sessionConfiguration = new SessionConfiguration.Builder().setClientId(CLIENT_ID)
-                .setRedirectUri("com.example.uberauth://redirect")
+                .setRedirectUri(REDIRECT_URI)
                 .setScopes(MIXED_SCOPES).build();
-        loginManager = new LoginManager(accessTokenStorage, callback,
+        loginManager = spy(new LoginManager(accessTokenStorage, callback,
                 sessionConfiguration, REQUEST_CODE_LOGIN_DEFAULT,
-                legacyUriRedirectHandler);
+                legacyUriRedirectHandler));
 
+        when(loginManager.getSsoDeeplink(any(Activity.class))).thenReturn(ssoDeeplink);
 
         when(activity.getPackageManager()).thenReturn(packageManager);
         when(activity.getApplicationInfo()).thenReturn(new ApplicationInfo());
-        when(activity.getPackageName()).thenReturn("com.example");
+        when(activity.getPackageName()).thenReturn(PACKAGE_NAME);
+
         when(legacyUriRedirectHandler.checkValidState(eq(activity), eq(loginManager))).thenReturn(true);
     }
 
     @Test
     public void login_withLegacyModeBlocking_shouldNotLogin() {
-        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED);
         when(legacyUriRedirectHandler.checkValidState(eq(activity), eq(loginManager))).thenReturn(false);
         loginManager.login(activity);
 
         verify(activity, never()).startActivityForResult(any(Intent.class), anyInt());
     }
 
-    @Test
-    public void login_withLegacyModeNotBlocking_shouldLogin() {
-        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED);
-        when(legacyUriRedirectHandler.checkValidState(eq(activity), eq(loginManager))).thenReturn(true);
-        loginManager.login(activity);
-
-        verify(activity).startActivityForResult(any(Intent.class), anyInt());
-    }
 
     @Test
-    public void loginWithAppInstalledPrivilegedScopes_shouldLaunchIntent() {
-        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED);
-
+    public void login_withRedirectToSdkFlowSsoSupported_shouldLoginActivityWithSsoParams() {
+        when(ssoDeeplink.isSupported(REDIRECT_TO_SDK)).thenReturn(true);
         loginManager.login(activity);
+
+        verify(ssoDeeplink).isSupported(REDIRECT_TO_SDK);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         ArgumentCaptor<Integer> codeCaptor = ArgumentCaptor.forClass(Integer.class);
 
         verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
 
-        assertThat(intentCaptor.getValue().getData().toString()).isEqualTo(DEFAULT_REGION);
+        final Intent resultIntent = intentCaptor.getValue();
+        validateLoginIntentFields(resultIntent, sessionConfiguration, ResponseType.TOKEN, false,
+                true, true);
         assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
     }
 
     @Test
-    public void loginWithAppInstalledPrivilegedScopesAndRequestCode_shouldLaunchIntent() {
-        loginManager = new LoginManager(accessTokenStorage, callback,
-                sessionConfiguration, REQUEST_CODE);
-
-        stubAppInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0], SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED);
+    public void login_withDefaultSsoFlowSupported_shouldExecuteDeeplink() {
+        when(ssoDeeplink.isSupported(REDIRECT_TO_SDK)).thenReturn(false);
+        when(ssoDeeplink.isSupported(DEFAULT)).thenReturn(true);
 
         loginManager.login(activity);
 
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        ArgumentCaptor<Integer> codeCaptor = ArgumentCaptor.forClass(Integer.class);
-
-        verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
-
-        assertThat(intentCaptor.getValue().getData().toString()).isEqualTo(DEFAULT_REGION);
-        assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE);
+        verify(ssoDeeplink).isSupported(DEFAULT);
+        verify(ssoDeeplink).execute(DEFAULT);
     }
 
     @Test
-    public void login_withEatsProductPriority_shouldLaunchEats() {
-        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration, REQUEST_CODE);
-        stubAppInstalled(packageManager, "com.ubercab", SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED);
-        stubAppInstalled(packageManager, "com.ubercab.eats", SsoDeeplink.MIN_UBER_EATS_VERSION_SUPPORTED);
-        List<SupportedAppType> appTypes = ImmutableList.of(UBER_EATS);
-
-        loginManager.setProductFlowPriority(appTypes).login(activity);
-
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        ArgumentCaptor<Integer> codeCaptor = ArgumentCaptor.forClass(Integer.class);
-
-        verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
-
-        assertThat(intentCaptor.getValue().getPackage()).isEqualTo("com.ubercab.eats");
-        assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE);
-    }
-
-    @Test
-    public void login_withRidesAndEatsProductPriority_shouldLaunchRides() {
-        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration, REQUEST_CODE);
-        stubAppInstalled(packageManager, "com.ubercab", SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED);
-        stubAppInstalled(packageManager, "com.ubercab.eats", SsoDeeplink.MIN_UBER_EATS_VERSION_SUPPORTED);
-        List<SupportedAppType> appTypes = ImmutableList.of(UBER, UBER_EATS);
-
-        loginManager.setProductFlowPriority(appTypes).login(activity);
-
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        ArgumentCaptor<Integer> codeCaptor = ArgumentCaptor.forClass(Integer.class);
-
-        verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
-
-        assertThat(intentCaptor.getValue().getPackage()).isEqualTo("com.ubercab");
-        assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE);
-    }
-
-    @Test
-    public void loginWithoutAppInstalledGeneralScopesAndAuthCodeFlowDisabled_shouldLaunchImplicitGrant() {
-        sessionConfiguration = sessionConfiguration.newBuilder().setScopes(GENERAL_SCOPES).build();
-        loginManager = new LoginManager(accessTokenStorage, callback,
-                sessionConfiguration);
-
-        stubAppNotInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0]);
-
-        loginManager.login(activity);
-
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        ArgumentCaptor<Integer> codeCaptor = ArgumentCaptor.forClass(Integer.class);
-
-        verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
-
-        assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
-
-        final Intent capturedIntent = intentCaptor.getValue();
-        final ResponseType responseType = (ResponseType) capturedIntent
-                .getSerializableExtra(LoginActivity.EXTRA_RESPONSE_TYPE);
-        final SessionConfiguration configuration = (SessionConfiguration) intentCaptor.getValue()
-                .getSerializableExtra(LoginActivity.EXTRA_SESSION_CONFIGURATION);
-        assertThat(responseType).isEqualTo(ResponseType.TOKEN);
-        assertThat(configuration.getScopes()).containsAll(GENERAL_SCOPES);
-    }
-
-    @Test
-    public void loginWithoutAppInstalledGeneralScopesAndAuthCodeFlowEnabled_shouldLaunchAuthCodeFlow() {
-        sessionConfiguration = sessionConfiguration.newBuilder().setScopes(GENERAL_SCOPES).build();
-        loginManager = new LoginManager(accessTokenStorage, callback,
-                sessionConfiguration);
-
-        stubAppNotInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0]);
-
+    public void login_withSsoNotSupported_andAuthCodeFlowEnabled_shouldLoginWithAuthCodeFlowParams() {
+        when(ssoDeeplink.isSupported(REDIRECT_TO_SDK)).thenReturn(false);
+        when(ssoDeeplink.isSupported(DEFAULT)).thenReturn(false);
         loginManager.setAuthCodeFlowEnabled(true);
+
         loginManager.login(activity);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -269,22 +173,17 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
 
+        final Intent resultIntent = intentCaptor.getValue();
+        validateLoginIntentFields(resultIntent, sessionConfiguration, ResponseType.CODE, false,
+                false, false);
         assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
-
-        final Intent capturedIntent = intentCaptor.getValue();
-        final ResponseType responseType = (ResponseType) capturedIntent
-                .getSerializableExtra(LoginActivity.EXTRA_RESPONSE_TYPE);
-        final SessionConfiguration configuration = (SessionConfiguration) intentCaptor.getValue()
-                .getSerializableExtra(LoginActivity.EXTRA_SESSION_CONFIGURATION);
-        assertThat(responseType).isEqualTo(ResponseType.CODE);
-        assertThat(configuration.getScopes()).containsAll(GENERAL_SCOPES);
     }
 
     @Test
-    public void loginWithoutAppInstalledPrivilegedScopesAndAuthCodeFlowEnabled_shouldLaunchAuthCodeFlow() {
-        stubAppNotInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0]);
+    public void login_withSsoNotSupported_andAuthCodeFlowDisabled_shouldLoginWithImplicitGrantParamsAndRedirectToPlayStoreEnabled() {
+        when(ssoDeeplink.isSupported(REDIRECT_TO_SDK)).thenReturn(false);
+        when(ssoDeeplink.isSupported(DEFAULT)).thenReturn(false);
 
-        loginManager.setAuthCodeFlowEnabled(true);
         loginManager.login(activity);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -292,36 +191,56 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
 
+        final Intent resultIntent = intentCaptor.getValue();
+        validateLoginIntentFields(resultIntent, sessionConfiguration, ResponseType.TOKEN, false,
+                false, true);
         assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
-
-        final Intent capturedIntent = intentCaptor.getValue();
-        final ResponseType responseType = (ResponseType) capturedIntent
-                .getSerializableExtra(LoginActivity.EXTRA_RESPONSE_TYPE);
-        final SessionConfiguration configuration = (SessionConfiguration) intentCaptor.getValue()
-                .getSerializableExtra(LoginActivity.EXTRA_SESSION_CONFIGURATION);
-        assertThat(responseType).isEqualTo(ResponseType.CODE);
-        assertThat(configuration.getScopes()).containsAll(MIXED_SCOPES);
     }
 
     @Test
-    public void loginWithoutAppInstalledPrivilegedScopes_shouldLaunchAppInstall() {
-        final Activity activity = spy(Robolectric.setupActivity(Activity.class));
-        when(activity.getPackageManager()).thenReturn(packageManager);
+    public void loginForImplicitGrant_withLegacyModeBlocking_shouldNotLogin() {
+        when(legacyUriRedirectHandler.checkValidState(eq(activity), eq(loginManager))).thenReturn(false);
+        loginManager.loginForImplicitGrant(activity);
 
-        sessionConfiguration = sessionConfiguration.newBuilder().build();
-        loginManager = new LoginManager(accessTokenStorage, callback,
-                sessionConfiguration)
-                .setAuthCodeFlowEnabled(false);
+        verify(activity, never()).startActivityForResult(any(Intent.class), anyInt());
+    }
 
-        stubAppNotInstalled(packageManager, AppProtocol.UBER_PACKAGE_NAMES[0]);
-
-        loginManager.login(activity);
+    @Test
+    public void loginForImplicitGrant_withoutLegacyModeBlocking_shouldLoginWithImplicitGrantParamsAndRedirectToPlayStoreDisabled() {
+        loginManager.loginForImplicitGrant(activity);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        ArgumentCaptor<Integer> codeCaptor = ArgumentCaptor.forClass(Integer.class);
 
-        verify(activity).startActivity(intentCaptor.capture());
+        verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
 
-        assertThat(intentCaptor.getValue().getData().toString()).isEqualTo(INSTALL);
+        final Intent resultIntent = intentCaptor.getValue();
+        validateLoginIntentFields(resultIntent, sessionConfiguration, ResponseType.TOKEN, false,
+                false, false);
+        assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
+    }
+
+    @Test
+    public void loginForAuthorizationCode_withLegacyModeBlocking_shouldNotLogin() {
+        when(legacyUriRedirectHandler.checkValidState(eq(activity), eq(loginManager))).thenReturn(false);
+        loginManager.loginForAuthorizationCode(activity);
+
+        verify(activity, never()).startActivityForResult(any(Intent.class), anyInt());
+    }
+
+    @Test
+    public void loginForAuthorizationCode_withoutLegacyModeBlocking_shouldLoginWithAuthCodeFlowParams() {
+        loginManager.loginForAuthorizationCode(activity);
+
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        ArgumentCaptor<Integer> codeCaptor = ArgumentCaptor.forClass(Integer.class);
+
+        verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
+
+        final Intent resultIntent = intentCaptor.getValue();
+        validateLoginIntentFields(resultIntent, sessionConfiguration, ResponseType.CODE, false,
+                false, false);
+        assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
     }
 
     @Test
@@ -414,7 +333,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         final Intent capturedIntent = intentCaptor.getValue();
         final ResponseType responseType = (ResponseType) capturedIntent
-                .getSerializableExtra(LoginActivity.EXTRA_RESPONSE_TYPE);
+                .getSerializableExtra(EXTRA_RESPONSE_TYPE);
         final SessionConfiguration loginConfiguration = (SessionConfiguration) capturedIntent
                 .getSerializableExtra(LoginActivity.EXTRA_SESSION_CONFIGURATION);
 
@@ -441,7 +360,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         final Intent capturedIntent = intentCaptor.getValue();
         final ResponseType responseType = (ResponseType) capturedIntent
-                .getSerializableExtra(LoginActivity.EXTRA_RESPONSE_TYPE);
+                .getSerializableExtra(EXTRA_RESPONSE_TYPE);
         final SessionConfiguration loginConfiguration = (SessionConfiguration) capturedIntent
                 .getSerializableExtra(LoginActivity.EXTRA_SESSION_CONFIGURATION);
 
@@ -480,7 +399,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         final Intent capturedIntent = intentCaptor.getValue();
         final ResponseType responseType = (ResponseType) capturedIntent
-                .getSerializableExtra(LoginActivity.EXTRA_RESPONSE_TYPE);
+                .getSerializableExtra(EXTRA_RESPONSE_TYPE);
         final SessionConfiguration loginConfiguration = (SessionConfiguration) capturedIntent
                 .getSerializableExtra(LoginActivity.EXTRA_SESSION_CONFIGURATION);
 
@@ -530,27 +449,18 @@ public class LoginManagerTest extends RobolectricTestBase {
         loginManager.getSession();
     }
 
-    private static PackageManager stubAppInstalled(PackageManager packageManager, String packageName, int versionCode) {
-        final PackageInfo packageInfo = new PackageInfo();
-        packageInfo.versionCode = versionCode;
-        packageInfo.signatures = new Signature[]{new Signature(PUBLIC_SIGNATURE)};
-        packageInfo.packageName = packageName;
-        try {
-            when(packageManager.getPackageInfo(eq(packageName), anyInt()))
-                    .thenReturn(packageInfo);
-        } catch (PackageManager.NameNotFoundException e) {
-            fail("Unable to mock Package Manager");
-        }
-        return packageManager;
-    }
-
-    private static PackageManager stubAppNotInstalled(PackageManager packageManager, String packageName) {
-        try {
-            when(packageManager.getPackageInfo(eq(packageName), anyInt()))
-                    .thenThrow(PackageManager.NameNotFoundException.class);
-        } catch (PackageManager.NameNotFoundException e) {
-            fail("Unable to mock Package Manager");
-        }
-        return packageManager;
+    private void validateLoginIntentFields(
+            @NonNull Intent loginIntent,
+            @NonNull SessionConfiguration expectedSessionConfiguration,
+            @NonNull ResponseType expectedResponseType,
+            boolean expectedForceWebview,
+            boolean expectedSsoEnabled,
+            boolean expectedRedirectToPlayStoreEnabled) {
+        assertThat(loginIntent.getSerializableExtra(EXTRA_SESSION_CONFIGURATION)).isEqualTo(expectedSessionConfiguration);
+        assertThat(loginIntent.getSerializableExtra(EXTRA_RESPONSE_TYPE)).isEqualTo(expectedResponseType);
+        assertThat(loginIntent.getBooleanExtra(EXTRA_FORCE_WEBVIEW, false)).isEqualTo(expectedForceWebview);
+        assertThat(loginIntent.getBooleanExtra(EXTRA_SSO_ENABLED, false)).isEqualTo(expectedSsoEnabled);
+        assertThat(loginIntent.getBooleanExtra(EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED, false))
+                .isEqualTo(expectedRedirectToPlayStoreEnabled);
     }
 }

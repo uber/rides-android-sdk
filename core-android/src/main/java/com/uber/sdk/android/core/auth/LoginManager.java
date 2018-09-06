@@ -26,6 +26,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.SupportedAppType;
@@ -88,9 +89,6 @@ public class LoginManager {
     static final String EXTRA_CODE_RECEIVED = "CODE_RECEIVED";
 
     static final int REQUEST_CODE_LOGIN_DEFAULT = 1001;
-
-    private static final String USER_AGENT = String.format("core-android-v%s-login_manager",
-            BuildConfig.VERSION_NAME);
 
     private final AccessTokenStorage accessTokenStorage;
     private final LoginCallback callback;
@@ -175,22 +173,20 @@ public class LoginManager {
             return;
         }
 
-        SsoDeeplink ssoDeeplink = new SsoDeeplink.Builder(activity)
-                .clientId(sessionConfiguration.getClientId())
-                .scopes(sessionConfiguration.getScopes())
-                .customScopes(sessionConfiguration.getCustomScopes())
-                .productFlowPriority(productFlowPriority)
-                .activityRequestCode(requestCode)
-                .build();
+        SsoDeeplink ssoDeeplink = getSsoDeeplink(activity);
 
-        if (ssoDeeplink.isSupported()) {
-            ssoDeeplink.execute();
+        if (ssoDeeplink.isSupported(SsoDeeplink.FlowVersion.REDIRECT_TO_SDK)) {
+            Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, ResponseType.TOKEN,
+                    false, true, true);
+            activity.startActivityForResult(intent, requestCode);
+        } else if (ssoDeeplink.isSupported(SsoDeeplink.FlowVersion.DEFAULT)) {
+            ssoDeeplink.execute(SsoDeeplink.FlowVersion.DEFAULT);
         } else if (isAuthCodeFlowEnabled()) {
             loginForAuthorizationCode(activity);
-        } else if (!AuthUtils.isPrivilegeScopeRequired(sessionConfiguration.getScopes())) {
-            loginForImplicitGrant(activity);
         } else {
-            redirectToInstallApp(activity);
+            Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, ResponseType.TOKEN,
+                    legacyUriRedirectHandler.isLegacyMode(), false, true);
+            activity.startActivityForResult(intent, requestCode);
         }
     }
 
@@ -199,6 +195,7 @@ public class LoginManager {
      *
      * @param activity to start Activity on.
      */
+    @Deprecated
     public void loginForImplicitGrant(@NonNull Activity activity) {
 
         if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
@@ -365,10 +362,6 @@ public class LoginManager {
         return authCodeFlowEnabled;
     }
 
-    private void redirectToInstallApp(@NonNull Activity activity) {
-        new SignupDeeplink(activity, sessionConfiguration.getClientId(), USER_AGENT).execute();
-    }
-
     /**
      * {@link Activity} result handler to be called from starting {@link Activity}. Stores {@link AccessToken} and
      * notifies consumer callback of login result.
@@ -392,6 +385,22 @@ public class LoginManager {
         } else if (resultCode == Activity.RESULT_CANCELED) {
             handleResultCancelled(activity, data);
         }
+    }
+
+    /**
+     * Generates the deeplink required to execute the SSO Flow
+     * @param activity the activity to execute the deeplink intent
+     * @return the object that executes the deeplink
+     */
+    @VisibleForTesting
+    SsoDeeplink getSsoDeeplink(@NonNull Activity activity) {
+        return new SsoDeeplink.Builder(activity).clientId(sessionConfiguration.getClientId())
+                .scopes(sessionConfiguration.getScopes())
+                .customScopes(sessionConfiguration.getCustomScopes())
+                .activityRequestCode(requestCode)
+                .redirectUri(sessionConfiguration.getRedirectUri())
+                .productFlowPriority(productFlowPriority)
+                .build();
     }
 
     private void handleResultCancelled(
