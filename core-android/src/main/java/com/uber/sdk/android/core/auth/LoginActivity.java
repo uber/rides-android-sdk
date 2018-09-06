@@ -39,7 +39,9 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.R;
+import com.uber.sdk.android.core.install.SignupDeeplink;
 import com.uber.sdk.android.core.utils.CustomTabsHelper;
 import com.uber.sdk.core.client.SessionConfiguration;
 
@@ -47,18 +49,30 @@ import com.uber.sdk.core.client.SessionConfiguration;
  * {@link android.app.Activity} that shows web view for Uber user authentication and authorization.
  */
 public class LoginActivity extends Activity {
+    @VisibleForTesting
+    static final String USER_AGENT = String.format("core-android-v%s-login_manager", BuildConfig.VERSION_NAME);
 
     static final String EXTRA_RESPONSE_TYPE = "RESPONSE_TYPE";
     static final String EXTRA_SESSION_CONFIGURATION = "SESSION_CONFIGURATION";
     static final String EXTRA_FORCE_WEBVIEW = "FORCE_WEBVIEW";
+    static final String EXTRA_SSO_ENABLED = "SSO_ENABLED";
+    static final String EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED = "REDIRECT_TO_PLAY_STORE_ENABLED";
 
     static final String ERROR = "error";
 
-    private WebView webView;
     private ResponseType responseType;
     private SessionConfiguration sessionConfiguration;
-    private LoginManager loginManager;
     private boolean authStarted;
+
+    @VisibleForTesting
+    WebView webView;
+
+    @VisibleForTesting
+    SsoDeeplinkFactory ssoDeeplinkFactory = new SsoDeeplinkFactory();
+
+    @VisibleForTesting
+    CustomTabsHelper customTabsHelper = new CustomTabsHelper();
+
 
     /**
      * Create an {@link Intent} to pass to this activity
@@ -93,10 +107,34 @@ public class LoginActivity extends Activity {
             @NonNull ResponseType responseType,
             boolean forceWebview) {
 
+        return newIntent(context, sessionConfiguration, responseType, forceWebview, false, false);
+    }
+
+    /**
+     * Create an {@link Intent} to pass to this activity
+     *
+     * @param context the {@link Context} for the intent
+     * @param sessionConfiguration to be used for gather clientId
+     * @param responseType that is expected
+     * @param forceWebview Forced to use old webview instead of chrometabs
+     * @param isSsoEnabled specifies whether to attempt login with SSO
+     * @return an intent that can be passed to this activity
+     */
+    @NonNull
+    static Intent newIntent(
+            @NonNull Context context,
+            @NonNull SessionConfiguration sessionConfiguration,
+            @NonNull ResponseType responseType,
+            boolean forceWebview,
+            boolean isSsoEnabled,
+            boolean isRedirectToPlayStoreEnabled) {
+
         final Intent data = new Intent(context, LoginActivity.class)
                 .putExtra(EXTRA_SESSION_CONFIGURATION, sessionConfiguration)
                 .putExtra(EXTRA_RESPONSE_TYPE, responseType)
-                .putExtra(EXTRA_FORCE_WEBVIEW, forceWebview);
+                .putExtra(EXTRA_FORCE_WEBVIEW, forceWebview)
+                .putExtra(EXTRA_SSO_ENABLED, isSsoEnabled)
+                .putExtra(EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED, isRedirectToPlayStoreEnabled);
 
         return data;
     }
@@ -152,28 +190,44 @@ public class LoginActivity extends Activity {
     }
 
     protected void loadUrl() {
-        sessionConfiguration = (SessionConfiguration) getIntent().getSerializableExtra(EXTRA_SESSION_CONFIGURATION);
-        if (sessionConfiguration == null) {
-            onError(AuthenticationError.UNAVAILABLE);
-            return;
-        }
+        Intent intent = getIntent();
 
-        if ((sessionConfiguration.getScopes() == null || sessionConfiguration.getScopes().isEmpty())
-                && (sessionConfiguration.getCustomScopes() == null  || sessionConfiguration.getCustomScopes().isEmpty())) {
-            onError(AuthenticationError.INVALID_SCOPE);
-            return;
-        }
+        sessionConfiguration = (SessionConfiguration) intent.getSerializableExtra(EXTRA_SESSION_CONFIGURATION);
+        responseType = (ResponseType) intent.getSerializableExtra(EXTRA_RESPONSE_TYPE);
 
-        responseType = (ResponseType) getIntent().getSerializableExtra(EXTRA_RESPONSE_TYPE);
-        if (responseType == null) {
-            onError(AuthenticationError.UNAVAILABLE);
+        if (!validateRequestParams()) {
+            return;
         }
 
         String redirectUri = sessionConfiguration.getRedirectUri() != null ? sessionConfiguration
                 .getRedirectUri() : getApplicationContext().getPackageName() + "uberauth";
 
+        if (intent.getBooleanExtra(EXTRA_SSO_ENABLED, false)) {
+            SsoDeeplink ssoDeeplink = ssoDeeplinkFactory.getSsoDeeplink(this, sessionConfiguration);
+
+            if (ssoDeeplink.isSupported(SsoDeeplink.FlowVersion.REDIRECT_TO_SDK)) {
+                ssoDeeplink.execute(SsoDeeplink.FlowVersion.REDIRECT_TO_SDK);
+            } else {
+                onError(AuthenticationError.INVALID_REDIRECT_URI);
+            }
+            return;
+        }
+
+        boolean forceWebview = intent.getBooleanExtra(EXTRA_FORCE_WEBVIEW, false);
+        boolean isRedirectToPlayStoreEnabled = intent.getBooleanExtra(EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED, false);
+        if (responseType == ResponseType.CODE) {
+            loadWebPage(redirectUri, ResponseType.CODE, sessionConfiguration, forceWebview);
+        } else if (responseType == ResponseType.TOKEN && !(AuthUtils.isPrivilegeScopeRequired(sessionConfiguration.getScopes())
+                && isRedirectToPlayStoreEnabled)) {
+            loadWebPage(redirectUri, ResponseType.TOKEN, sessionConfiguration, forceWebview);
+        } else {
+            redirectToInstallApp(this);
+        }
+    }
+
+    protected void loadWebPage(String redirectUri, ResponseType responseType, SessionConfiguration sessionConfiguration, boolean forceWebview) {
         String url = AuthUtils.buildUrl(redirectUri, responseType, sessionConfiguration);
-        if (getIntent().getBooleanExtra(EXTRA_FORCE_WEBVIEW, false)) {
+        if (forceWebview) {
             loadWebview(url, redirectUri);
         } else {
             loadChrometab(url);
@@ -213,7 +267,6 @@ public class LoginActivity extends Activity {
 
     protected void loadChrometab(String url) {
         final CustomTabsIntent intent = new CustomTabsIntent.Builder().build();
-        CustomTabsHelper customTabsHelper = new CustomTabsHelper();
         customTabsHelper.openCustomTab(this, intent, Uri.parse(url), new CustomTabsHelper
                 .BrowserFallback());
     }
@@ -255,6 +308,30 @@ public class LoginActivity extends Activity {
             onError(loginException.getAuthenticationError());
             return;
         }
+    }
+
+    private boolean validateRequestParams() {
+        if (sessionConfiguration == null) {
+            onError(AuthenticationError.INVALID_PARAMETERS);
+            return false;
+        }
+
+        if ((sessionConfiguration.getScopes() == null || sessionConfiguration.getScopes().isEmpty())
+                && (sessionConfiguration.getCustomScopes() == null  || sessionConfiguration.getCustomScopes().isEmpty())) {
+            onError(AuthenticationError.INVALID_SCOPE);
+            return false;
+        }
+
+        if (responseType == null) {
+            onError(AuthenticationError.INVALID_RESPONSE_TYPE);
+            return false;
+        }
+
+        return true;
+    }
+
+    private void redirectToInstallApp(@NonNull Activity activity) {
+        new SignupDeeplink(activity, sessionConfiguration.getClientId(), USER_AGENT).execute();
     }
 
     /**
