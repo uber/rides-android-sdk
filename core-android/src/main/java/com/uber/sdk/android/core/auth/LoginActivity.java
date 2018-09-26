@@ -200,7 +200,7 @@ public class LoginActivity extends Activity {
         }
 
         String redirectUri = sessionConfiguration.getRedirectUri() != null ? sessionConfiguration
-                .getRedirectUri() : getApplicationContext().getPackageName() + "uberauth";
+                .getRedirectUri() : getApplicationContext().getPackageName().concat(".uberauth://redirect");
 
         if (intent.getBooleanExtra(EXTRA_SSO_ENABLED, false)) {
             SsoDeeplink ssoDeeplink = ssoDeeplinkFactory.getSsoDeeplink(this, sessionConfiguration);
