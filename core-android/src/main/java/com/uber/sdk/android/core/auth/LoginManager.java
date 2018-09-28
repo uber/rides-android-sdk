@@ -184,9 +184,7 @@ public class LoginManager {
         } else if (isAuthCodeFlowEnabled()) {
             loginForAuthorizationCode(activity);
         } else {
-            Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, ResponseType.TOKEN,
-                    legacyUriRedirectHandler.isLegacyMode(), false, true);
-            activity.startActivityForResult(intent, requestCode);
+            loginForImplicitGrantWithFallback(activity);
         }
     }
 
@@ -219,6 +217,22 @@ public class LoginManager {
 
         Intent intent = LoginActivity.newIntent(activity, sessionConfiguration,
                 ResponseType.CODE, legacyUriRedirectHandler.isLegacyMode());
+        activity.startActivityForResult(intent, requestCode);
+    }
+
+    /**
+     * Login using Implicit Grant, but if requesting privileged scopes, fallback to redirecting the user to the play
+     * store to install the app.
+     *
+     * @param activity to start Activity on.
+     */
+    private void loginForImplicitGrantWithFallback(@NonNull Activity activity) {
+        if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
+            return;
+        }
+
+        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, ResponseType.TOKEN,
+                legacyUriRedirectHandler.isLegacyMode(), false, true);
         activity.startActivityForResult(intent, requestCode);
     }
 
