@@ -108,17 +108,12 @@ public class SsoDeeplink implements Deeplink {
 
         List<PackageInfo> validatedPackages = new ArrayList<>();
         if (productFlowPriority.isEmpty()) {
-            validatedPackages.addAll(appProtocol.getInstalledPackages(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED));
+            validatedPackages.addAll(
+                    appProtocol.getInstalledPackages(activity, UBER, getSupportedAppVersion(UBER)));
         } else {
             for (SupportedAppType supportedAppType : productFlowPriority) {
-                switch (supportedAppType) {
-                    case UBER:
-                        validatedPackages.addAll(appProtocol.getInstalledPackages(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED));
-                        break;
-                    case UBER_EATS:
-                        validatedPackages.addAll(appProtocol.getInstalledPackages(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED));
-                        break;
-                }
+                validatedPackages.addAll(appProtocol.getInstalledPackages(
+                        activity, supportedAppType, getSupportedAppVersion(supportedAppType)));
             }
         }
 
@@ -150,8 +145,25 @@ public class SsoDeeplink implements Deeplink {
      */
     @Override
     public boolean isSupported() {
-        return appProtocol.isInstalled(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED)
-                || appProtocol.isInstalled(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED);
+        if (productFlowPriority.isEmpty()) {
+            return appProtocol.isInstalled(activity, UBER, getSupportedAppVersion(UBER));
+        } else {
+            for (SupportedAppType supportedAppType : productFlowPriority) {
+                if (appProtocol.isInstalled(activity, supportedAppType, getSupportedAppVersion(supportedAppType))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    private static int getSupportedAppVersion(SupportedAppType supportedAppType) {
+        if (UBER == supportedAppType) {
+            return MIN_UBER_RIDES_VERSION_SUPPORTED;
+        } else if (UBER_EATS == supportedAppType) {
+            return MIN_UBER_EATS_VERSION_SUPPORTED;
+        }
+        return Integer.MAX_VALUE;
     }
 
     public static class Builder {
