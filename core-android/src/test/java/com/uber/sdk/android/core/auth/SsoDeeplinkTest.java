@@ -90,7 +90,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     }
 
     @Test
-    public void isSupported_eatsAppInstalled_shouldBeTrue() {
+    public void isSupported_eatsAppInstalled_withoutProductPriority_shouldBeFalse() {
         when(appProtocol.isInstalled(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED)).thenReturn(false);
         when(appProtocol.isInstalled(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED)).thenReturn(true);
 
@@ -98,6 +98,21 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
                 .clientId(CLIENT_ID)
                 .scopes(GENERAL_SCOPES)
                 .appProtocol(appProtocol)
+                .build();
+
+        assertThat(link.isSupported()).isFalse();
+    }
+
+    @Test
+    public void isSupported_eatsAppInstalled_withProductPriority_shouldBeTrue() {
+        when(appProtocol.isInstalled(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED)).thenReturn(false);
+        when(appProtocol.isInstalled(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED)).thenReturn(true);
+
+        final SsoDeeplink link = new SsoDeeplink.Builder(activity)
+                .clientId(CLIENT_ID)
+                .scopes(GENERAL_SCOPES)
+                .appProtocol(appProtocol)
+                .productFlowPriority(ImmutableList.of(UBER_EATS))
                 .build();
 
         assertThat(link.isSupported()).isTrue();
@@ -229,14 +244,12 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
         when(appProtocol.getInstalledPackages(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED))
                 .thenReturn(Collections.singletonList(eatsPackageInfo));
 
-        Collection<SupportedAppType> supportedAppTypes = ImmutableList.of(UBER_EATS);
-
         new SsoDeeplink.Builder(activity)
                 .clientId(CLIENT_ID)
                 .activityRequestCode(REQUEST_CODE)
                 .scopes(GENERAL_SCOPES)
                 .appProtocol(appProtocol)
-                .productFlowPriority(supportedAppTypes)
+                .productFlowPriority(ImmutableList.of(UBER_EATS))
                 .build()
                 .execute();
 
@@ -250,19 +263,17 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     public void execute_withMissingProductFlowPriority_shouldLaunchRides() {
         enableSupport();
         String ridesPackageName = "com.ubercab";
-        PackageInfo eatsPackageInfo = new PackageInfo();
-        eatsPackageInfo.packageName = ridesPackageName;
+        PackageInfo ridesPackageInfo = new PackageInfo();
+        ridesPackageInfo.packageName = ridesPackageName;
         when(appProtocol.getInstalledPackages(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED))
-                .thenReturn(Collections.singletonList(eatsPackageInfo));
-
-        Collection<SupportedAppType> supportedAppTypes = ImmutableList.of();
+                .thenReturn(Collections.singletonList(ridesPackageInfo));
 
         new SsoDeeplink.Builder(activity)
                 .clientId(CLIENT_ID)
                 .activityRequestCode(REQUEST_CODE)
                 .scopes(GENERAL_SCOPES)
                 .appProtocol(appProtocol)
-                .productFlowPriority(supportedAppTypes)
+                .productFlowPriority(ImmutableList.<SupportedAppType>of())
                 .build()
                 .execute();
 
