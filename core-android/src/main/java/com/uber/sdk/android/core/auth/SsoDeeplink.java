@@ -29,7 +29,6 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
-import android.util.Pair;
 import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.Deeplink;
 import com.uber.sdk.android.core.SupportedAppType;
@@ -39,7 +38,6 @@ import com.uber.sdk.core.auth.Scope;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static com.uber.sdk.android.core.SupportedAppType.UBER;
@@ -73,6 +71,7 @@ public class SsoDeeplink implements Deeplink {
     private final String clientId;
     private final Collection<Scope> requestedScopes;
     private final Collection<String> requestedCustomScopes;
+    private final Collection<SupportedAppType> productFlowPriority;
     private final int requestCode;
 
     private SsoDeeplink(
@@ -81,6 +80,7 @@ public class SsoDeeplink implements Deeplink {
             @NonNull String clientId,
             @NonNull Collection<Scope> requestedScopes,
             @NonNull Collection<String> requestedCustomScopes,
+            @NonNull Collection<SupportedAppType> productFlowPriority,
             int requestCode) {
         this.activity = activity;
         this.appProtocol = appProtocol;
@@ -88,6 +88,7 @@ public class SsoDeeplink implements Deeplink {
         this.requestCode = requestCode;
         this.requestedScopes = requestedScopes;
         this.requestedCustomScopes = requestedCustomScopes;
+        this.productFlowPriority = productFlowPriority;
     }
 
     /**
@@ -106,10 +107,22 @@ public class SsoDeeplink implements Deeplink {
         intent.setData(deepLinkUri);
 
         List<PackageInfo> validatedPackages = new ArrayList<>();
-        validatedPackages.addAll(appProtocol.getInstalledPackages(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED));
-        validatedPackages.addAll(appProtocol.getInstalledPackages(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED));
+        if (productFlowPriority.isEmpty()) {
+            validatedPackages.addAll(appProtocol.getInstalledPackages(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED));
+        } else {
+            for (SupportedAppType supportedAppType : productFlowPriority) {
+                switch (supportedAppType) {
+                    case UBER:
+                        validatedPackages.addAll(appProtocol.getInstalledPackages(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED));
+                        break;
+                    case UBER_EATS:
+                        validatedPackages.addAll(appProtocol.getInstalledPackages(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED));
+                        break;
+                }
+            }
+        }
 
-        if(!validatedPackages.isEmpty()) {
+        if (!validatedPackages.isEmpty()) {
             intent.setPackage(validatedPackages.get(0).packageName);
         }
         activity.startActivityForResult(intent, requestCode);
@@ -138,7 +151,7 @@ public class SsoDeeplink implements Deeplink {
     @Override
     public boolean isSupported() {
         return appProtocol.isInstalled(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED)
-            || appProtocol.isInstalled(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED);
+                || appProtocol.isInstalled(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED);
     }
 
     public static class Builder {
@@ -148,6 +161,7 @@ public class SsoDeeplink implements Deeplink {
         private String clientId;
         private Collection<Scope> requestedScopes;
         private Collection<String> requestedCustomScopes;
+        private Collection<SupportedAppType> productFlowPriority;
         private int requestCode = DEFAULT_REQUEST_CODE;
 
         public Builder(@NonNull Activity activity) {
@@ -171,6 +185,11 @@ public class SsoDeeplink implements Deeplink {
 
         public Builder customScopes(@NonNull Collection<String> customScopes) {
             this.requestedCustomScopes = customScopes;
+            return this;
+        }
+
+        public Builder productFlowPriority(@NonNull Collection<SupportedAppType> productFlowPriority) {
+            this.productFlowPriority = productFlowPriority;
             return this;
         }
 
@@ -202,11 +221,16 @@ public class SsoDeeplink implements Deeplink {
                 appProtocol = new AppProtocol();
             }
 
+            if (productFlowPriority == null) {
+                productFlowPriority = new ArrayList<>();
+            }
+
             return new SsoDeeplink(activity,
                     appProtocol,
                     clientId,
                     requestedScopes,
                     requestedCustomScopes,
+                    productFlowPriority,
                     requestCode);
         }
     }
