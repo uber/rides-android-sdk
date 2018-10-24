@@ -28,10 +28,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
-
 import com.google.common.collect.ImmutableList;
 import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.RobolectricTestBase;
+import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenAuthenticator;
@@ -39,13 +39,16 @@ import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
 import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.robolectric.Robolectric;
 
+import java.util.List;
+
+import static com.uber.sdk.android.core.SupportedAppType.UBER;
+import static com.uber.sdk.android.core.SupportedAppType.UBER_EATS;
 import static com.uber.sdk.android.core.auth.LoginManager.EXTRA_ACCESS_TOKEN;
 import static com.uber.sdk.android.core.auth.LoginManager.EXTRA_CODE_RECEIVED;
 import static com.uber.sdk.android.core.auth.LoginManager.EXTRA_ERROR;
@@ -114,7 +117,8 @@ public class LoginManagerTest extends RobolectricTestBase {
     @Mock
     AccessTokenStorage accessTokenStorage;
 
-    @Mock LegacyUriRedirectHandler legacyUriRedirectHandler;
+    @Mock
+    LegacyUriRedirectHandler legacyUriRedirectHandler;
 
     SessionConfiguration sessionConfiguration;
 
@@ -184,6 +188,42 @@ public class LoginManagerTest extends RobolectricTestBase {
         verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
 
         assertThat(intentCaptor.getValue().getData().toString()).isEqualTo(DEFAULT_REGION);
+        assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE);
+    }
+
+    @Test
+    public void login_withEatsProductPriority_shouldLaunchEats() {
+        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration, REQUEST_CODE);
+        stubAppInstalled(packageManager, "com.ubercab", SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED);
+        stubAppInstalled(packageManager, "com.ubercab.eats", SsoDeeplink.MIN_UBER_EATS_VERSION_SUPPORTED);
+        List<SupportedAppType> appTypes = ImmutableList.of(UBER_EATS);
+
+        loginManager.setProductFlowPriority(appTypes).login(activity);
+
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        ArgumentCaptor<Integer> codeCaptor = ArgumentCaptor.forClass(Integer.class);
+
+        verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
+
+        assertThat(intentCaptor.getValue().getPackage()).isEqualTo("com.ubercab.eats");
+        assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE);
+    }
+
+    @Test
+    public void login_withRidesAndEatsProductPriority_shouldLaunchRides() {
+        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration, REQUEST_CODE);
+        stubAppInstalled(packageManager, "com.ubercab", SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED);
+        stubAppInstalled(packageManager, "com.ubercab.eats", SsoDeeplink.MIN_UBER_EATS_VERSION_SUPPORTED);
+        List<SupportedAppType> appTypes = ImmutableList.of(UBER, UBER_EATS);
+
+        loginManager.setProductFlowPriority(appTypes).login(activity);
+
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        ArgumentCaptor<Integer> codeCaptor = ArgumentCaptor.forClass(Integer.class);
+
+        verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
+
+        assertThat(intentCaptor.getValue().getPackage()).isEqualTo("com.ubercab");
         assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE);
     }
 
@@ -481,7 +521,7 @@ public class LoginManagerTest extends RobolectricTestBase {
     public void getSession_withAccessToken_successful() {
         when(accessTokenStorage.getAccessToken()).thenReturn(ACCESS_TOKEN);
         Session session = loginManager.getSession();
-        assertEquals(ACCESS_TOKEN, ((AccessTokenAuthenticator)session.getAuthenticator()).getTokenStorage().getAccessToken());
+        assertEquals(ACCESS_TOKEN, ((AccessTokenAuthenticator) session.getAuthenticator()).getTokenStorage().getAccessToken());
     }
 
     @Test(expected = IllegalStateException.class)

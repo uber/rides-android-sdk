@@ -26,9 +26,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.net.Uri;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.RobolectricTestBase;
+import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.core.auth.Scope;
 import org.junit.Before;
@@ -88,7 +90,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     }
 
     @Test
-    public void isSupported_eatsAppInstalled_shouldBeTrue() {
+    public void isSupported_eatsAppInstalled_withoutProductPriority_shouldBeFalse() {
         when(appProtocol.isInstalled(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED)).thenReturn(false);
         when(appProtocol.isInstalled(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED)).thenReturn(true);
 
@@ -96,6 +98,21 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
                 .clientId(CLIENT_ID)
                 .scopes(GENERAL_SCOPES)
                 .appProtocol(appProtocol)
+                .build();
+
+        assertThat(link.isSupported()).isFalse();
+    }
+
+    @Test
+    public void isSupported_eatsAppInstalled_withProductPriority_shouldBeTrue() {
+        when(appProtocol.isInstalled(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED)).thenReturn(false);
+        when(appProtocol.isInstalled(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED)).thenReturn(true);
+
+        final SsoDeeplink link = new SsoDeeplink.Builder(activity)
+                .clientId(CLIENT_ID)
+                .scopes(GENERAL_SCOPES)
+                .appProtocol(appProtocol)
+                .productFlowPriority(ImmutableList.of(UBER_EATS))
                 .build();
 
         assertThat(link.isSupported()).isTrue();
@@ -216,6 +233,54 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
 
         Uri uri = intentArgumentCaptor.getValue().getData();
         assertThat(uri.getQueryParameter("scope")).contains("history", "profile", "sample", "test");
+    }
+
+    @Test
+    public void execute_withEatsProductFlowPriority_shouldLaunchEats() {
+        enableSupport();
+        String eatsPackageName = "com.ubercab.eats";
+        PackageInfo eatsPackageInfo = new PackageInfo();
+        eatsPackageInfo.packageName = eatsPackageName;
+        when(appProtocol.getInstalledPackages(activity, UBER_EATS, MIN_UBER_EATS_VERSION_SUPPORTED))
+                .thenReturn(Collections.singletonList(eatsPackageInfo));
+
+        new SsoDeeplink.Builder(activity)
+                .clientId(CLIENT_ID)
+                .activityRequestCode(REQUEST_CODE)
+                .scopes(GENERAL_SCOPES)
+                .appProtocol(appProtocol)
+                .productFlowPriority(ImmutableList.of(UBER_EATS))
+                .build()
+                .execute();
+
+        ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(activity).startActivityForResult(intentArgumentCaptor.capture(), anyInt());
+
+        assertThat(intentArgumentCaptor.getValue().getPackage()).isEqualTo(eatsPackageName);
+    }
+
+    @Test
+    public void execute_withMissingProductFlowPriority_shouldLaunchRides() {
+        enableSupport();
+        String ridesPackageName = "com.ubercab";
+        PackageInfo ridesPackageInfo = new PackageInfo();
+        ridesPackageInfo.packageName = ridesPackageName;
+        when(appProtocol.getInstalledPackages(activity, UBER, MIN_UBER_RIDES_VERSION_SUPPORTED))
+                .thenReturn(Collections.singletonList(ridesPackageInfo));
+
+        new SsoDeeplink.Builder(activity)
+                .clientId(CLIENT_ID)
+                .activityRequestCode(REQUEST_CODE)
+                .scopes(GENERAL_SCOPES)
+                .appProtocol(appProtocol)
+                .productFlowPriority(ImmutableList.<SupportedAppType>of())
+                .build()
+                .execute();
+
+        ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(activity).startActivityForResult(intentArgumentCaptor.capture(), anyInt());
+
+        assertThat(intentArgumentCaptor.getValue().getPackage()).isEqualTo(ridesPackageName);
     }
 
     @Test(expected = NullPointerException.class)

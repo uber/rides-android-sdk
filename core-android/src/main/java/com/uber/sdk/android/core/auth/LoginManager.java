@@ -27,8 +27,8 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
 import com.uber.sdk.android.core.BuildConfig;
+import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.install.SignupDeeplink;
 import com.uber.sdk.android.core.utils.AppProtocol;
@@ -39,6 +39,8 @@ import com.uber.sdk.core.client.AccessTokenSession;
 import com.uber.sdk.core.client.ServerTokenSession;
 import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
+
+import java.util.Collection;
 
 import static com.uber.sdk.core.client.utils.Preconditions.checkNotEmpty;
 import static com.uber.sdk.core.client.utils.Preconditions.checkNotNull;
@@ -96,6 +98,7 @@ public class LoginManager {
     private final int requestCode;
     private final LegacyUriRedirectHandler legacyUriRedirectHandler;
 
+    private Collection<SupportedAppType> productFlowPriority;
     private boolean authCodeFlowEnabled = false;
     @Deprecated
     private boolean redirectForAuthorizationCode = false;
@@ -138,11 +141,11 @@ public class LoginManager {
     }
 
     /**
-     * @param accessTokenStorage to store access token.
-     * @param loginCallback      callback to be called when {@link LoginManager#onActivityResult(Activity, int, int, Intent)} is called.
-     * @param configuration      to provide authentication information
-     * @param requestCode        custom code to use for Activity communication
-     * @param legacyUriRedirectHandler         Used to handle URI Redirect Migration
+     * @param accessTokenStorage       to store access token.
+     * @param loginCallback            callback to be called when {@link LoginManager#onActivityResult(Activity, int, int, Intent)} is called.
+     * @param configuration            to provide authentication information
+     * @param requestCode              custom code to use for Activity communication
+     * @param legacyUriRedirectHandler Used to handle URI Redirect Migration
      */
     LoginManager(
             @NonNull AccessTokenStorage accessTokenStorage,
@@ -176,6 +179,7 @@ public class LoginManager {
                 .clientId(sessionConfiguration.getClientId())
                 .scopes(sessionConfiguration.getScopes())
                 .customScopes(sessionConfiguration.getCustomScopes())
+                .productFlowPriority(productFlowPriority)
                 .activityRequestCode(requestCode)
                 .build();
 
@@ -322,16 +326,30 @@ public class LoginManager {
      * (See <a href="https://developer.uber.com/docs/authentication#section-step-one-authorize">
      * https://developer.uber.com/docs/authentication#section-step-one-authorize</a>) instead of an
      * installation prompt for the Uber app  or Implicit Grant (WebView) as a login fallback mechanism.
-     *
+     * <p>
      * Requires that the app's backend system is configured to support this flow and the redirect
      * URI is pointed correctly.
      *
      * @param authCodeFlowEnabled true for use of auth code flow, false to fallback to Uber app
-     * installation
-     * @return this instace of {@link LoginManager}
+     *                            installation
+     * @return this instance of {@link LoginManager}.
      */
     public LoginManager setAuthCodeFlowEnabled(boolean authCodeFlowEnabled) {
         this.authCodeFlowEnabled = authCodeFlowEnabled;
+        return this;
+    }
+
+    /**
+     * Dictates the order of which Uber applications should be used for SSO.
+     * This can be used to order Eats then Rides or vice-versa.
+     * Only specified applications will be used, so specifying only Rides or Eats will ignore other apps if installed.
+     * The default behavior (for backward compatibility) is Rides only.
+     *
+     * @param productFlowPriority A Collection of SupportedAppType indicating priority of SSO applications.
+     * @return this instance of {@link LoginManager}.
+     */
+    public LoginManager setProductFlowPriority(@NonNull Collection<SupportedAppType> productFlowPriority) {
+        this.productFlowPriority = productFlowPriority;
         return this;
     }
 
