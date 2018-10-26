@@ -16,8 +16,8 @@
 
 buildscript {
     repositories {
-        jcenter()
         google()
+        jcenter()
         maven { url deps.build.repositories.plugins }
     }
 
