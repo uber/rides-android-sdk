@@ -27,8 +27,10 @@ import android.content.Intent;
 import android.net.Uri;
 
 import android.support.customtabs.CustomTabsIntent;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.uber.sdk.android.core.RobolectricTestBase;
+import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.utils.CustomTabsHelper;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.Scope;
@@ -43,8 +45,11 @@ import org.robolectric.shadows.ShadowActivity;
 import org.robolectric.shadows.ShadowWebView;
 import org.robolectric.util.ActivityController;
 
+import java.util.ArrayList;
 import java.util.Set;
 
+import static com.uber.sdk.android.core.SupportedAppType.UBER;
+import static com.uber.sdk.android.core.SupportedAppType.UBER_EATS;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,6 +69,7 @@ public class LoginActivityTest extends RobolectricTestBase {
     private static final Set<Scope> MIXED_SCOPES = Sets.newHashSet(Scope.REQUEST, Scope.PROFILE, Scope.PAYMENT_METHODS);
     private static final String SIGNUP_DEEPLINK_URL =  "https://m.uber.com/sign-up?client_id=" + CLIENT_ID + "&user-agent=" + LoginActivity.USER_AGENT;
 
+    private final ArrayList<SupportedAppType> productPriority = new ArrayList<>(ImmutableList.of(UBER_EATS, UBER));
     private LoginActivity loginActivity;
     private SessionConfiguration loginConfiguration;
 
@@ -87,7 +93,8 @@ public class LoginActivityTest extends RobolectricTestBase {
         Intent data = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration, ResponseType.TOKEN);
         loginActivity = Robolectric.buildActivity(LoginActivity.class).withIntent(data).get();
 
-        when(ssoDeeplinkFactory.getSsoDeeplink(any(LoginActivity.class), any(SessionConfiguration.class))).thenReturn(ssoDeeplink);
+        when(ssoDeeplinkFactory.getSsoDeeplink(any(LoginActivity.class),
+                eq(productPriority), any(SessionConfiguration.class))).thenReturn(ssoDeeplink);
     }
 
     @Test
@@ -143,8 +150,8 @@ public class LoginActivityTest extends RobolectricTestBase {
 
     @Test
     public void onLoginLoad_withSsoEnabled_andSupported_shouldExecuteSsoDeeplink() {
-        Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
-                ResponseType.TOKEN, false, true, true);
+        Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), productPriority,
+                loginConfiguration, ResponseType.TOKEN, false, true, true);
 
         ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class).withIntent(intent);
         loginActivity = controller.get();
@@ -159,8 +166,8 @@ public class LoginActivityTest extends RobolectricTestBase {
 
     @Test
     public void onLoginLoad_withSsoEnabled_andNotSupported_shouldReturnErrorResultIntent() {
-        Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
-                ResponseType.TOKEN, false, true, true);
+        Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), productPriority,
+                loginConfiguration, ResponseType.TOKEN, false, true, true);
 
         ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class).withIntent(intent);
         loginActivity = controller.get();
@@ -275,8 +282,8 @@ public class LoginActivityTest extends RobolectricTestBase {
                 .setRedirectUri(REDIRECT_URI)
                 .setScopes(MIXED_SCOPES)
                 .build();
-        Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
-                ResponseType.TOKEN, true, false, true);
+        Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class),
+                new ArrayList<SupportedAppType>(), loginConfiguration, ResponseType.TOKEN, true, false, true);
 
         ShadowActivity shadowActivity = shadowOf(Robolectric.buildActivity(LoginActivity.class).withIntent(intent).create().get());
 

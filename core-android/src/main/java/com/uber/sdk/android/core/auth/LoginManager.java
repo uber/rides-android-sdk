@@ -41,6 +41,7 @@ import com.uber.sdk.core.client.ServerTokenSession;
 import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static com.uber.sdk.core.client.utils.Preconditions.checkNotEmpty;
@@ -176,8 +177,14 @@ public class LoginManager {
         SsoDeeplink ssoDeeplink = getSsoDeeplink(activity);
 
         if (ssoDeeplink.isSupported(SsoDeeplink.FlowVersion.REDIRECT_TO_SDK)) {
-            Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, ResponseType.TOKEN,
-                    false, true, true);
+            Intent intent = LoginActivity.newIntent(
+                    activity,
+                    new ArrayList<>(productFlowPriority),
+                    sessionConfiguration,
+                    ResponseType.TOKEN,
+                    false,
+                    true,
+                    true);
             activity.startActivityForResult(intent, requestCode);
         } else if (ssoDeeplink.isSupported(SsoDeeplink.FlowVersion.DEFAULT)) {
             ssoDeeplink.execute(SsoDeeplink.FlowVersion.DEFAULT);
@@ -231,8 +238,14 @@ public class LoginManager {
             return;
         }
 
-        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration, ResponseType.TOKEN,
-                legacyUriRedirectHandler.isLegacyMode(), false, true);
+        Intent intent = LoginActivity.newIntent(
+                activity,
+                new ArrayList<SupportedAppType>(),
+                sessionConfiguration,
+                ResponseType.TOKEN,
+                legacyUriRedirectHandler.isLegacyMode(),
+                false,
+                true);
         activity.startActivityForResult(intent, requestCode);
     }
 

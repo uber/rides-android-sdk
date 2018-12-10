@@ -41,9 +41,14 @@ import android.webkit.WebViewClient;
 
 import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.R;
+import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.install.SignupDeeplink;
 import com.uber.sdk.android.core.utils.CustomTabsHelper;
 import com.uber.sdk.core.client.SessionConfiguration;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * {@link android.app.Activity} that shows web view for Uber user authentication and authorization.
@@ -52,6 +57,7 @@ public class LoginActivity extends Activity {
     @VisibleForTesting
     static final String USER_AGENT = String.format("core-android-v%s-login_manager", BuildConfig.VERSION_NAME);
 
+    static final String EXTRA_PRODUCT_PRIORITY = "PRODUCT_PRIORITY";
     static final String EXTRA_RESPONSE_TYPE = "RESPONSE_TYPE";
     static final String EXTRA_SESSION_CONFIGURATION = "SESSION_CONFIGURATION";
     static final String EXTRA_FORCE_WEBVIEW = "FORCE_WEBVIEW";
@@ -60,6 +66,7 @@ public class LoginActivity extends Activity {
 
     static final String ERROR = "error";
 
+    private ArrayList<SupportedAppType> productPriority;
     private ResponseType responseType;
     private SessionConfiguration sessionConfiguration;
     private boolean authStarted;
@@ -107,13 +114,14 @@ public class LoginActivity extends Activity {
             @NonNull ResponseType responseType,
             boolean forceWebview) {
 
-        return newIntent(context, sessionConfiguration, responseType, forceWebview, false, false);
+        return newIntent(context, new ArrayList<SupportedAppType>(), sessionConfiguration, responseType, forceWebview, false, false);
     }
 
     /**
      * Create an {@link Intent} to pass to this activity
      *
      * @param context the {@link Context} for the intent
+     * @param productPriority dictates the order of which Uber applications should be used for SSO.
      * @param sessionConfiguration to be used for gather clientId
      * @param responseType that is expected
      * @param forceWebview Forced to use old webview instead of chrometabs
@@ -123,6 +131,7 @@ public class LoginActivity extends Activity {
     @NonNull
     static Intent newIntent(
             @NonNull Context context,
+            @NonNull ArrayList<SupportedAppType> productPriority,
             @NonNull SessionConfiguration sessionConfiguration,
             @NonNull ResponseType responseType,
             boolean forceWebview,
@@ -130,6 +139,7 @@ public class LoginActivity extends Activity {
             boolean isRedirectToPlayStoreEnabled) {
 
         final Intent data = new Intent(context, LoginActivity.class)
+                .putExtra(EXTRA_PRODUCT_PRIORITY, productPriority)
                 .putExtra(EXTRA_SESSION_CONFIGURATION, sessionConfiguration)
                 .putExtra(EXTRA_RESPONSE_TYPE, responseType)
                 .putExtra(EXTRA_FORCE_WEBVIEW, forceWebview)
@@ -194,6 +204,7 @@ public class LoginActivity extends Activity {
 
         sessionConfiguration = (SessionConfiguration) intent.getSerializableExtra(EXTRA_SESSION_CONFIGURATION);
         responseType = (ResponseType) intent.getSerializableExtra(EXTRA_RESPONSE_TYPE);
+        productPriority = (ArrayList<SupportedAppType>) intent.getSerializableExtra(EXTRA_PRODUCT_PRIORITY);
 
         if (!validateRequestParams()) {
             return;
@@ -203,7 +214,7 @@ public class LoginActivity extends Activity {
                 .getRedirectUri() : getApplicationContext().getPackageName().concat(".uberauth://redirect");
 
         if (intent.getBooleanExtra(EXTRA_SSO_ENABLED, false)) {
-            SsoDeeplink ssoDeeplink = ssoDeeplinkFactory.getSsoDeeplink(this, sessionConfiguration);
+            SsoDeeplink ssoDeeplink = ssoDeeplinkFactory.getSsoDeeplink(this, productPriority, sessionConfiguration);
 
             if (ssoDeeplink.isSupported(SsoDeeplink.FlowVersion.REDIRECT_TO_SDK)) {
                 ssoDeeplink.execute(SsoDeeplink.FlowVersion.REDIRECT_TO_SDK);
