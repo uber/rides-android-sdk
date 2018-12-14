@@ -1,6 +1,15 @@
 v0.9.2 - TBD
 ------------
 
+### Added
+ - [Issue #144](https://github.com/uber/rides-android-sdk/issues/144) Allow SSO Client to dictate which Uber Apps can be used for SSO
+ - [Issue #138](https://github.com/uber/rides-android-sdk/issues/138) Support for IETF RFC 8252
+ - [Issue #130](https://github.com/uber/rides-android-sdk/issues/130) Support for Uber Eats SSO
+
+### Fixed
+ - [Issue #129](https://github.com/uber/rides-android-sdk/issues/129) Allow use of refresh token for non-privileged scopes
+ - [Issue #119](https://github.com/uber/rides-android-sdk/issues/119) Redirect URL documentation issue
+
 v0.9.1 - 03/20/2018
 ------------
 
