@@ -28,10 +28,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
-import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.UberSdk;
-import com.uber.sdk.android.core.install.SignupDeeplink;
 import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenStorage;
@@ -44,7 +42,7 @@ import com.uber.sdk.core.client.SessionConfiguration;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static com.uber.sdk.core.client.utils.Preconditions.checkNotEmpty;
+import static com.uber.sdk.android.core.utils.Preconditions.checkState;
 import static com.uber.sdk.core.client.utils.Preconditions.checkNotNull;
 
 /**
@@ -165,10 +163,11 @@ public class LoginManager {
      * @param activity the activity used to start the {@link LoginActivity}.
      */
     public void login(final @NonNull Activity activity) {
-        checkNotEmpty(sessionConfiguration.getScopes(), "Scopes must be set in the Session " +
-                "Configuration.");
-        checkNotNull(sessionConfiguration.getRedirectUri(), "Redirect URI must be set in "
-                + "Session Configuration.");
+        boolean hasScopes = (sessionConfiguration.getScopes() != null && !sessionConfiguration.getScopes().isEmpty())
+                || (sessionConfiguration.getCustomScopes() != null && !sessionConfiguration.getCustomScopes().isEmpty());
+        checkState(hasScopes, "Scopes must be set in the Session Configuration.");
+        checkNotNull(sessionConfiguration.getRedirectUri(),
+                "Redirect URI must be set in Session Configuration.");
 
         if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
             return;
@@ -416,6 +415,7 @@ public class LoginManager {
 
     /**
      * Generates the deeplink required to execute the SSO Flow
+     *
      * @param activity the activity to execute the deeplink intent
      * @return the object that executes the deeplink
      */
