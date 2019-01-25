@@ -24,8 +24,8 @@ package com.uber.sdk.android.core.auth;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.*;
-
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import com.google.common.collect.ImmutableList;
 import com.uber.sdk.android.core.RobolectricTestBase;
@@ -46,7 +46,12 @@ import java.util.List;
 
 import static com.uber.sdk.android.core.SupportedAppType.UBER;
 import static com.uber.sdk.android.core.SupportedAppType.UBER_EATS;
-import static com.uber.sdk.android.core.auth.LoginActivity.*;
+import static com.uber.sdk.android.core.auth.LoginActivity.EXTRA_FORCE_WEBVIEW;
+import static com.uber.sdk.android.core.auth.LoginActivity.EXTRA_PRODUCT_PRIORITY;
+import static com.uber.sdk.android.core.auth.LoginActivity.EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED;
+import static com.uber.sdk.android.core.auth.LoginActivity.EXTRA_RESPONSE_TYPE;
+import static com.uber.sdk.android.core.auth.LoginActivity.EXTRA_SESSION_CONFIGURATION;
+import static com.uber.sdk.android.core.auth.LoginActivity.EXTRA_SSO_ENABLED;
 import static com.uber.sdk.android.core.auth.LoginManager.EXTRA_ACCESS_TOKEN;
 import static com.uber.sdk.android.core.auth.LoginManager.EXTRA_CODE_RECEIVED;
 import static com.uber.sdk.android.core.auth.LoginManager.EXTRA_ERROR;
@@ -80,6 +85,8 @@ public class LoginManagerTest extends RobolectricTestBase {
     private static final String REDIRECT_URI = "com.example.uberauth://redirect";
     private static final ImmutableList<Scope> MIXED_SCOPES = ImmutableList.of(Scope.PROFILE, Scope.REQUEST_RECEIPT);
     private static final ImmutableList<Scope> GENERAL_SCOPES = ImmutableList.of(Scope.PROFILE, Scope.HISTORY);
+    private static final ImmutableList<Scope> EMPTY_SCOPES = ImmutableList.of();
+    private static final ImmutableList<String> CUSTOM_SCOPES = ImmutableList.of("foo", "bar");
 
     private static final String AUTHORIZATION_CODE = "Auth123Code";
     private static final String PACKAGE_NAME = "com.example";
@@ -131,7 +138,6 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         verify(activity, never()).startActivityForResult(any(Intent.class), anyInt());
     }
-
 
     @Test
     public void login_withRedirectToSdkFlowSsoSupported_shouldLoginActivityWithSsoParams() {
@@ -236,6 +242,37 @@ public class LoginManagerTest extends RobolectricTestBase {
     @Test
     public void loginForAuthorizationCode_withoutLegacyModeBlocking_shouldLoginWithAuthCodeFlowParams() {
         loginManager.loginForAuthorizationCode(activity);
+
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        ArgumentCaptor<Integer> codeCaptor = ArgumentCaptor.forClass(Integer.class);
+
+        verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
+
+        final Intent resultIntent = intentCaptor.getValue();
+        validateLoginIntentFields(resultIntent, new ArrayList<SupportedAppType>(), sessionConfiguration,
+                ResponseType.CODE, false, false, false);
+        assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void login_whenMissingScopes_shouldThrowException() {
+        sessionConfiguration = sessionConfiguration.newBuilder().setScopes(EMPTY_SCOPES).build();
+        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration);
+
+        loginManager.setAuthCodeFlowEnabled(true);
+        loginManager.login(activity);
+    }
+
+    @Test
+    public void login_whenOnlyCustomScopes_shouldLogin() {
+        sessionConfiguration = sessionConfiguration.newBuilder()
+                .setScopes(EMPTY_SCOPES)
+                .setCustomScopes(CUSTOM_SCOPES)
+                .build();
+        loginManager = new LoginManager(accessTokenStorage, callback, sessionConfiguration);
+
+        loginManager.setAuthCodeFlowEnabled(true);
+        loginManager.login(activity);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         ArgumentCaptor<Integer> codeCaptor = ArgumentCaptor.forClass(Integer.class);

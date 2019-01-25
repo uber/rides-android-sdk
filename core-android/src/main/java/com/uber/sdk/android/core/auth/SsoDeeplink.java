@@ -45,7 +45,6 @@ import java.util.List;
 import static com.uber.sdk.android.core.SupportedAppType.UBER;
 import static com.uber.sdk.android.core.SupportedAppType.UBER_EATS;
 import static com.uber.sdk.android.core.UberSdk.UBER_SDK_LOG_TAG;
-import static com.uber.sdk.android.core.utils.Preconditions.checkNotEmpty;
 import static com.uber.sdk.android.core.utils.Preconditions.checkNotNull;
 import static com.uber.sdk.android.core.utils.Preconditions.checkState;
 
@@ -117,7 +116,7 @@ public class SsoDeeplink implements Deeplink {
      *
      * @param flowVersion specifies which client implementation to use for handling the response to the SSO request
      * @throws IllegalStateException if compatible Uber app is not installed or the deeplink is incorrectly configured.
-     * Use {@link #isSupported()} to check.
+     *                               Use {@link #isSupported()} to check.
      */
     void execute(@NonNull FlowVersion flowVersion) {
         checkState(isSupported(flowVersion), "Single sign on is not supported on the device. " +
@@ -277,7 +276,9 @@ public class SsoDeeplink implements Deeplink {
         public SsoDeeplink build() {
             checkNotNull(clientId, "Client Id must be set");
 
-            checkNotEmpty(requestedScopes, "Scopes must be set.");
+            boolean hasScopes = (requestedScopes != null && !requestedScopes.isEmpty())
+                    || (requestedCustomScopes != null && !requestedCustomScopes.isEmpty());
+            checkState(hasScopes, "Scopes must be set.");
 
             if (requestedCustomScopes == null) {
                 requestedCustomScopes = new ArrayList<>();

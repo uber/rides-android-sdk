@@ -33,7 +33,6 @@ import com.google.common.collect.Sets;
 import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.RobolectricTestBase;
 import com.uber.sdk.android.core.utils.AppProtocol;
-
 import com.uber.sdk.core.auth.Scope;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +45,6 @@ import org.robolectric.res.builder.RobolectricPackageManager;
 import org.robolectric.shadows.ShadowResolveInfo;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
@@ -55,13 +53,18 @@ import static com.uber.sdk.android.core.SupportedAppType.UBER_EATS;
 import static com.uber.sdk.android.core.auth.SsoDeeplink.FlowVersion.DEFAULT;
 import static com.uber.sdk.android.core.auth.SsoDeeplink.FlowVersion.REDIRECT_TO_SDK;
 import static com.uber.sdk.android.core.auth.SsoDeeplink.MIN_UBER_EATS_VERSION_SUPPORTED;
-import static com.uber.sdk.android.core.auth.SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED;
 import static com.uber.sdk.android.core.auth.SsoDeeplink.MIN_UBER_RIDES_VERSION_REDIRECT_FLOW_SUPPORTED;
+import static com.uber.sdk.android.core.auth.SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class SsoDeeplinkTest extends RobolectricTestBase {
 
@@ -438,13 +441,11 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     public void execute_withScopesAndCustomScopes_shouldSucceed() {
         enableSupport(DEFAULT);
 
-        Collection<String> collection = Arrays.asList("sample", "test");
-
         new SsoDeeplink.Builder(activity)
                 .clientId(CLIENT_ID)
                 .activityRequestCode(REQUEST_CODE)
                 .scopes(GENERAL_SCOPES)
-                .customScopes(collection)
+                .customScopes(Arrays.asList("sample", "test"))
                 .appProtocol(appProtocol)
                 .build()
                 .execute();
@@ -454,6 +455,26 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
 
         Uri uri = intentArgumentCaptor.getValue().getData();
         assertThat(uri.getQueryParameter("scope")).contains("history", "profile", "sample", "test");
+    }
+
+    @Test
+    public void execute_withOnlyCustomScopes_shouldSucceed() {
+        enableSupport(DEFAULT);
+
+        new SsoDeeplink.Builder(activity)
+                .clientId(CLIENT_ID)
+                .activityRequestCode(REQUEST_CODE)
+                .scopes(Collections.<Scope>emptyList())
+                .customScopes(Arrays.asList("sample", "test"))
+                .appProtocol(appProtocol)
+                .build()
+                .execute();
+
+        ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(activity).startActivityForResult(intentArgumentCaptor.capture(), anyInt());
+
+        Uri uri = intentArgumentCaptor.getValue().getData();
+        assertThat(uri.getQueryParameter("scope")).contains("sample", "test");
     }
 
     @Test
@@ -480,11 +501,13 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void execute_withoutScopes_shouldFail() {
+    public void execute_withoutAnyScopes_shouldFail() {
         enableSupport(DEFAULT);
 
         new SsoDeeplink.Builder(activity)
                 .clientId(CLIENT_ID)
+                .scopes(Collections.<Scope>emptyList())
+                .customScopes(Collections.<String>emptyList())
                 .activityRequestCode(REQUEST_CODE)
                 .appProtocol(appProtocol)
                 .build()
