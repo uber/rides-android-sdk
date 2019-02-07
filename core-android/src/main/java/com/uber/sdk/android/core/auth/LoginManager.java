@@ -95,7 +95,7 @@ public class LoginManager {
     private final int requestCode;
     private final LegacyUriRedirectHandler legacyUriRedirectHandler;
 
-    private Collection<SupportedAppType> productFlowPriority;
+    private ArrayList<SupportedAppType> productFlowPriority;
     private boolean authCodeFlowEnabled = false;
     @Deprecated
     private boolean redirectForAuthorizationCode = false;
@@ -152,6 +152,7 @@ public class LoginManager {
             @NonNull LegacyUriRedirectHandler legacyUriRedirectHandler) {
         this.accessTokenStorage = accessTokenStorage;
         this.callback = loginCallback;
+        this.productFlowPriority = new ArrayList<>();
         this.sessionConfiguration = configuration;
         this.requestCode = requestCode;
         this.legacyUriRedirectHandler = legacyUriRedirectHandler;
@@ -178,7 +179,7 @@ public class LoginManager {
         if (ssoDeeplink.isSupported(SsoDeeplink.FlowVersion.REDIRECT_TO_SDK)) {
             Intent intent = LoginActivity.newIntent(
                     activity,
-                    new ArrayList<>(productFlowPriority),
+                    productFlowPriority,
                     sessionConfiguration,
                     ResponseType.TOKEN,
                     false,
@@ -372,7 +373,7 @@ public class LoginManager {
      * @return this instance of {@link LoginManager}.
      */
     public LoginManager setProductFlowPriority(@NonNull Collection<SupportedAppType> productFlowPriority) {
-        this.productFlowPriority = productFlowPriority;
+        this.productFlowPriority = new ArrayList<>(productFlowPriority);
         return this;
     }
 
