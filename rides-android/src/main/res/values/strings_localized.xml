@@ -21,8 +21,6 @@
   -->
 
 <resources>
-    <string name="ub__ride_request_activity_authentication_error">There was a problem authenticating you.</string>
-    <string name="ub__ride_request_activity_widget_error">The Ride Request Widget encountered a problem.</string>
     <string name="ub__ride_with_uber">Ride there with Uber</string>
     <string name="ub__ride_error_try_again">Try Again</string>
     <string name="ub__get_ride">Get a ride</string>

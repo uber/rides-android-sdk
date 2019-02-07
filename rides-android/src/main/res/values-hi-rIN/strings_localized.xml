@@ -22,8 +22,6 @@
   -->
 
 <resources>
-    <string name="ub__ride_request_activity_authentication_error">आपका प्रमाणन करने में कोई समस्या थी. </string>
-    <string name="ub__ride_request_activity_widget_error">राइड अनुरोध विजेट में कोई समस्या आई. </string>
     <string name="ub__ride_with_uber">Uber के साथ राइड करें</string>
     <string name="ub__ride_error_try_again">पुन: प्रयास करें</string>
     <string name="ub__get_ride">एक राइड पाएं</string>

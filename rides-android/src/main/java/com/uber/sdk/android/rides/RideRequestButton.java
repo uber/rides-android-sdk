@@ -65,8 +65,6 @@ public class RideRequestButton extends FrameLayout implements RideRequestButtonV
     private static final String USER_AGENT_BUTTON = String.format("rides-android-v%s-button",
             BuildConfig.VERSION_NAME);
 
-    private RideRequestBehavior rideRequestBehavior;
-
     @NonNull
     private RideParameters rideParameters = new RideParameters.Builder().build();
 
@@ -156,21 +154,6 @@ public class RideRequestButton extends FrameLayout implements RideRequestButtonV
      */
     public RideRequestButton setDeeplinkFallback(@NonNull Deeplink.Fallback fallback) {
         this.deeplinkFallback = fallback;
-        return this;
-    }
-
-    /**
-     * Sets how the request button should act for button actions.
-     *
-     * @param requestBehavior an object that implements {@link RideRequestBehavior}
-     * @return this instance of {@link RideRequestButton}
-     *
-     * @deprecated Button will use deeplink by default use RideRequestButton to indicate fallback
-     * now instead.
-     */
-    @Deprecated
-    public RideRequestButton setRequestBehavior(@NonNull RideRequestBehavior requestBehavior) {
-        rideRequestBehavior = requestBehavior;
         return this;
     }
 

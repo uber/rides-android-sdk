@@ -22,8 +22,6 @@
   -->
 
 <resources>
-    <string name="ub__ride_request_activity_authentication_error">身份驗證發生問題。</string>
-    <string name="ub__ride_request_activity_widget_error">乘客預約側邊欄出現問題。</string>
     <string name="ub__ride_with_uber">搭乘优步前往</string>
     <string name="ub__ride_error_try_again">再試</string>
     <string name="ub__get_ride">開始搭乘</string>
