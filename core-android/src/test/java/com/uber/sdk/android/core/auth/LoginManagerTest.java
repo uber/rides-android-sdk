@@ -156,7 +156,7 @@ public class LoginManagerTest extends RobolectricTestBase {
         verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
 
         final Intent resultIntent = intentCaptor.getValue();
-        validateLoginIntentFields(resultIntent, new ArrayList<SupportedAppType>(productPriority), sessionConfiguration,
+        validateLoginIntentFields(resultIntent, new ArrayList<>(productPriority), sessionConfiguration,
                 ResponseType.TOKEN, false, true, true);
         assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
     }
@@ -164,8 +164,6 @@ public class LoginManagerTest extends RobolectricTestBase {
     @Test
     public void login_withoutAppPriority_shouldLoginActivityWithSsoParams() {
         when(ssoDeeplink.isSupported(REDIRECT_TO_SDK)).thenReturn(true);
-        ArrayList<SupportedAppType> supportedAppTypes = new ArrayList<>();
-        supportedAppTypes.add(UBER);
 
         loginManager.login(activity);
 
@@ -177,7 +175,7 @@ public class LoginManagerTest extends RobolectricTestBase {
         verify(activity).startActivityForResult(intentCaptor.capture(), codeCaptor.capture());
 
         final Intent resultIntent = intentCaptor.getValue();
-        validateLoginIntentFields(resultIntent, supportedAppTypes, sessionConfiguration,
+        validateLoginIntentFields(resultIntent, new ArrayList<SupportedAppType>(), sessionConfiguration,
                 ResponseType.TOKEN, false, true, true);
         assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
     }
@@ -515,7 +513,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
     private void validateLoginIntentFields(
             @NonNull Intent loginIntent,
-            @NonNull Iterable<SupportedAppType> expectedProductPriority,
+            @NonNull List<SupportedAppType> expectedProductPriority,
             @NonNull SessionConfiguration expectedSessionConfiguration,
             @NonNull ResponseType expectedResponseType,
             boolean expectedForceWebview,
@@ -524,7 +522,7 @@ public class LoginManagerTest extends RobolectricTestBase {
         assertThat(loginIntent.getSerializableExtra(EXTRA_SESSION_CONFIGURATION)).isEqualTo(expectedSessionConfiguration);
         assertThat(loginIntent.getSerializableExtra(EXTRA_RESPONSE_TYPE)).isEqualTo(expectedResponseType);
         assertThat((ArrayList<SupportedAppType>) loginIntent.getSerializableExtra(EXTRA_PRODUCT_PRIORITY))
-                .hasSameElementsAs(expectedProductPriority);
+                .containsAll(expectedProductPriority);
         assertThat(loginIntent.getBooleanExtra(EXTRA_FORCE_WEBVIEW, false)).isEqualTo(expectedForceWebview);
         assertThat(loginIntent.getBooleanExtra(EXTRA_SSO_ENABLED, false)).isEqualTo(expectedSsoEnabled);
         assertThat(loginIntent.getBooleanExtra(EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED, false))
