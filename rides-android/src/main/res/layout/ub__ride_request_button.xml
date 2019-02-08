@@ -29,6 +29,7 @@
         android:layout_centerVertical="true"
         android:layout_gravity="center_vertical|start"
         android:drawableLeft="@drawable/uber_badge"
+        android:drawableStart="@drawable/uber_badge"
         android:drawablePadding="@dimen/ub__small_padding"
         android:gravity="center_vertical|start"
         android:minHeight="@dimen/ub__ride_request_button_height"

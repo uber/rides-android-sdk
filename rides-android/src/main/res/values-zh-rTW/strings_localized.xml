@@ -22,8 +22,7 @@
   -->
 
 <resources>
-    \<string name="ub__ride_with_uber">搭乘优步前往</string>
-    <string name="ub__ride_error_try_again">再試</string>
+    <string name="ub__ride_with_uber">搭乘优步前往</string>
     <string name="ub__get_ride">開始搭乘</string>
     <string name="ub__time_estimate">相距 %d 分鐘</string>
     <string name="ub__price_estimate">%2$s 的估價為 %1$s</string>

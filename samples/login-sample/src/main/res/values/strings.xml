@@ -29,7 +29,7 @@
     <string name="copy_access_token_to_clipboard">Copy Access Token to Clipboard</string>
     <string name="clear_access_token">Clear Access Token</string>
     <string name="user_cancels_message">User cancels login</string>
-    <string name="login_error_message">Error occured during login: %s</string>
+    <string name="login_error_message">Error occurred during login: %s</string>
     <string name="custom_login_text">I want to sign in using my Uber app.</string>
     <string name="authorization_code_message">Received an authorization code:\n %s</string>
     <string name="greeting">Hello %s!</string>

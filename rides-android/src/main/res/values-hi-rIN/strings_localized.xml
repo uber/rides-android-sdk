@@ -23,7 +23,6 @@
 
 <resources>
     <string name="ub__ride_with_uber">Uber के साथ राइड करें</string>
-    <string name="ub__ride_error_try_again">पुन: प्रयास करें</string>
     <string name="ub__get_ride">एक राइड पाएं</string>
     <string name="ub__time_estimate">%d मिनट दूर</string>
     <string name="ub__price_estimate">%2$s के लिए %1$s</string>

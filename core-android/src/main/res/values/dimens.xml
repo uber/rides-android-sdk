@@ -23,9 +23,7 @@
 <resources>
     <dimen name="ub__text_size">20sp</dimen>
     <dimen name="ub__secondary_text_size">14sp</dimen>
-    <dimen name="ub__estimates_text_size">12sp</dimen>
     <dimen name="ub__standard_padding">16dp</dimen>
     <dimen name="ub__small_padding">8dp</dimen>
-
     <dimen name="ub__signin_margin">48dp</dimen>
 </resources>

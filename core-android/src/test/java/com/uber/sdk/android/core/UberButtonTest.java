@@ -51,7 +51,6 @@ public class UberButtonTest extends RobolectricTestBase {
 
     private static final String ANDROID_COLOR_BLACK = "@android:color/black";
     private static final String ANDROID_COLOR_WHITE = "@android:color/white";
-    private static final String DRAWABLE_UBER_BADGE = "@drawable/uber_badge";
     private static final String GRAVITY_END = "end";
     private static final String STYLE_ITALIC = "italic";
     private static final String ONE_SP = "1sp";
@@ -59,8 +58,6 @@ public class UberButtonTest extends RobolectricTestBase {
     private static final String THREE_SP = "3sp";
     private static final String FOUR_SP = "4sp";
     private static final String TEXT = "test";
-
-    private static final String UBER_PACKAGE_NAME = "com.uber.sdk.android.core";
 
     private Context context;
 
@@ -81,19 +78,10 @@ public class UberButtonTest extends RobolectricTestBase {
     @Test
     public void onCreate_whenCompoundDrawablesAndPaddingSet_shouldSetCompoundDrawableAttributes() {
         AttributeSet attributeSet = Robolectric.buildAttributeSet()
-                .addAttribute(android.R.attr.drawableLeft, DRAWABLE_UBER_BADGE)
-                .addAttribute(android.R.attr.drawableTop, DRAWABLE_UBER_BADGE)
-                .addAttribute(android.R.attr.drawableRight, DRAWABLE_UBER_BADGE)
-                .addAttribute(android.R.attr.drawableBottom, DRAWABLE_UBER_BADGE)
                 .addAttribute(android.R.attr.drawablePadding, ONE_SP)
                 .build();
 
         UberButton uberButton = new UberButton(context, attributeSet, 0, 0) { };
-        Drawable[] drawables = uberButton.getCompoundDrawables();
-        assertNotNull(drawables[0]);
-        assertNotNull(drawables[1]);
-        assertNotNull(drawables[2]);
-        assertNotNull(drawables[3]);
         assertEquals(1, uberButton.getCompoundDrawablePadding());
     }
 
