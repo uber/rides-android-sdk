@@ -42,7 +42,6 @@
             android:layout_gravity="center"
             uber:ub__request_code="1111"
             uber:ub__style="white" />
-
     </FrameLayout>
 
     <FrameLayout
@@ -59,7 +58,6 @@
             android:layout_gravity="center"
             uber:ub__scopes="all_trips|request|profile"
             uber:ub__style="black" />
-
     </FrameLayout>
 
     <FrameLayout
