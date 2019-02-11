@@ -60,7 +60,7 @@ dependencies {
 
 /**
  * Loads property from gradle.properties and ~/.gradle/gradle.properties
- * Use to look up confidential information like keys that shoudln't be stored publicly
+ * Use to look up confidential information like keys that shouldn't be stored publicly
  * @param name to lookup
  * @return the value of the property or "MISSING"
  */

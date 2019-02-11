@@ -22,8 +22,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.uber.sdk.android.rides.samples" >
+    package="com.uber.sdk.android.samples" >
 
     <application
         android:allowBackup="true"
@@ -31,7 +30,7 @@
         android:theme="@style/Theme.AppCompat"
         android:icon="@drawable/uber_sample_ic_launcher">
         <activity
-            android:name="com.uber.sdk.android.samples.LoginSampleActivity"
+            android:name=".LoginSampleActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,5 +39,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

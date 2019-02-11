@@ -55,27 +55,24 @@ public class SampleActivity extends AppCompatActivity implements RideRequestButt
     private static final Double DROPOFF_LAT = 37.795079;
     private static final Double DROPOFF_LONG = -122.397805;
     private static final String DROPOFF_NICK = "Embarcadero";
-    private static final String ERROR_LOG_TAG = "UberSDK-SampleActivity";
     private static final String PICKUP_ADDR = "1455 Market Street, San Francisco";
     private static final Double PICKUP_LAT = 37.775304;
     private static final Double PICKUP_LONG = -122.417522;
     private static final String PICKUP_NICK = "Uber HQ";
     private static final String UBERX_PRODUCT_ID = "a1111c8c-c720-46c3-8534-2fcdd730040d";
-    private static final int WIDGET_REQUEST_CODE = 1234;
 
     private static final String CLIENT_ID = BuildConfig.CLIENT_ID;
     private static final String REDIRECT_URI = BuildConfig.REDIRECT_URI;
     private static final String SERVER_TOKEN = BuildConfig.SERVER_TOKEN;
 
     private RideRequestButton blackButton;
-    private SessionConfiguration configuration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
 
-        configuration = new SessionConfiguration.Builder()
+        SessionConfiguration configuration = new SessionConfiguration.Builder()
                 .setRedirectUri(REDIRECT_URI)
                 .setClientId(CLIENT_ID)
                 .setServerToken(SERVER_TOKEN)
@@ -96,11 +93,6 @@ public class SampleActivity extends AppCompatActivity implements RideRequestButt
         blackButton.setSession(session);
         blackButton.setCallback(this);
         blackButton.loadRideInformation();
-
-        RideParameters rideParametersCheapestProduct = new RideParameters.Builder()
-                .setPickupLocation(PICKUP_LAT, PICKUP_LONG, PICKUP_NICK, PICKUP_ADDR)
-                .setDropoffLocation(DROPOFF_LAT, DROPOFF_LONG, DROPOFF_NICK, DROPOFF_ADDR)
-                .build();
 
         RideRequestButton uberButtonWhite = (RideRequestButton) findViewById(R.id.uber_button_white);
         uberButtonWhite.setRideParameters(rideParametersForProduct);
