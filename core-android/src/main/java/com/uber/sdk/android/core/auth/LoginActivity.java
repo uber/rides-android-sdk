@@ -121,6 +121,27 @@ public class LoginActivity extends Activity {
      * Create an {@link Intent} to pass to this activity
      *
      * @param context the {@link Context} for the intent
+     * @param sessionConfiguration to be used for gather clientId
+     * @param responseType that is expected
+     * @param forceWebview Forced to use old webview instead of chrometabs
+     * @return an intent that can be passed to this activity
+     */
+    @NonNull
+    public static Intent newIntent(
+            @NonNull Context context,
+            @NonNull ArrayList<SupportedAppType> productPriority,
+            @NonNull SessionConfiguration sessionConfiguration,
+            @NonNull ResponseType responseType,
+            boolean forceWebview) {
+
+        return newIntent(context, productPriority, sessionConfiguration, responseType, forceWebview, false, false);
+    }
+
+
+    /**
+     * Create an {@link Intent} to pass to this activity
+     *
+     * @param context the {@link Context} for the intent
      * @param productPriority dictates the order of which Uber applications should be used for SSO.
      * @param sessionConfiguration to be used for gather clientId
      * @param responseType that is expected

@@ -207,7 +207,7 @@ public class LoginManager {
             return;
         }
 
-        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration,
+        Intent intent = LoginActivity.newIntent(activity, productFlowPriority, sessionConfiguration,
                 ResponseType.TOKEN, legacyUriRedirectHandler.isLegacyMode());
         activity.startActivityForResult(intent, requestCode);
     }
@@ -222,7 +222,7 @@ public class LoginManager {
             return;
         }
 
-        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration,
+        Intent intent = LoginActivity.newIntent(activity, productFlowPriority, sessionConfiguration,
                 ResponseType.CODE, legacyUriRedirectHandler.isLegacyMode());
         activity.startActivityForResult(intent, requestCode);
     }
@@ -240,7 +240,7 @@ public class LoginManager {
 
         Intent intent = LoginActivity.newIntent(
                 activity,
-                new ArrayList<SupportedAppType>(),
+                productFlowPriority,
                 sessionConfiguration,
                 ResponseType.TOKEN,
                 legacyUriRedirectHandler.isLegacyMode(),
