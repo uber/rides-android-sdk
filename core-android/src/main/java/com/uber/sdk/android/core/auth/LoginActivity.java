@@ -245,12 +245,29 @@ public class LoginActivity extends Activity {
         }
     }
 
-    protected boolean handleResponse(@NonNull Uri uri) {
-        final String fragment = uri.getFragment();
+    /**
+     * Handler for both AccessToken and AuthorizationCode redirects.
+     *
+     * @param uri The redirect Uri.
+     */
+    private void handleResponse(@NonNull Uri uri) {
+        if (AuthUtils.isAuthorizationCodePresent(uri)) {
+            onCodeReceived(uri);
+        } else {
+            handleAccessTokenResponse(uri);
+        }
+    }
 
-        if (fragment == null) {
+    /**
+     * Process the callback for AccessToken.
+     *
+     * @param uri Redirect URI containing AccessToken values.
+     */
+    private void handleAccessTokenResponse(@NonNull Uri uri) {
+        final String fragment = uri.getFragment();
+        if (TextUtils.isEmpty(fragment)) {
             onError(AuthenticationError.INVALID_RESPONSE);
-            return true;
+            return;
         }
 
         final Uri fragmentUri = new Uri.Builder().encodedQuery(fragment).build();
@@ -259,11 +276,9 @@ public class LoginActivity extends Activity {
         final String error = fragmentUri.getQueryParameter(ERROR);
         if (!TextUtils.isEmpty(error)) {
             onError(AuthenticationError.fromString(error));
-            return true;
+        } else {
+            onTokenReceived(fragmentUri);
         }
-
-        onTokenReceived(fragmentUri);
-        return true;
     }
 
     protected void loadWebview(String url, String redirectUri) {
@@ -427,7 +442,8 @@ public class LoginActivity extends Activity {
             }
 
             if (url.startsWith(redirectUri)) {
-                return handleResponse(uri);
+                handleAccessTokenResponse(uri);
+                return true;
             }
 
             return super.shouldOverrideUrlLoading(view, url);

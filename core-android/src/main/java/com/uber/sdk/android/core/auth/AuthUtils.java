@@ -49,6 +49,7 @@ import java.util.Set;
  * A utility class for the Uber SDK.
  */
 class AuthUtils {
+    static final String KEY_AUTHENTICATION_CODE = "code";
     static final String KEY_EXPIRATION_TIME = "expires_in";
     static final String KEY_SCOPES = "scope";
     static final String KEY_TOKEN = "access_token";
@@ -222,8 +223,12 @@ class AuthUtils {
         return data;
     }
 
+    static boolean isAuthorizationCodePresent(@NonNull Uri uri) {
+        return !TextUtils.isEmpty(uri.getQueryParameter(KEY_AUTHENTICATION_CODE));
+    }
+
     static String parseAuthorizationCode(@NonNull Uri uri) throws LoginAuthenticationException {
-        final String code = uri.getQueryParameter("code");
+        final String code = uri.getQueryParameter(KEY_AUTHENTICATION_CODE);
         if (TextUtils.isEmpty(code)) {
             throw new LoginAuthenticationException(AuthenticationError.INVALID_RESPONSE);
         }
