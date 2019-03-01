@@ -23,12 +23,10 @@
 package com.uber.sdk.android.core.auth;
 
 import android.net.Uri;
-
 import com.uber.sdk.android.core.RobolectricTestBase;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.Scope;
 import com.uber.sdk.core.client.SessionConfiguration;
-
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -44,6 +42,7 @@ public class AuthUtilsTest extends RobolectricTestBase {
     private static final String BEARER = "Bearer";
 
     private final String ACCESS_TOKEN_STRING = "accessToken1234";
+    // GMT: Wednesday, March 23, 2016 10:08:26 PM
     private final long EXPIRATION_TIME = 1458770906206L;
 
     @Test
@@ -258,12 +257,17 @@ public class AuthUtilsTest extends RobolectricTestBase {
         assertThat(AuthUtils.parseAuthorizationCode(Uri.parse(redirectUrl))).isEqualTo(AUTH_CODE);
     }
 
-    @Test(expected = LoginAuthenticationException.class)
-    public void getCodeFromUrl_whenNoValidAuthorizationCodePassed() throws LoginAuthenticationException {
+    @Test
+    public void getCodeFromUrl_whenNoValidAuthorizationCodePassed() {
         String redirectUrl = "http://localhost:1234?access_token=" + ACCESS_TOKEN_STRING
                 + "&expires_in=" + EXPIRATION_TIME + "&scope=history";
 
-         AuthUtils.parseAuthorizationCode(Uri.parse(redirectUrl));
+        try {
+            AuthUtils.parseAuthorizationCode(Uri.parse(redirectUrl));
+            fail("Authorization Code should not be parsable from Access Token response.");
+        } catch (LoginAuthenticationException e) {
+            // When an access token string is found when parsing authorization code we expect to get an exception.
+        }
     }
 
     @Test
