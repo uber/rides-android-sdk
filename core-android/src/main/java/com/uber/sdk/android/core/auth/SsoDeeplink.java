@@ -59,7 +59,7 @@ public class SsoDeeplink implements Deeplink {
     @VisibleForTesting
     static final int MIN_UBER_RIDES_VERSION_SUPPORTED = 31302;
     @VisibleForTesting
-    static final int MIN_UBER_EATS_VERSION_SUPPORTED = 1085;
+    static final int MIN_UBER_EATS_VERSION_SUPPORTED = 2488;
 
     @VisibleForTesting
     static final int MIN_UBER_RIDES_VERSION_REDIRECT_FLOW_SUPPORTED = 35757;
