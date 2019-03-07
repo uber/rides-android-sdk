@@ -26,12 +26,16 @@ import static com.uber.sdk.android.core.SupportedAppType.UBER;
 import static com.uber.sdk.android.core.SupportedAppType.UBER_EATS;
 
 public class AppProtocol {
+    @Deprecated
+    public static final String[] UBER_PACKAGE_NAMES =
+            {"com.ubercab", "com.ubercab.presidio.app", "com.ubercab.presidio.exo", "com.ubercab.presidio.development"};
+
     @VisibleForTesting
     static final String[] RIDER_PACKAGE_NAMES =
             {"com.ubercab.presidio.development", "com.ubercab.presidio.exo", "com.ubercab.presidio.app", "com.ubercab"};
     @VisibleForTesting
     static final String[] EATS_PACKAGE_NAMES =
-            {"com.ubercab.eats.debug", "com.ubercab.eats.exo", "com.ubercab.eats", "com.ubercab.eats.internal", "com.ubercab.eats.nightly"};
+            {"com.ubercab.eats.debug", "com.ubercab.eats.exo", "com.ubercab.eats.internal", "com.ubercab.eats.nightly", "com.ubercab.eats"};
     public static final String PLATFORM = "android";
 
     // Both com.ubercab.eats and com.ubercab.eats.nightly share the same hash
