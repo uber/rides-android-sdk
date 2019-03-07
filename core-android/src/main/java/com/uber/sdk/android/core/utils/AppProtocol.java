@@ -26,20 +26,19 @@ import static com.uber.sdk.android.core.SupportedAppType.UBER;
 import static com.uber.sdk.android.core.SupportedAppType.UBER_EATS;
 
 public class AppProtocol {
-    @Deprecated
-    public static final String[] UBER_PACKAGE_NAMES =
-            {"com.ubercab", "com.ubercab.presidio.app", "com.ubercab.presidio.exo", "com.ubercab.presidio.development"};
-
     @VisibleForTesting
     static final String[] RIDER_PACKAGE_NAMES =
             {"com.ubercab.presidio.development", "com.ubercab.presidio.exo", "com.ubercab.presidio.app", "com.ubercab"};
     @VisibleForTesting
     static final String[] EATS_PACKAGE_NAMES =
-            {"com.ubercab.eats.debug", "com.ubercab.eats.exo", "com.ubercab.eats"};
+            {"com.ubercab.eats.debug", "com.ubercab.eats.exo", "com.ubercab.eats", "com.ubercab.eats.internal", "com.ubercab.eats.nightly"};
     public static final String PLATFORM = "android";
 
-    private static final String UBER_RIDER_HASH = "411c40b31f6d01dac68d711df99b6eafeec8e73b";
+    // Both com.ubercab.eats and com.ubercab.eats.nightly share the same hash
     private static final String UBER_EATS_HASH = "ae0b86995f174533b423067837beba13d922fbb0";
+    // For com.ubercab.eats.internal
+    private static final String UBER_EATS_INTERNAL_HASH = "9a715f0cbb44b01e3c41c9bda30feba107561e79";
+    private static final String UBER_RIDER_HASH = "411c40b31f6d01dac68d711df99b6eafeec8e73b";
     private static final String HASH_ALGORITHM_SHA1 = "SHA-1";
     private static final int DEFAULT_MIN_VERSION = 0;
 
@@ -50,6 +49,7 @@ public class AppProtocol {
         HashSet<String> set = new HashSet<>();
         set.add(UBER_RIDER_HASH);
         set.add(UBER_EATS_HASH);
+        set.add(UBER_EATS_INTERNAL_HASH);
         return set;
     }
 
