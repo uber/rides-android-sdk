@@ -35,7 +35,7 @@ public class AppProtocol {
             {"com.ubercab.presidio.development", "com.ubercab.presidio.exo", "com.ubercab.presidio.app", "com.ubercab"};
     @VisibleForTesting
     static final String[] EATS_PACKAGE_NAMES =
-            {"com.ubercab.eats.debug", "com.ubercab.eats.exo", "com.ubercab.eats"};
+            {"com.ubercab.eats.debug", "com.ubercab.eats.exo", "com.ubercab.eats.nightly", "com.ubercab.eats"};
     public static final String PLATFORM = "android";
 
     private static final String UBER_RIDER_HASH = "411c40b31f6d01dac68d711df99b6eafeec8e73b";
