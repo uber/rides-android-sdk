@@ -4,6 +4,11 @@ v0.10.2 - TBD
 v0.10.1 - 02/27/2019
 -------------
 
+### Fixed
+ - [Issue #153](https://github.com/uber/rides-android-sdk/issues/153) NullPointerException when login via SSO without setting product flow priority
+ - [Issue #151](https://github.com/uber/rides-android-sdk/issues/151) Login throws IllegalStateException when using only CustomScopes
+
+
 v0.10.0 - 12/14/2018
 ------------
 
