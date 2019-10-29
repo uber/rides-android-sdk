@@ -199,6 +199,12 @@ public class LoginActivity extends Activity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        customTabsHelper.destory(this);
+    }
+
     protected void loadUrl() {
         Intent intent = getIntent();
 
