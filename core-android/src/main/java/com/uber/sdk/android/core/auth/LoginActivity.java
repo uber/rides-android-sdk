@@ -202,7 +202,7 @@ public class LoginActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        customTabsHelper.destory(this);
+        customTabsHelper.onDestroy(this);
     }
 
     protected void loadUrl() {
