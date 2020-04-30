@@ -97,8 +97,10 @@ public class CustomTabsHelper {
      * Called to clean up the CustomTab when the parentActivity is destroyed.
      */
     public void onDestroy(Activity parentActivity) {
-        parentActivity.unbindService(connection);
-        connection = null;
+        if (connection != null) {
+            parentActivity.unbindService(connection);
+            connection = null;
+        }
     }
 
     /**
