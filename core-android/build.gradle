@@ -37,7 +37,7 @@ android {
         targetSdkVersion deps.build.targetSdkVersion
         versionName VERSION_NAME
         consumerProguardFiles 'consumer-proguard-rules.txt'
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {

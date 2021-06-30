@@ -26,7 +26,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 
-import android.support.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsIntent;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.uber.sdk.android.core.RobolectricTestBase;

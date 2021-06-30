@@ -26,7 +26,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.google.common.collect.ImmutableList;
 import com.uber.sdk.android.core.RobolectricTestBase;
 import com.uber.sdk.android.core.SupportedAppType;
@@ -36,7 +36,7 @@ import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
 import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
-import edu.emory.mathcs.backport.java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;

@@ -24,7 +24,7 @@ package com.uber.sdk.android.rides;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsIntent;
 
 import com.uber.sdk.android.core.Deeplink;
 import com.uber.sdk.android.core.utils.AppProtocol;
