@@ -16,7 +16,7 @@
 
 def versions = [
         androidTest: '0.5',
-        support: '27.1.1',
+        androidxVersion: '1.0.0',
         uberJava: '0.8.0',
 ]
 
@@ -45,9 +45,9 @@ def misc = [
 ]
 
 def support = [
-        annotations: 'androidx.annotation:annotation:1.0.0',
-        appCompat  : 'androidx.appcompat:appcompat:1.0.0',
-        chrometabs : 'androidx.browser:browser:1.0.0',
+        annotations: "androidx.annotation:annotation:${versions.androidxVersion}",
+        appCompat  : "androidx.appcompat:appcompat:${versions.androidxVersion}",
+        chrometabs : "androidx.browser:browser:${versions.androidxVersion}",
 ]
 
 def test = [
