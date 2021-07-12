@@ -24,9 +24,9 @@ package com.uber.sdk.android.core.auth;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import android.util.Log;
 import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.UberSdk;

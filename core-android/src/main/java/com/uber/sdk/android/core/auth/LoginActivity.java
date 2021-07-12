@@ -29,9 +29,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
-import android.support.customtabs.CustomTabsIntent;
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+import androidx.browser.customtabs.CustomTabsIntent;
 import android.text.TextUtils;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -47,8 +47,6 @@ import com.uber.sdk.android.core.utils.CustomTabsHelper;
 import com.uber.sdk.core.client.SessionConfiguration;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 
 /**
  * {@link android.app.Activity} that shows web view for Uber user authentication and authorization.

@@ -22,7 +22,7 @@
 
 package com.uber.sdk.android.core.auth;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.uber.sdk.core.auth.AccessToken;
 
