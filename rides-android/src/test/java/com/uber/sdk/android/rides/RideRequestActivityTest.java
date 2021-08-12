@@ -62,7 +62,8 @@ public class RideRequestActivityTest extends RobolectricTestBase {
         Intent data = RideRequestActivity.newIntent(Robolectric.setupActivity(Activity.class), null,
                 new SessionConfiguration.Builder().setClientId("clientId").build(),
                 null);
-        activity = Robolectric.buildActivity(RideRequestActivity.class).withIntent(data).create()
+        activity = Robolectric.buildActivity(RideRequestActivity.class, data)
+                .create()
                 .get();
     }
 
@@ -115,7 +116,7 @@ public class RideRequestActivityTest extends RobolectricTestBase {
                 rideParameters,
                 new SessionConfiguration.Builder().setClientId("clientId").build(),
                 null);
-        activity = Robolectric.buildActivity(RideRequestActivity.class).withIntent(data).create().get();
+        activity = Robolectric.buildActivity(RideRequestActivity.class, data).create().get();
 
         String tokenString = "accessToken1234";
         AccessToken accessToken = new AccessToken(2592000, ImmutableList.of(Scope.RIDE_WIDGETS), tokenString,
@@ -135,7 +136,7 @@ public class RideRequestActivityTest extends RobolectricTestBase {
                 rideParameters,
                 new SessionConfiguration.Builder().setClientId("clientId").build(),
                 null);
-        activity = Robolectric.buildActivity(RideRequestActivity.class).withIntent(data).create().get();
+        activity = Robolectric.buildActivity(RideRequestActivity.class, data).create().get();
         assertEquals(userAgent, activity.rideRequestView.rideParameters.getUserAgent());
     }
 
@@ -144,7 +145,7 @@ public class RideRequestActivityTest extends RobolectricTestBase {
         ShadowActivity shadowActivity = shadowOf(activity);
         Intent intent = new Intent();
         intent.putExtra(RideRequestActivity.EXTRA_LOGIN_CONFIGURATION, new SessionConfiguration.Builder().setClientId("clientId").build());
-        activity = Robolectric.buildActivity(RideRequestActivity.class).withIntent(intent).create().get();
+        activity = Robolectric.buildActivity(RideRequestActivity.class, intent).create().get();
         assertNull(shadowActivity.getResultIntent());
         assertFalse(shadowActivity.isFinishing());
     }
