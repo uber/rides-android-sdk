@@ -41,7 +41,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.res.builder.RobolectricPackageManager;
+import org.robolectric.shadows.ShadowPackageManager;
 import org.robolectric.shadows.ShadowResolveInfo;
 
 import java.util.Arrays;
@@ -65,6 +65,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
 public class SsoDeeplinkTest extends RobolectricTestBase {
 
@@ -82,7 +83,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
 
     Activity activity;
 
-    RobolectricPackageManager packageManager;
+    protected ShadowPackageManager packageManager;
 
     ResolveInfo resolveInfo;
 
@@ -97,7 +98,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
         redirectIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(REDIRECT_URI));
         redirectIntent.setPackage(activity.getPackageName());
         resolveInfo = ShadowResolveInfo.newResolveInfo("", activity.getPackageName());
-        packageManager = RuntimeEnvironment.getRobolectricPackageManager();
+        packageManager = shadowOf(RuntimeEnvironment.application.getPackageManager());
         packageManager.addResolveInfoForIntent(redirectIntent, resolveInfo);
 
         ssoDeeplink = new SsoDeeplink.Builder(activity)

@@ -30,6 +30,6 @@ import org.robolectric.annotation.Config;
  * Base test class to remove use of annotations on all test classes.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21)
+@Config(sdk = 21)
 public abstract class RobolectricTestBase {
 }

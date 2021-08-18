@@ -47,14 +47,14 @@ def misc = [
 def support = [
         annotations: "androidx.annotation:annotation:${versions.androidxVersion}",
         appCompat  : "androidx.appcompat:appcompat:${versions.androidxVersion}",
-        chrometabs : "androidx.browser:browser:${versions.androidxVersion}",
+        chrometabs : "androidx.browser:browser:${versions.androidxVersion}"
 ]
 
 def test = [
         androidRunner: "com.android.support.test:runner:${versions.androidTest}",
         androidRules: "com.android.support.test:rules:${versions.androidTest}",
         junit: 'junit:junit:4.12',
-        robolectric: 'org.robolectric:robolectric:3.2.2',
+        robolectric: 'org.robolectric:robolectric:4.0',
         assertj: 'org.assertj:assertj-core:1.7.1',
         mockito: 'org.mockito:mockito-core:1.10.19',
         guava: 'com.google.guava:guava:23.4-android',

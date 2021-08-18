@@ -36,8 +36,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
 import org.robolectric.Shadows;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.shadows.ShadowActivity;
-import org.robolectric.util.ActivityController;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -73,7 +73,7 @@ public class OAuthWebViewClientTest extends RobolectricTestBase {
         Intent intent = new Intent();
         intent.putExtra(LoginActivity.EXTRA_SESSION_CONFIGURATION, config);
         final ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class)
-                .withIntent(intent);
+                .newIntent(intent);
         final ShadowActivity shadowActivity = Shadows.shadowOf(controller.get());
 
         controller.create();

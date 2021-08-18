@@ -41,9 +41,9 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.robolectric.Robolectric;
 import org.robolectric.Shadows;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.shadows.ShadowActivity;
 import org.robolectric.shadows.ShadowWebView;
-import org.robolectric.util.ActivityController;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -91,7 +91,7 @@ public class LoginActivityTest extends RobolectricTestBase {
                 .build();
 
         Intent data = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration, ResponseType.TOKEN);
-        loginActivity = Robolectric.buildActivity(LoginActivity.class).withIntent(data).get();
+        loginActivity = Robolectric.buildActivity(LoginActivity.class, data).get();
 
         when(ssoDeeplinkFactory.getSsoDeeplink(any(LoginActivity.class),
                 eq(productPriority), any(SessionConfiguration.class))).thenReturn(ssoDeeplink);
@@ -116,8 +116,7 @@ public class LoginActivityTest extends RobolectricTestBase {
         Intent intent = new Intent();
         intent.putExtra(LoginActivity.EXTRA_SESSION_CONFIGURATION, new SessionConfiguration.Builder().setClientId(CLIENT_ID).build());
 
-        ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class)
-                .withIntent(intent)
+        ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class, intent)
                 .create();
 
         ShadowActivity shadowActivity = shadowOf(controller.get());
@@ -136,7 +135,7 @@ public class LoginActivityTest extends RobolectricTestBase {
         intent.putExtra(LoginActivity.EXTRA_RESPONSE_TYPE, (ResponseType) null);
 
         ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class)
-                .withIntent(intent)
+                .newIntent(intent)
                 .create();
 
         ShadowActivity shadowActivity = shadowOf(controller.get());
@@ -153,7 +152,7 @@ public class LoginActivityTest extends RobolectricTestBase {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), productPriority,
                 loginConfiguration, ResponseType.TOKEN, false, true, true);
 
-        ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class).withIntent(intent);
+        ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class, intent);
         loginActivity = controller.get();
         loginActivity.ssoDeeplinkFactory = ssoDeeplinkFactory;
 
@@ -169,7 +168,7 @@ public class LoginActivityTest extends RobolectricTestBase {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), productPriority,
                 loginConfiguration, ResponseType.TOKEN, false, true, true);
 
-        ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class).withIntent(intent);
+        ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class).newIntent(intent);
         loginActivity = controller.get();
         loginActivity.ssoDeeplinkFactory = ssoDeeplinkFactory;
         ShadowActivity shadowActivity = shadowOf(loginActivity);
@@ -189,7 +188,7 @@ public class LoginActivityTest extends RobolectricTestBase {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
                 ResponseType.CODE, true);
 
-        loginActivity = Robolectric.buildActivity(LoginActivity.class).withIntent(intent).create().get();
+        loginActivity = Robolectric.buildActivity(LoginActivity.class, intent).create().get();
         ShadowWebView webview = Shadows.shadowOf(loginActivity.webView);
 
         String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.CODE, loginConfiguration);
@@ -201,7 +200,7 @@ public class LoginActivityTest extends RobolectricTestBase {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
                 ResponseType.CODE, false);
 
-        ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class).withIntent(intent);
+        ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class, intent);
         loginActivity = controller.get();
         loginActivity.customTabsHelper = customTabsHelper;
         controller.create();
@@ -216,7 +215,7 @@ public class LoginActivityTest extends RobolectricTestBase {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
                 ResponseType.TOKEN, true);
 
-        loginActivity = Robolectric.buildActivity(LoginActivity.class).withIntent(intent).create().get();
+        loginActivity = Robolectric.buildActivity(LoginActivity.class, intent).create().get();
         ShadowWebView webview = Shadows.shadowOf(loginActivity.webView);
 
         String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.TOKEN, loginConfiguration);
@@ -228,7 +227,7 @@ public class LoginActivityTest extends RobolectricTestBase {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
                 ResponseType.TOKEN, false);
 
-        ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class).withIntent(intent);
+        ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class).newIntent(intent);
         loginActivity = controller.get();
         loginActivity.customTabsHelper = customTabsHelper;
         controller.create();
@@ -248,7 +247,7 @@ public class LoginActivityTest extends RobolectricTestBase {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
                 ResponseType.TOKEN, true);
 
-        loginActivity = Robolectric.buildActivity(LoginActivity.class).withIntent(intent).create().get();
+        loginActivity = Robolectric.buildActivity(LoginActivity.class, intent).create().get();
         ShadowWebView webview = Shadows.shadowOf(loginActivity.webView);
 
         String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.TOKEN, loginConfiguration);
@@ -265,7 +264,7 @@ public class LoginActivityTest extends RobolectricTestBase {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
                 ResponseType.TOKEN, false);
 
-        ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class).withIntent(intent);
+        ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class, intent);
         loginActivity = controller.get();
         loginActivity.customTabsHelper = customTabsHelper;
         controller.create();
@@ -285,7 +284,7 @@ public class LoginActivityTest extends RobolectricTestBase {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class),
                 new ArrayList<SupportedAppType>(), loginConfiguration, ResponseType.TOKEN, true, false, true);
 
-        ShadowActivity shadowActivity = shadowOf(Robolectric.buildActivity(LoginActivity.class).withIntent(intent).create().get());
+        ShadowActivity shadowActivity = shadowOf(Robolectric.buildActivity(LoginActivity.class, intent).create().get());
 
         final Intent signupDeeplinkIntent = shadowActivity.peekNextStartedActivity();
         assertThat(signupDeeplinkIntent.getData().toString()).isEqualTo(SIGNUP_DEEPLINK_URL);
