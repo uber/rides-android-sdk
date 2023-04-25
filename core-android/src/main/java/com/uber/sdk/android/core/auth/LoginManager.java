@@ -29,39 +29,25 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import android.util.Log;
-import android.view.Gravity;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 
-import com.uber.sdk.android.core.R;
 import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
-import com.uber.sdk.core.auth.internal.OAuth2Service;
-import com.uber.sdk.core.auth.internal.ProfileHint;
 import com.uber.sdk.core.client.AccessTokenSession;
 import com.uber.sdk.core.client.ServerTokenSession;
 import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
-import com.uber.sdk.core.client.internal.LoginPARRequest;
-import com.uber.sdk.core.client.internal.LoginPARRequestException;
 
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.Executors;
 
 import static com.uber.sdk.android.core.utils.Preconditions.checkState;
 import static com.uber.sdk.core.client.utils.Preconditions.checkNotNull;
-
-import retrofit2.Retrofit;
-import retrofit2.converter.moshi.MoshiConverterFactory;
 
 /**
  * Manages user login via OAuth 2.0 Implicit Grant.  Be sure to call
@@ -227,7 +213,7 @@ public class LoginManager {
         if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
             return;
         }
-        executePARRequestIfNecessary(activity, ResponseType.TOKEN);
+        launchOnboardingFlow(activity, ResponseType.TOKEN);
     }
 
     /**
@@ -240,7 +226,7 @@ public class LoginManager {
             return;
         }
 
-        executePARRequestIfNecessary(activity, ResponseType.CODE);
+        launchOnboardingFlow(activity, ResponseType.CODE);
     }
 
     /**
@@ -254,10 +240,10 @@ public class LoginManager {
             return;
         }
 
-        executePARRequestIfNecessary(activity, ResponseType.CODE);
+        launchOnboardingFlow(activity, ResponseType.CODE);
     }
 
-    private void executePARRequestIfNecessary(Activity activity, ResponseType responseType) {
+    private void launchOnboardingFlow(Activity activity, ResponseType responseType) {
         Intent intent = LoginActivity.newIntent(
                 activity,
                 productFlowPriority,
