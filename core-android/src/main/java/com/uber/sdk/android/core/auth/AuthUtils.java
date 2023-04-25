@@ -258,10 +258,11 @@ class AuthUtils {
     static String buildUrl(
             @NonNull String redirectUri,
             @NonNull ResponseType responseType,
-            @NonNull SessionConfiguration configuration) {
+            @NonNull SessionConfiguration configuration,
+            @NonNull String requestUri) {
 
         final String CLIENT_ID_PARAM = "client_id";
-        final String ENDPOINT = "login";
+        final String ENDPOINT = "auth";
         final String HTTPS = "https";
         final String PATH = "oauth/v2/authorize";
         final String REDIRECT_PARAM = "redirect_uri";
@@ -269,6 +270,7 @@ class AuthUtils {
         final String SCOPE_PARAM = "scope";
         final String SHOW_FB_PARAM = "show_fb";
         final String SIGNUP_PARAMS = "signup_params";
+        final String REQUEST_URI_PARAM = "request_uri";
         final String REDIRECT_LOGIN = "{\"redirect_to_login\":true}";
 
 
@@ -284,6 +286,9 @@ class AuthUtils {
                 .appendQueryParameter(SCOPE_PARAM, getScopes(configuration))
                 .appendQueryParameter(SHOW_FB_PARAM, "false")
                 .appendQueryParameter(SIGNUP_PARAMS, AuthUtils.createEncodedParam(REDIRECT_LOGIN));
+        if (!TextUtils.isEmpty(requestUri)) {
+            builder.appendQueryParameter(REQUEST_URI_PARAM, requestUri);
+        }
 
         return builder.build().toString();
     }

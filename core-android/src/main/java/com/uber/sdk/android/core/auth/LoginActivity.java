@@ -33,11 +33,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.browser.customtabs.CustomTabsIntent;
 import android.text.TextUtils;
+import android.view.Gravity;
+import android.view.ViewGroup;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.R;
@@ -45,6 +49,8 @@ import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.install.SignupDeeplink;
 import com.uber.sdk.android.core.utils.CustomTabsHelper;
 import com.uber.sdk.core.client.SessionConfiguration;
+import com.uber.sdk.core.client.internal.LoginPARRequest;
+import com.uber.sdk.core.client.internal.LoginPARRequestException;
 
 import java.util.ArrayList;
 
@@ -62,6 +68,10 @@ public class LoginActivity extends Activity {
     static final String EXTRA_SSO_ENABLED = "SSO_ENABLED";
     static final String EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED = "REDIRECT_TO_PLAY_STORE_ENABLED";
 
+    static final String EXTRA_REQUEST_URI = "REQUEST_URI";
+
+    static final String EXTRA_PAR_FLOW = "PAR_FLOW";
+
     static final String ERROR = "error";
 
     private ArrayList<SupportedAppType> productPriority;
@@ -78,13 +88,16 @@ public class LoginActivity extends Activity {
     @VisibleForTesting
     CustomTabsHelper customTabsHelper = new CustomTabsHelper();
 
+    @VisibleForTesting
+    LinearLayout progressBarLayoutContainer;
+
 
     /**
      * Create an {@link Intent} to pass to this activity
      *
-     * @param context the {@link Context} for the intent
+     * @param context              the {@link Context} for the intent
      * @param sessionConfiguration to be used for gather clientId
-     * @param responseType that is expected
+     * @param responseType         that is expected
      * @return an intent that can be passed to this activity
      */
     @NonNull
@@ -93,16 +106,16 @@ public class LoginActivity extends Activity {
             @NonNull SessionConfiguration sessionConfiguration,
             @NonNull ResponseType responseType) {
 
-        return newIntent(context, sessionConfiguration, responseType, false);
+        return newIntent(context, sessionConfiguration, responseType, "");
     }
 
     /**
      * Create an {@link Intent} to pass to this activity
      *
-     * @param context the {@link Context} for the intent
+     * @param context              the {@link Context} for the intent
      * @param sessionConfiguration to be used for gather clientId
-     * @param responseType that is expected
-     * @param forceWebview Forced to use old webview instead of chrometabs
+     * @param responseType         that is expected
+     * @param isParFlow            specifies whether to send user's profile info to Uber as part of login/signup flow
      * @return an intent that can be passed to this activity
      */
     @NonNull
@@ -110,20 +123,54 @@ public class LoginActivity extends Activity {
             @NonNull Context context,
             @NonNull SessionConfiguration sessionConfiguration,
             @NonNull ResponseType responseType,
-            boolean forceWebview) {
+            boolean isParFlow) {
 
-        return newIntent(context, new ArrayList<SupportedAppType>(), sessionConfiguration, responseType, forceWebview, false, false);
+        return newIntent(context,
+                new ArrayList<SupportedAppType>(),
+                sessionConfiguration,
+                responseType,
+                "",
+                false,
+                false,
+                isParFlow);
     }
 
     /**
      * Create an {@link Intent} to pass to this activity
      *
-     * @param context the {@link Context} for the intent
-     * @param productPriority dictates the order of which Uber applications should be used for SSO.
+     * @param context              the {@link Context} for the intent
      * @param sessionConfiguration to be used for gather clientId
-     * @param responseType that is expected
-     * @param forceWebview Forced to use old webview instead of chrometabs
-     * @param isSsoEnabled specifies whether to attempt login with SSO
+     * @param responseType         that is expected
+     * @param requestUri           to be used to prefill user's profile hint information
+     * @return an intent that can be passed to this activity
+     */
+    @NonNull
+    public static Intent newIntent(
+            @NonNull Context context,
+            @NonNull SessionConfiguration sessionConfiguration,
+            @NonNull ResponseType responseType,
+            @NonNull String requestUri) {
+
+        return newIntent(context,
+                new ArrayList<SupportedAppType>(),
+                sessionConfiguration,
+                responseType,
+                requestUri,
+                false,
+                false,
+                false);
+    }
+
+    /**
+     * Create an {@link Intent} to pass to this activity
+     *
+     * @param context                      the {@link Context} for the intent
+     * @param productPriority              dictates the order of which Uber applications should be used for SSO.
+     * @param sessionConfiguration         to be used for gather clientId
+     * @param responseType                 that is expected
+     * @param isSsoEnabled                 specifies whether to attempt login with SSO
+     * @param isRedirectToPlayStoreEnabled specifies whether to redirect to Play Store if Uber app is not installed
+     * @param isParFlow                    specifies whether to send user's profile info to Uber as part of login/signup flow
      * @return an intent that can be passed to this activity
      */
     @NonNull
@@ -132,17 +179,19 @@ public class LoginActivity extends Activity {
             @NonNull ArrayList<SupportedAppType> productPriority,
             @NonNull SessionConfiguration sessionConfiguration,
             @NonNull ResponseType responseType,
-            boolean forceWebview,
+            String requestUri,
             boolean isSsoEnabled,
-            boolean isRedirectToPlayStoreEnabled) {
+            boolean isRedirectToPlayStoreEnabled,
+            boolean isParFlow) {
 
         final Intent data = new Intent(context, LoginActivity.class)
                 .putExtra(EXTRA_PRODUCT_PRIORITY, productPriority)
                 .putExtra(EXTRA_SESSION_CONFIGURATION, sessionConfiguration)
+                .putExtra(EXTRA_REQUEST_URI, requestUri)
                 .putExtra(EXTRA_RESPONSE_TYPE, responseType)
-                .putExtra(EXTRA_FORCE_WEBVIEW, forceWebview)
                 .putExtra(EXTRA_SSO_ENABLED, isSsoEnabled)
-                .putExtra(EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED, isRedirectToPlayStoreEnabled);
+                .putExtra(EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED, isRedirectToPlayStoreEnabled)
+                .putExtra(EXTRA_PAR_FLOW, isParFlow);
 
         return data;
     }
@@ -171,8 +220,8 @@ public class LoginActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        if(webView == null) {
-            if(!authStarted) {
+        if (webView == null) {
+            if (!authStarted) {
                 authStarted = true;
                 return;
             }
@@ -190,10 +239,21 @@ public class LoginActivity extends Activity {
     }
 
     protected void init() {
-        if(getIntent().getData() != null) {
+        if (getIntent().getData() != null) {
             handleResponse(getIntent().getData());
         } else {
-            loadUrl();
+            sessionConfiguration = (SessionConfiguration) getIntent().getSerializableExtra(EXTRA_SESSION_CONFIGURATION);
+            responseType = (ResponseType) getIntent().getSerializableExtra(EXTRA_RESPONSE_TYPE);
+            if (isParFlow(getIntent())) {
+                addProgressIndicator();
+                LoginPARDispatcher.dispatchPAR(
+                        sessionConfiguration,
+                        responseType,
+                        new LoginPARCallback(responseType)
+                );
+            } else {
+                loadUrl();
+            }
         }
     }
 
@@ -228,25 +288,21 @@ public class LoginActivity extends Activity {
             return;
         }
 
-        boolean forceWebview = intent.getBooleanExtra(EXTRA_FORCE_WEBVIEW, false);
+        String requestUri = intent.getStringExtra(EXTRA_REQUEST_URI);
         boolean isRedirectToPlayStoreEnabled = intent.getBooleanExtra(EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED, false);
         if (responseType == ResponseType.CODE) {
-            loadWebPage(redirectUri, ResponseType.CODE, sessionConfiguration, forceWebview);
+            loadWebPage(redirectUri, ResponseType.CODE, sessionConfiguration, requestUri);
         } else if (responseType == ResponseType.TOKEN && !(AuthUtils.isPrivilegeScopeRequired(sessionConfiguration.getScopes())
                 && isRedirectToPlayStoreEnabled)) {
-            loadWebPage(redirectUri, ResponseType.TOKEN, sessionConfiguration, forceWebview);
+            loadWebPage(redirectUri, ResponseType.TOKEN, sessionConfiguration, requestUri);
         } else {
             redirectToInstallApp(this);
         }
     }
 
-    protected void loadWebPage(String redirectUri, ResponseType responseType, SessionConfiguration sessionConfiguration, boolean forceWebview) {
-        String url = AuthUtils.buildUrl(redirectUri, responseType, sessionConfiguration);
-        if (forceWebview) {
-            loadWebview(url, redirectUri);
-        } else {
-            loadChrometab(url);
-        }
+    protected void loadWebPage(String redirectUri, ResponseType responseType, SessionConfiguration sessionConfiguration, String requestUri) {
+        String url = AuthUtils.buildUrl(redirectUri, responseType, sessionConfiguration, requestUri);
+        loadChrometab(url);
     }
 
     /**
@@ -347,7 +403,7 @@ public class LoginActivity extends Activity {
         }
 
         if ((sessionConfiguration.getScopes() == null || sessionConfiguration.getScopes().isEmpty())
-                && (sessionConfiguration.getCustomScopes() == null  || sessionConfiguration.getCustomScopes().isEmpty())) {
+                && (sessionConfiguration.getCustomScopes() == null || sessionConfiguration.getCustomScopes().isEmpty())) {
             onError(AuthenticationError.INVALID_SCOPE);
             return false;
         }
@@ -362,6 +418,42 @@ public class LoginActivity extends Activity {
 
     private void redirectToInstallApp(@NonNull Activity activity) {
         new SignupDeeplink(activity, sessionConfiguration.getClientId(), USER_AGENT).execute();
+    }
+
+    private boolean isParFlow(Intent intent) {
+        return intent.getBooleanExtra(EXTRA_PAR_FLOW, false);
+    }
+
+    private void addProgressIndicator() {
+        progressBarLayoutContainer = new LinearLayout(this);
+        progressBarLayoutContainer.setGravity(Gravity.CENTER);
+        progressBarLayoutContainer.setLayoutParams(
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT
+                )
+        );
+        ProgressBar progressBar = new ProgressBar(this);
+        progressBar.setLayoutParams(
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        (int) getResources().getDimension(R.dimen.ub__progress_bar_height)
+                )
+        );
+        ViewGroup rootLayout = findViewById(android.R.id.content);
+        progressBarLayoutContainer.addView(progressBar);
+        rootLayout.addView(progressBarLayoutContainer);
+    }
+
+    private void removeProgressBar() {
+        ViewGroup rootLayout = findViewById(android.R.id.content);
+        if (progressBarLayoutContainer.getParent() != null) {
+            ((ViewGroup) progressBarLayoutContainer.getParent()).removeView(progressBarLayoutContainer);
+        }
+    }
+
+    private void loginInternal(String requestUri) {
+        getIntent().putExtra(EXTRA_REQUEST_URI, requestUri);
+        loadUrl();
     }
 
     /**
@@ -384,6 +476,7 @@ public class LoginActivity extends Activity {
 
         /**
          * add deprecated member "onReceivedError" to solve compatibility issue when API level < 23
+         *
          * @param view
          * @param errorCode
          * @param description
@@ -407,7 +500,7 @@ public class LoginActivity extends Activity {
             receivedError();
         }
 
-        private void receivedError(){
+        private void receivedError() {
             onError(AuthenticationError.CONNECTIVITY_ISSUE);
         }
     }
@@ -451,6 +544,33 @@ public class LoginActivity extends Activity {
             }
 
             return super.shouldOverrideUrlLoading(view, url);
+        }
+    }
+
+    class LoginPARCallback implements LoginPARRequest.Callback {
+
+        private final ResponseType responseType;
+
+        LoginPARCallback(ResponseType responseType) {
+            this.responseType = responseType;
+        }
+
+        @Override
+        public void onSuccess(String requestUri) {
+            removeProgressBar();
+            loginInternal(requestUri);
+        }
+
+        private void removeProgressBar() {
+            if (progressBarLayoutContainer.getParent() != null) {
+                ((ViewGroup) progressBarLayoutContainer.getParent()).removeView(progressBarLayoutContainer);
+            }
+        }
+
+        @Override
+        public void onError(LoginPARRequestException e) {
+            removeProgressBar();
+            LoginActivity.this.onError(AuthenticationError.INVALID_FLOW_ERROR);
         }
     }
 }

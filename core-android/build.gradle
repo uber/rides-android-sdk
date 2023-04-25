@@ -41,8 +41,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     testOptions {
@@ -60,6 +60,7 @@ dependencies {
     implementation deps.support.appCompat
     implementation deps.support.annotations
     implementation deps.support.chrometabs
+    implementation deps.network.moshi
 
     testImplementation deps.test.junit
     testImplementation deps.test.assertj
