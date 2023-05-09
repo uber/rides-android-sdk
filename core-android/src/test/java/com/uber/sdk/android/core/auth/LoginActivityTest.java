@@ -150,7 +150,7 @@ public class LoginActivityTest extends RobolectricTestBase {
     @Test
     public void onLoginLoad_withSsoEnabled_andSupported_shouldExecuteSsoDeeplink() {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), productPriority,
-                loginConfiguration, ResponseType.TOKEN, false, true, true);
+                loginConfiguration, ResponseType.TOKEN, "", true, true, false);
 
         ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class, intent);
         loginActivity = controller.get();
@@ -166,7 +166,7 @@ public class LoginActivityTest extends RobolectricTestBase {
     @Test
     public void onLoginLoad_withSsoEnabled_andNotSupported_shouldReturnErrorResultIntent() {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), productPriority,
-                loginConfiguration, ResponseType.TOKEN, false, true, true);
+                loginConfiguration, ResponseType.TOKEN, "", true, true, false);
 
         ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class).newIntent(intent);
         loginActivity = controller.get();
@@ -184,92 +184,51 @@ public class LoginActivityTest extends RobolectricTestBase {
     }
 
     @Test
-    public void onLoginLoad_withResponseTypeCode_andForceWebview_shouldLoadWebview() {
+    public void onLoginLoad_withResponseTypeCode_shouldLoadChrometab() {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
-                ResponseType.CODE, true);
-
-        loginActivity = Robolectric.buildActivity(LoginActivity.class, intent).create().get();
-        ShadowWebView webview = Shadows.shadowOf(loginActivity.webView);
-
-        String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.CODE, loginConfiguration);
-        assertThat(webview.getLastLoadedUrl()).isEqualTo(expectedUrl);
-    }
-
-    @Test
-    public void onLoginLoad_withResponseTypeCode_andNotForceWebview_shouldLoadChrometab() {
-        Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
-                ResponseType.CODE, false);
+                ResponseType.CODE);
 
         ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class, intent);
         loginActivity = controller.get();
         loginActivity.customTabsHelper = customTabsHelper;
         controller.create();
 
-        String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.CODE, loginConfiguration);
+        String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.CODE, loginConfiguration, "");
         verify(customTabsHelper).openCustomTab(any(LoginActivity.class), any(CustomTabsIntent.class),
                 eq(Uri.parse(expectedUrl)), any(CustomTabsHelper.BrowserFallback.class));
     }
 
     @Test
-    public void onLoginLoad_withResponseTypeToken_andForceWebview_andGeneralScopes_shouldLoadWebview() {
+    public void onLoginLoad_withResponseTypeToken_andGeneralScopes_shouldLoadChrometab() {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
-                ResponseType.TOKEN, true);
-
-        loginActivity = Robolectric.buildActivity(LoginActivity.class, intent).create().get();
-        ShadowWebView webview = Shadows.shadowOf(loginActivity.webView);
-
-        String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.TOKEN, loginConfiguration);
-        assertThat(webview.getLastLoadedUrl()).isEqualTo(expectedUrl);
-    }
-
-    @Test
-    public void onLoginLoad_withResponseTypeToken_andNotForceWebview_andGeneralScopes_shouldLoadChrometab() {
-        Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
-                ResponseType.TOKEN, false);
+                ResponseType.TOKEN);
 
         ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class).newIntent(intent);
         loginActivity = controller.get();
         loginActivity.customTabsHelper = customTabsHelper;
         controller.create();
 
-        String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.TOKEN, loginConfiguration);
+        String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.TOKEN, loginConfiguration, "");
         verify(customTabsHelper).openCustomTab(any(LoginActivity.class), any(CustomTabsIntent.class),
                 eq(Uri.parse(expectedUrl)), any(CustomTabsHelper.BrowserFallback.class));
     }
 
     @Test
-    public void onLoginLoad_withResponseTypeToken_andForceWebview_andPrivilegedScopes_andRedirectToPlayStoreDisabled_shouldLoadWebview() {
+    public void onLoginLoad_withResponseTypeToken_andPrivilegedScopes_andRedirectToPlayStoreDisabled_shouldLoadChrometab() {
         loginConfiguration = new SessionConfiguration.Builder()
                 .setClientId(CLIENT_ID)
                 .setRedirectUri(REDIRECT_URI)
                 .setScopes(MIXED_SCOPES)
                 .build();
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
-                ResponseType.TOKEN, true);
-
-        loginActivity = Robolectric.buildActivity(LoginActivity.class, intent).create().get();
-        ShadowWebView webview = Shadows.shadowOf(loginActivity.webView);
-
-        String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.TOKEN, loginConfiguration);
-        assertThat(webview.getLastLoadedUrl()).isEqualTo(expectedUrl);
-    }
-
-    @Test
-    public void onLoginLoad_withResponseTypeToken_andNotForceWebview_andPrivilegedScopes_andRedirectToPlayStoreDisabled_shouldLoadChrometab() {
-        loginConfiguration = new SessionConfiguration.Builder()
-                .setClientId(CLIENT_ID)
-                .setRedirectUri(REDIRECT_URI)
-                .setScopes(MIXED_SCOPES)
-                .build();
-        Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
-                ResponseType.TOKEN, false);
+                ResponseType.TOKEN);
 
         ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class, intent);
         loginActivity = controller.get();
         loginActivity.customTabsHelper = customTabsHelper;
         controller.create();
 
-        String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.TOKEN, loginConfiguration);
+        String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.TOKEN, loginConfiguration, "");
         verify(customTabsHelper).openCustomTab(any(LoginActivity.class), any(CustomTabsIntent.class),
                 eq(Uri.parse(expectedUrl)), any(CustomTabsHelper.BrowserFallback.class));
     }
@@ -282,7 +241,7 @@ public class LoginActivityTest extends RobolectricTestBase {
                 .setScopes(MIXED_SCOPES)
                 .build();
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class),
-                new ArrayList<SupportedAppType>(), loginConfiguration, ResponseType.TOKEN, true, false, true);
+                new ArrayList<SupportedAppType>(), loginConfiguration, ResponseType.TOKEN, "", false, true, false);
 
         ShadowActivity shadowActivity = shadowOf(Robolectric.buildActivity(LoginActivity.class, intent).create().get());
 

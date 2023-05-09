@@ -2,13 +2,13 @@ subprojects {
     buildscript {
         repositories {
             google()
-            jcenter()
+            mavenCentral()
         }
     }
 
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven {
             url 'https://maven.google.com'
         }

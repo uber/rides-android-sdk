@@ -45,6 +45,7 @@ import com.uber.sdk.android.rides.samples.BuildConfig;
 import com.uber.sdk.android.rides.samples.R;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenStorage;
+import com.uber.sdk.core.auth.ProfileHint;
 import com.uber.sdk.core.auth.Scope;
 import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
@@ -84,17 +85,23 @@ public class LoginSampleActivity extends AppCompatActivity {
     private Button customButton;
     private AccessTokenStorage accessTokenStorage;
     private LoginManager loginManager;
-    private SessionConfiguration configuration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
 
-        configuration = new SessionConfiguration.Builder()
+        SessionConfiguration configuration = new SessionConfiguration.Builder()
                 .setClientId(CLIENT_ID)
                 .setRedirectUri(REDIRECT_URI)
                 .setScopes(Arrays.asList(Scope.PROFILE, Scope.RIDE_WIDGETS))
+                .setProfileHint(new ProfileHint
+                        .Builder()
+                        .email("john@doe.com")
+                        .firstName("John")
+                        .lastName("Doe")
+                        .phone("1234567890")
+                        .build())
                 .build();
 
         validateConfiguration(configuration);

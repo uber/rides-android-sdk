@@ -49,8 +49,8 @@ import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.install.SignupDeeplink;
 import com.uber.sdk.android.core.utils.CustomTabsHelper;
 import com.uber.sdk.core.client.SessionConfiguration;
-import com.uber.sdk.core.client.internal.LoginPARRequest;
 import com.uber.sdk.core.client.internal.LoginPARRequestException;
+import com.uber.sdk.core.client.internal.LoginPushedAuthorizationRequest;
 
 import java.util.ArrayList;
 
@@ -266,8 +266,6 @@ public class LoginActivity extends Activity {
     protected void loadUrl() {
         Intent intent = getIntent();
 
-        sessionConfiguration = (SessionConfiguration) intent.getSerializableExtra(EXTRA_SESSION_CONFIGURATION);
-        responseType = (ResponseType) intent.getSerializableExtra(EXTRA_RESPONSE_TYPE);
         productPriority = (ArrayList<SupportedAppType>) intent.getSerializableExtra(EXTRA_PRODUCT_PRIORITY);
 
         if (!validateRequestParams()) {
@@ -547,7 +545,7 @@ public class LoginActivity extends Activity {
         }
     }
 
-    class LoginPARCallback implements LoginPARRequest.Callback {
+    class LoginPARCallback implements LoginPushedAuthorizationRequest.Callback {
 
         private final ResponseType responseType;
 

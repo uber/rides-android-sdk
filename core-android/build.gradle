@@ -17,7 +17,7 @@
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven { url deps.build.repositories.plugins }
     }
 
@@ -66,6 +66,7 @@ dependencies {
     testImplementation deps.test.assertj
     testImplementation deps.test.mockito
     testImplementation deps.test.robolectric
+    testImplementation project(path: ':core-android')
 }
 
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

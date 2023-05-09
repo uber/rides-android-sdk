@@ -286,8 +286,8 @@ public class AuthUtilsTest extends RobolectricTestBase {
                 .setClientId(clientId)
                 .build();
 
-        String url = AuthUtils.buildUrl(redirectUri, ResponseType.TOKEN, loginConfiguration);
-        assertEquals("https://login.uber.com/oauth/v2/authorize?client_id=" + clientId +
+        String url = AuthUtils.buildUrl(redirectUri, ResponseType.TOKEN, loginConfiguration, "");
+        assertEquals("https://auth.uber.com/oauth/v2/authorize?client_id=" + clientId +
                 "&redirect_uri=" + redirectUri + "&response_type=token&scope=history&" +
                 "show_fb=false&signup_params=eyJyZWRpcmVjdF90b19sb2dpbiI6dHJ1ZX0%3D%0A", url);
     }

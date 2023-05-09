@@ -17,7 +17,7 @@
 def versions = [
         androidTest: '0.5',
         androidxVersion: '1.0.0',
-        uberJava: '0.8.1-SNAPSHOT',
+        uberJava: '0.8.1',
 ]
 
 def network = [

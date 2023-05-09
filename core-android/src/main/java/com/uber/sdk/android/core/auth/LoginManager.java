@@ -175,7 +175,6 @@ public class LoginManager {
         checkState(hasScopes, "Scopes must be set in the Session Configuration.");
         checkNotNull(sessionConfiguration.getRedirectUri(),
                 "Redirect URI must be set in Session Configuration.");
-
         if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
             return;
         }
@@ -213,7 +212,7 @@ public class LoginManager {
         if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
             return;
         }
-        launchOnboardingFlow(activity, ResponseType.TOKEN);
+        launchOnboardingFlow(activity, ResponseType.TOKEN, false);
     }
 
     /**
@@ -226,7 +225,7 @@ public class LoginManager {
             return;
         }
 
-        launchOnboardingFlow(activity, ResponseType.CODE);
+        launchOnboardingFlow(activity, ResponseType.CODE, false);
     }
 
     /**
@@ -240,18 +239,20 @@ public class LoginManager {
             return;
         }
 
-        launchOnboardingFlow(activity, ResponseType.CODE);
+        launchOnboardingFlow(activity, ResponseType.TOKEN, true);
     }
 
-    private void launchOnboardingFlow(Activity activity, ResponseType responseType) {
+    private void launchOnboardingFlow(Activity activity,
+                                      ResponseType responseType,
+                                      boolean isRedirectToPlayStoreEnabled) {
         Intent intent = LoginActivity.newIntent(
                 activity,
                 productFlowPriority,
                 sessionConfiguration,
-                ResponseType.TOKEN,
+                responseType,
                 "",
                 false,
-                false,
+                isRedirectToPlayStoreEnabled,
                 true);
         activity.startActivityForResult(intent, requestCode);
     }
