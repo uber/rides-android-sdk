@@ -291,4 +291,22 @@ public class AuthUtilsTest extends RobolectricTestBase {
                 "&redirect_uri=" + redirectUri + "&response_type=token&scope=history&" +
                 "show_fb=false&signup_params=eyJyZWRpcmVjdF90b19sb2dpbiI6dHJ1ZX0%3D%0A", url);
     }
+
+    @Test
+    public void onBuildUrl_whenRequestUriIsNotEmpty_shouldHaveRequestUriInQueryParams() {
+        String clientId = "clientId1234";
+        String redirectUri = "localHost1234";
+
+        SessionConfiguration loginConfiguration = new SessionConfiguration.Builder()
+                .setRedirectUri(redirectUri)
+                .setScopes(Arrays.asList(Scope.HISTORY))
+                .setClientId(clientId)
+                .build();
+
+        String url = AuthUtils.buildUrl(redirectUri, ResponseType.TOKEN, loginConfiguration, "requestUri");
+        assertEquals("https://auth.uber.com/oauth/v2/authorize?client_id=" + clientId +
+                "&redirect_uri=" + redirectUri + "&response_type=token&scope=history&" +
+                "show_fb=false&signup_params=eyJyZWRpcmVjdF90b19sb2dpbiI6dHJ1ZX0%3D%0A" +
+                "&request_uri=requestUri", url);
+    }
 }

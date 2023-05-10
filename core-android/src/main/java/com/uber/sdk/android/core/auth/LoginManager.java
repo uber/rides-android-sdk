@@ -234,7 +234,8 @@ public class LoginManager {
      *
      * @param activity to start Activity on.
      */
-    private void loginForImplicitGrantWithFallback(@NonNull Activity activity) {
+    @VisibleForTesting
+    void loginForImplicitGrantWithFallback(@NonNull Activity activity) {
         if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
             return;
         }

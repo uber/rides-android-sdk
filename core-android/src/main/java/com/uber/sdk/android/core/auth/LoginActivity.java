@@ -285,7 +285,6 @@ public class LoginActivity extends Activity {
             }
             return;
         }
-
         String requestUri = intent.getStringExtra(EXTRA_REQUEST_URI);
         boolean isRedirectToPlayStoreEnabled = intent.getBooleanExtra(EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED, false);
         if (responseType == ResponseType.CODE) {
@@ -422,8 +421,14 @@ public class LoginActivity extends Activity {
         return intent.getBooleanExtra(EXTRA_PAR_FLOW, false);
     }
 
-    private void addProgressIndicator() {
+    /**
+     * Adds progress spinner to the top of the activity
+     */
+    @VisibleForTesting
+    void addProgressIndicator() {
         progressBarLayoutContainer = new LinearLayout(this);
+        progressBarLayoutContainer.setId(R.id.progress_spinner);
+
         progressBarLayoutContainer.setGravity(Gravity.CENTER);
         progressBarLayoutContainer.setLayoutParams(
                 new LinearLayout.LayoutParams(
@@ -442,10 +447,13 @@ public class LoginActivity extends Activity {
         rootLayout.addView(progressBarLayoutContainer);
     }
 
-    private void removeProgressBar() {
-        ViewGroup rootLayout = findViewById(android.R.id.content);
+    /**
+     * Removes progress spinner from the activity
+     */
+    @VisibleForTesting void removeProgressIndicator() {
         if (progressBarLayoutContainer.getParent() != null) {
             ((ViewGroup) progressBarLayoutContainer.getParent()).removeView(progressBarLayoutContainer);
+            progressBarLayoutContainer = null;
         }
     }
 
@@ -555,20 +563,14 @@ public class LoginActivity extends Activity {
 
         @Override
         public void onSuccess(String requestUri) {
-            removeProgressBar();
+            removeProgressIndicator();
             loginInternal(requestUri);
-        }
-
-        private void removeProgressBar() {
-            if (progressBarLayoutContainer.getParent() != null) {
-                ((ViewGroup) progressBarLayoutContainer.getParent()).removeView(progressBarLayoutContainer);
-            }
         }
 
         @Override
         public void onError(LoginPARRequestException e) {
-            removeProgressBar();
-            LoginActivity.this.onError(AuthenticationError.INVALID_FLOW_ERROR);
+            removeProgressIndicator();
+            loginInternal("");
         }
     }
 }

@@ -511,6 +511,26 @@ public class LoginManagerTest extends RobolectricTestBase {
         loginManager.getSession();
     }
 
+    @Test
+    public void loginForAuthorizationCode_shouldEnablePARFlow() {
+        loginManager.loginForAuthorizationCode(activity);
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+
+        verify(activity).startActivityForResult(intentCaptor.capture(), anyInt());
+        Intent value = intentCaptor.getValue();
+        assertThat((ResponseType)value.getSerializableExtra(EXTRA_RESPONSE_TYPE)).isEqualTo(ResponseType.CODE);
+    }
+
+    @Test
+    public void loginForImplicitGrantWithFallback_shouldEnablePARFlow() {
+        loginManager.loginForImplicitGrantWithFallback(activity);
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+
+        verify(activity).startActivityForResult(intentCaptor.capture(), anyInt());
+        Intent value = intentCaptor.getValue();
+        assertThat((ResponseType)value.getSerializableExtra(EXTRA_RESPONSE_TYPE)).isEqualTo(ResponseType.TOKEN);
+    }
+
     private void validateLoginIntentFields(
             @NonNull Intent loginIntent,
             @NonNull List<SupportedAppType> expectedProductPriority,
