@@ -427,7 +427,6 @@ public class LoginActivity extends Activity {
     @VisibleForTesting
     void addProgressIndicator() {
         progressBarLayoutContainer = new LinearLayout(this);
-        progressBarLayoutContainer.setId(R.id.progress_spinner);
 
         progressBarLayoutContainer.setGravity(Gravity.CENTER);
         progressBarLayoutContainer.setLayoutParams(
