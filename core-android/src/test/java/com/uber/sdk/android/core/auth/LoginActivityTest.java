@@ -26,7 +26,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.widget.LinearLayout;
 
 import androidx.browser.customtabs.CustomTabsIntent;
 import com.google.common.collect.ImmutableList;
@@ -41,10 +40,8 @@ import com.uber.sdk.core.client.SessionConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowActivity;
@@ -155,7 +152,7 @@ public class LoginActivityTest extends RobolectricTestBase {
     @Test
     public void onLoginLoad_withSsoEnabled_andSupported_shouldExecuteSsoDeeplink() {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), productPriority,
-                loginConfiguration, ResponseType.TOKEN, "", true, true, false);
+                loginConfiguration, ResponseType.TOKEN, true, true, false);
 
         ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class, intent);
         loginActivity = controller.get();
@@ -171,7 +168,7 @@ public class LoginActivityTest extends RobolectricTestBase {
     @Test
     public void onLoginLoad_withSsoEnabled_andNotSupported_shouldReturnErrorResultIntent() {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), productPriority,
-                loginConfiguration, ResponseType.TOKEN, "", true, true, false);
+                loginConfiguration, ResponseType.TOKEN, true, true, false);
 
         ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class).newIntent(intent);
         loginActivity = controller.get();
@@ -246,7 +243,7 @@ public class LoginActivityTest extends RobolectricTestBase {
                 .setScopes(MIXED_SCOPES)
                 .build();
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class),
-                new ArrayList<SupportedAppType>(), loginConfiguration, ResponseType.TOKEN, "", false, true, false);
+                new ArrayList<SupportedAppType>(), loginConfiguration, ResponseType.TOKEN, true, false, true);
 
         ShadowActivity shadowActivity = shadowOf(Robolectric.buildActivity(LoginActivity.class, intent).create().get());
 
@@ -256,7 +253,7 @@ public class LoginActivityTest extends RobolectricTestBase {
 
     @Test
     @Config(shadows = ShadowLoginPARDispatcher.class )
-    public void onLoginLoad_whenPARFlowEnabled_shouldAddProgressIndicator_andLoadCustomTab() {
+    public void onLoginLoad_whenProfileHintProvided_shouldAddProgressIndicator_andLoadCustomTab() {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class),
                 loginConfiguration
                         .newBuilder()
@@ -279,7 +276,7 @@ public class LoginActivityTest extends RobolectricTestBase {
 
     @Test
     @Config(shadows = ShadowLoginPARDispatcherWithError.class )
-    public void onLoginLoad_whenPARFlowEnabled_andErrorResponse_shouldAddProgressIndicator_andLoadCustomTab() {
+    public void onLoginLoad_whenProfileHintProvided_andErrorResponse_shouldAddProgressIndicator_andLoadCustomTab() {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
                 ResponseType.CODE, true);
 
@@ -294,26 +291,9 @@ public class LoginActivityTest extends RobolectricTestBase {
     }
 
     @Test
-    public void onLoginLoad_whenPARFlowEnabled_andProfileHintEmpty_shouldAddProgressIndicator_andLoadCustomTab() {
+    public void onLoginLoad_whenProfileHintIsNull_shouldNotAddProgressIndicator_andLoadCustomTab() {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
-                ResponseType.CODE, true);
-
-        ActivityController<LoginActivity> controller = Robolectric
-                .buildActivity(LoginActivity.class, intent);
-        loginActivity = spy(controller.get());
-        loginActivity.customTabsHelper = customTabsHelper;
-        loginActivity.onCreate(new Bundle());
-        verify(loginActivity).addProgressIndicator();
-        verify(loginActivity).removeProgressIndicator();
-        String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.CODE, loginConfiguration, "");
-        verify(customTabsHelper).openCustomTab(any(LoginActivity.class), any(CustomTabsIntent.class),
-                eq(Uri.parse(expectedUrl)), any(CustomTabsHelper.BrowserFallback.class));
-    }
-
-    @Test
-    public void onLoginLoad_whenPARFlowDisabled_shouldNotAddProgressIndicator_andLoadCustomTab() {
-        Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
-                ResponseType.CODE, false);
+                ResponseType.CODE);
 
         ActivityController<LoginActivity> controller = Robolectric
                 .buildActivity(LoginActivity.class, intent);
@@ -321,6 +301,71 @@ public class LoginActivityTest extends RobolectricTestBase {
         loginActivity.customTabsHelper = customTabsHelper;
         loginActivity.onCreate(new Bundle());
         verify(loginActivity, never()).addProgressIndicator();
+        verify(loginActivity, never()).removeProgressIndicator();
+        String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.CODE, loginConfiguration, "");
+        verify(customTabsHelper).openCustomTab(any(LoginActivity.class), any(CustomTabsIntent.class),
+                eq(Uri.parse(expectedUrl)), any(CustomTabsHelper.BrowserFallback.class));
+    }
+
+    @Test
+    public void onLoginLoad_whenProfileHintHasEmptyFields_shouldNotAddProgressIndicator_andLoadCustomTab() {
+        Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class),
+                loginConfiguration.newBuilder()
+                        .setProfileHint(
+                                new ProfileHint.Builder()
+                                        .firstName("")
+                                        .lastName("")
+                                        .email("")
+                                        .phone("")
+                                        .build()
+                        ).build(),
+                ResponseType.CODE);
+
+        ActivityController<LoginActivity> controller = Robolectric
+                .buildActivity(LoginActivity.class, intent);
+        loginActivity = spy(controller.get());
+        loginActivity.customTabsHelper = customTabsHelper;
+        loginActivity.onCreate(new Bundle());
+        verify(loginActivity, never()).addProgressIndicator();
+        String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.CODE, loginConfiguration, "");
+        verify(customTabsHelper).openCustomTab(any(LoginActivity.class), any(CustomTabsIntent.class),
+                eq(Uri.parse(expectedUrl)), any(CustomTabsHelper.BrowserFallback.class));
+    }
+
+    @Test
+    @Config(shadows = ShadowLoginPARDispatcher.class)
+    public void handleParFlow_whenProfileHintIsValid_thenAddProgressIndicator_andLaunchCustomTab() {
+        Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class),
+                loginConfiguration
+                        .newBuilder()
+                        .setProfileHint(new ProfileHint
+                                .Builder()
+                                .firstName("test")
+                                .build())
+                        .build(),
+                ResponseType.CODE, true);
+
+        ActivityController<LoginActivity> controller = Robolectric
+                .buildActivity(LoginActivity.class, intent);
+        LoginActivity loginActivity = spy(controller.get());
+        loginActivity.customTabsHelper = customTabsHelper;
+        loginActivity.onCreate(new Bundle());
+        String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.CODE, loginConfiguration, "requestUri");
+        verify(customTabsHelper).openCustomTab(any(LoginActivity.class), any(CustomTabsIntent.class),
+                eq(Uri.parse(expectedUrl)), any(CustomTabsHelper.BrowserFallback.class));
+    }
+
+    @Test
+    public void handleParFlow_whenProfileHintIsNull_thenAddProgressIndicator_andLaunchCustomTab() {
+        Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class),
+                loginConfiguration,
+                ResponseType.CODE);
+
+        ActivityController<LoginActivity> controller = Robolectric
+                .buildActivity(LoginActivity.class, intent);
+        LoginActivity loginActivity = spy(controller.get());
+        loginActivity.customTabsHelper = customTabsHelper;
+        loginActivity.onCreate(new Bundle());
         String expectedUrl = AuthUtils.buildUrl(REDIRECT_URI, ResponseType.CODE, loginConfiguration, "");
         verify(customTabsHelper).openCustomTab(any(LoginActivity.class), any(CustomTabsIntent.class),
                 eq(Uri.parse(expectedUrl)), any(CustomTabsHelper.BrowserFallback.class));

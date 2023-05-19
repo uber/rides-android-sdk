@@ -33,6 +33,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.browser.customtabs.CustomTabsIntent;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.webkit.WebResourceError;
@@ -48,6 +49,7 @@ import com.uber.sdk.android.core.R;
 import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.install.SignupDeeplink;
 import com.uber.sdk.android.core.utils.CustomTabsHelper;
+import com.uber.sdk.core.auth.ProfileHint;
 import com.uber.sdk.core.client.SessionConfiguration;
 import com.uber.sdk.core.client.internal.LoginPARRequestException;
 import com.uber.sdk.core.client.internal.LoginPushedAuthorizationRequest;
@@ -69,8 +71,6 @@ public class LoginActivity extends Activity {
     static final String EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED = "REDIRECT_TO_PLAY_STORE_ENABLED";
 
     static final String EXTRA_REQUEST_URI = "REQUEST_URI";
-
-    static final String EXTRA_PAR_FLOW = "PAR_FLOW";
 
     static final String ERROR = "error";
 
@@ -112,27 +112,58 @@ public class LoginActivity extends Activity {
     /**
      * Create an {@link Intent} to pass to this activity
      *
-     * @param context              the {@link Context} for the intent
+     * @param context the {@link Context} for the intent
      * @param sessionConfiguration to be used for gather clientId
-     * @param responseType         that is expected
-     * @param isParFlow            specifies whether to send user's profile info to Uber as part of login/signup flow
+     * @param responseType that is expected
+     * @param forceWebview Forced to use old webview instead of chrometabs
      * @return an intent that can be passed to this activity
+     *
+     * This method has been deprecated. Please use {@link LoginActivity#newIntent(Context, SessionConfiguration, ResponseType, String)}
      */
     @NonNull
+    @Deprecated
     public static Intent newIntent(
             @NonNull Context context,
             @NonNull SessionConfiguration sessionConfiguration,
             @NonNull ResponseType responseType,
-            boolean isParFlow) {
+            boolean forceWebview) {
 
-        return newIntent(context,
-                new ArrayList<SupportedAppType>(),
-                sessionConfiguration,
-                responseType,
-                "",
-                false,
-                false,
-                isParFlow);
+        return newIntent(context, new ArrayList<SupportedAppType>(), sessionConfiguration, responseType, forceWebview, false, false);
+    }
+
+    /**
+     * Create an {@link Intent} to pass to this activity
+     *
+     * @param context the {@link Context} for the intent
+     * @param productPriority dictates the order of which Uber applications should be used for SSO.
+     * @param sessionConfiguration to be used for gather clientId
+     * @param responseType that is expected
+     * @param forceWebview Forced to use old webview instead of chrometabs
+     * @param isSsoEnabled specifies whether to attempt login with SSO
+     * @return an intent that can be passed to this activity
+     *
+     * This method has been deprecated. Please use {@link LoginActivity#newIntent(Context, ArrayList, SessionConfiguration, ResponseType, String, boolean, boolean)}
+     */
+    @NonNull
+    @Deprecated
+    static Intent newIntent(
+            @NonNull Context context,
+            @NonNull ArrayList<SupportedAppType> productPriority,
+            @NonNull SessionConfiguration sessionConfiguration,
+            @NonNull ResponseType responseType,
+            boolean forceWebview,
+            boolean isSsoEnabled,
+            boolean isRedirectToPlayStoreEnabled) {
+
+        final Intent data = new Intent(context, LoginActivity.class)
+                .putExtra(EXTRA_PRODUCT_PRIORITY, productPriority)
+                .putExtra(EXTRA_SESSION_CONFIGURATION, sessionConfiguration)
+                .putExtra(EXTRA_RESPONSE_TYPE, responseType)
+                .putExtra(EXTRA_FORCE_WEBVIEW, forceWebview)
+                .putExtra(EXTRA_SSO_ENABLED, isSsoEnabled)
+                .putExtra(EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED, isRedirectToPlayStoreEnabled);
+
+        return data;
     }
 
     /**
@@ -157,7 +188,6 @@ public class LoginActivity extends Activity {
                 responseType,
                 requestUri,
                 false,
-                false,
                 false);
     }
 
@@ -170,7 +200,6 @@ public class LoginActivity extends Activity {
      * @param responseType                 that is expected
      * @param isSsoEnabled                 specifies whether to attempt login with SSO
      * @param isRedirectToPlayStoreEnabled specifies whether to redirect to Play Store if Uber app is not installed
-     * @param isParFlow                    specifies whether to send user's profile info to Uber as part of login/signup flow
      * @return an intent that can be passed to this activity
      */
     @NonNull
@@ -181,8 +210,7 @@ public class LoginActivity extends Activity {
             @NonNull ResponseType responseType,
             String requestUri,
             boolean isSsoEnabled,
-            boolean isRedirectToPlayStoreEnabled,
-            boolean isParFlow) {
+            boolean isRedirectToPlayStoreEnabled) {
 
         final Intent data = new Intent(context, LoginActivity.class)
                 .putExtra(EXTRA_PRODUCT_PRIORITY, productPriority)
@@ -190,8 +218,7 @@ public class LoginActivity extends Activity {
                 .putExtra(EXTRA_REQUEST_URI, requestUri)
                 .putExtra(EXTRA_RESPONSE_TYPE, responseType)
                 .putExtra(EXTRA_SSO_ENABLED, isSsoEnabled)
-                .putExtra(EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED, isRedirectToPlayStoreEnabled)
-                .putExtra(EXTRA_PAR_FLOW, isParFlow);
+                .putExtra(EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED, isRedirectToPlayStoreEnabled);
 
         return data;
     }
@@ -239,22 +266,28 @@ public class LoginActivity extends Activity {
     }
 
     protected void init() {
+        Log.d("yyyy", "intent is " + getIntent().getData());
         if (getIntent().getData() != null) {
             handleResponse(getIntent().getData());
+        } else if (isParFlow(getIntent())) {
+            handleParFlow();
         } else {
-            sessionConfiguration = (SessionConfiguration) getIntent().getSerializableExtra(EXTRA_SESSION_CONFIGURATION);
-            responseType = (ResponseType) getIntent().getSerializableExtra(EXTRA_RESPONSE_TYPE);
-            if (isParFlow(getIntent())) {
-                addProgressIndicator();
-                LoginPARDispatcher.dispatchPAR(
-                        sessionConfiguration,
-                        responseType,
-                        new LoginPARCallback(responseType)
-                );
-            } else {
-                loadUrl();
-            }
+            loadUrl();
         }
+    }
+
+    /**
+     * Initiates Pushed Authorization Request
+     */
+    @VisibleForTesting
+    void handleParFlow() {
+        responseType = (ResponseType) getIntent().getSerializableExtra(EXTRA_RESPONSE_TYPE);
+        addProgressIndicator();
+        LoginPARDispatcher.dispatchPAR(
+                sessionConfiguration,
+                responseType,
+                new LoginPARCallback(responseType)
+        );
     }
 
     @Override
@@ -265,7 +298,8 @@ public class LoginActivity extends Activity {
 
     protected void loadUrl() {
         Intent intent = getIntent();
-
+        sessionConfiguration = (SessionConfiguration) getIntent().getSerializableExtra(EXTRA_SESSION_CONFIGURATION);
+        responseType = (ResponseType) getIntent().getSerializableExtra(EXTRA_RESPONSE_TYPE);
         productPriority = (ArrayList<SupportedAppType>) intent.getSerializableExtra(EXTRA_PRODUCT_PRIORITY);
 
         if (!validateRequestParams()) {
@@ -418,7 +452,18 @@ public class LoginActivity extends Activity {
     }
 
     private boolean isParFlow(Intent intent) {
-        return intent.getBooleanExtra(EXTRA_PAR_FLOW, false);
+        sessionConfiguration = (SessionConfiguration) getIntent().getSerializableExtra(EXTRA_SESSION_CONFIGURATION);
+        if (sessionConfiguration == null) {
+            return false;
+        }
+        ProfileHint profileHint = sessionConfiguration.getProfileHint();
+        return (profileHint != null &&
+                !(TextUtils.isEmpty(profileHint.getEmail()) &&
+                        TextUtils.isEmpty(profileHint.getFirstName()) &&
+                        TextUtils.isEmpty(profileHint.getLastName()) &&
+                        TextUtils.isEmpty(profileHint.getEmail())
+                )
+        );
     }
 
     /**

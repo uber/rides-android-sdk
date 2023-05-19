@@ -29,7 +29,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import android.util.Log;
-import android.widget.LinearLayout;
 
 import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.UberSdk;
@@ -103,8 +102,6 @@ public class LoginManager {
     private boolean authCodeFlowEnabled = false;
     @Deprecated
     private boolean redirectForAuthorizationCode = false;
-
-    private LinearLayout progressBarLayoutContainer;
 
     /**
      * @param accessTokenStorage to store access token.
@@ -187,10 +184,9 @@ public class LoginManager {
                     productFlowPriority,
                     sessionConfiguration,
                     ResponseType.TOKEN,
-                    "",
+                    false,
                     true,
-                    true,
-                    false);
+                    true);
             activity.startActivityForResult(intent, requestCode);
         } else if (ssoDeeplink.isSupported(SsoDeeplink.FlowVersion.DEFAULT)) {
             ssoDeeplink.execute(SsoDeeplink.FlowVersion.DEFAULT);
@@ -253,8 +249,7 @@ public class LoginManager {
                 responseType,
                 "",
                 false,
-                isRedirectToPlayStoreEnabled,
-                true);
+                isRedirectToPlayStoreEnabled);
         activity.startActivityForResult(intent, requestCode);
     }
 
