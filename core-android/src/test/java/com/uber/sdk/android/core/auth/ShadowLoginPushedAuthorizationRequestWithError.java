@@ -1,14 +1,13 @@
 package com.uber.sdk.android.core.auth;
 
 import com.uber.sdk.core.client.SessionConfiguration;
-import com.uber.sdk.core.client.internal.LoginPARRequestException;
 import com.uber.sdk.core.client.internal.LoginPushedAuthorizationRequest;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
 @Implements(LoginPushedAuthorizationRequest.class)
-public class ShadowLoginPARDispatcherWithError {
+public class ShadowLoginPushedAuthorizationRequestWithError {
     private LoginPushedAuthorizationRequest.Callback callback;
 
     @Implementation

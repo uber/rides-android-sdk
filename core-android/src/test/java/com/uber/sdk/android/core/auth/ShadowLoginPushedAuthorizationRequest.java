@@ -7,7 +7,7 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
 @Implements(LoginPushedAuthorizationRequest.class)
-public class ShadowLoginPARDispatcher {
+public class ShadowLoginPushedAuthorizationRequest {
 
     private LoginPushedAuthorizationRequest.Callback callback;
 

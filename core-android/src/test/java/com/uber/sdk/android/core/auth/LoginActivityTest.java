@@ -252,7 +252,7 @@ public class LoginActivityTest extends RobolectricTestBase {
     }
 
     @Test
-    @Config(shadows = ShadowLoginPARDispatcher.class )
+    @Config(shadows = ShadowLoginPushedAuthorizationRequest.class )
     public void onLoginLoad_whenProfileHintProvided_shouldAddProgressIndicator_andLoadCustomTab() {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class),
                 loginConfiguration
@@ -275,7 +275,7 @@ public class LoginActivityTest extends RobolectricTestBase {
     }
 
     @Test
-    @Config(shadows = ShadowLoginPARDispatcherWithError.class )
+    @Config(shadows = ShadowLoginPushedAuthorizationRequestWithError.class )
     public void onLoginLoad_whenProfileHintProvided_andErrorResponse_shouldAddProgressIndicator_andLoadCustomTab() {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class), loginConfiguration,
                 ResponseType.CODE, true);
@@ -333,7 +333,7 @@ public class LoginActivityTest extends RobolectricTestBase {
     }
 
     @Test
-    @Config(shadows = ShadowLoginPARDispatcher.class)
+    @Config(shadows = ShadowLoginPushedAuthorizationRequest.class)
     public void handleParFlow_whenProfileHintIsValid_thenAddProgressIndicator_andLaunchCustomTab() {
         Intent intent = LoginActivity.newIntent(Robolectric.setupActivity(Activity.class),
                 loginConfiguration
