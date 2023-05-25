@@ -352,6 +352,24 @@ user1Manager.setAccessToken(accessToken);
 user2Manager.setAccessToken(accessToken2);
 ```
 
+### Prefilling User Information
+If you would like text fields during signup to be pre-populated with user information you can do so using the ProfileHint API. Partial information is accepted. You will need to supply a ProfileHint object when creating SessionConfiguration instance.
+
+```
+SessionConfiguration configuration = new SessionConfiguration.Builder()
+        .setClientId(CLIENT_ID)
+        .setRedirectUri(REDIRECT_URI)
+        .setScopes(Arrays.asList(Scope.PROFILE, Scope.RIDE_WIDGETS))
+        .setProfileHint(new ProfileHint
+                .Builder()
+                .email("john@doe.com")
+                .firstName("John")
+                .lastName("Doe")
+                .phone("1234567890")
+                .build())
+        .build();
+```
+
 ## Making an API Request
 The Android Uber SDK uses a dependency on the Java Uber SDK for API requests.
 After authentication is complete, create a `Session` to use the Uber API.
