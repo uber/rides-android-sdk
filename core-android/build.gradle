@@ -17,7 +17,7 @@
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven { url deps.build.repositories.plugins }
     }
 
@@ -41,8 +41,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     testOptions {
@@ -65,6 +65,7 @@ dependencies {
     testImplementation deps.test.assertj
     testImplementation deps.test.mockito
     testImplementation deps.test.robolectric
+    testImplementation project(path: ':core-android')
 }
 
 apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
