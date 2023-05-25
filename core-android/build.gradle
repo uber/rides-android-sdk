@@ -60,7 +60,6 @@ dependencies {
     implementation deps.support.appCompat
     implementation deps.support.annotations
     implementation deps.support.chrometabs
-    implementation deps.network.moshi
 
     testImplementation deps.test.junit
     testImplementation deps.test.assertj

@@ -29,11 +29,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
-import androidx.browser.customtabs.CustomTabsIntent;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.webkit.WebResourceError;
@@ -43,6 +39,10 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+import androidx.browser.customtabs.CustomTabsIntent;
 
 import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.R;
@@ -106,7 +106,12 @@ public class LoginActivity extends Activity {
             @NonNull SessionConfiguration sessionConfiguration,
             @NonNull ResponseType responseType) {
 
-        return newIntent(context, sessionConfiguration, responseType, "");
+        return newIntent(context,
+                new ArrayList<SupportedAppType>(),
+                sessionConfiguration,
+                responseType,
+                false,
+                false);
     }
 
     /**
@@ -118,7 +123,7 @@ public class LoginActivity extends Activity {
      * @param forceWebview Forced to use old webview instead of chrometabs
      * @return an intent that can be passed to this activity
      *
-     * This method has been deprecated. Please use {@link LoginActivity#newIntent(Context, SessionConfiguration, ResponseType, String)}
+     * This method has been deprecated. Please use {@link LoginActivity#newIntent(Context, SessionConfiguration, ResponseType)}
      */
     @NonNull
     @Deprecated
@@ -142,7 +147,7 @@ public class LoginActivity extends Activity {
      * @param isSsoEnabled specifies whether to attempt login with SSO
      * @return an intent that can be passed to this activity
      *
-     * This method has been deprecated. Please use {@link LoginActivity#newIntent(Context, ArrayList, SessionConfiguration, ResponseType, String, boolean, boolean)}
+     * This method has been deprecated. Please use {@link LoginActivity#newIntent(Context, ArrayList, SessionConfiguration, ResponseType, boolean, boolean)}
      */
     @NonNull
     @Deprecated
@@ -169,31 +174,6 @@ public class LoginActivity extends Activity {
     /**
      * Create an {@link Intent} to pass to this activity
      *
-     * @param context              the {@link Context} for the intent
-     * @param sessionConfiguration to be used for gather clientId
-     * @param responseType         that is expected
-     * @param requestUri           to be used to prefill user's profile hint information
-     * @return an intent that can be passed to this activity
-     */
-    @NonNull
-    public static Intent newIntent(
-            @NonNull Context context,
-            @NonNull SessionConfiguration sessionConfiguration,
-            @NonNull ResponseType responseType,
-            @NonNull String requestUri) {
-
-        return newIntent(context,
-                new ArrayList<SupportedAppType>(),
-                sessionConfiguration,
-                responseType,
-                requestUri,
-                false,
-                false);
-    }
-
-    /**
-     * Create an {@link Intent} to pass to this activity
-     *
      * @param context                      the {@link Context} for the intent
      * @param productPriority              dictates the order of which Uber applications should be used for SSO.
      * @param sessionConfiguration         to be used for gather clientId
@@ -208,14 +188,12 @@ public class LoginActivity extends Activity {
             @NonNull ArrayList<SupportedAppType> productPriority,
             @NonNull SessionConfiguration sessionConfiguration,
             @NonNull ResponseType responseType,
-            String requestUri,
             boolean isSsoEnabled,
             boolean isRedirectToPlayStoreEnabled) {
 
         final Intent data = new Intent(context, LoginActivity.class)
                 .putExtra(EXTRA_PRODUCT_PRIORITY, productPriority)
                 .putExtra(EXTRA_SESSION_CONFIGURATION, sessionConfiguration)
-                .putExtra(EXTRA_REQUEST_URI, requestUri)
                 .putExtra(EXTRA_RESPONSE_TYPE, responseType)
                 .putExtra(EXTRA_SSO_ENABLED, isSsoEnabled)
                 .putExtra(EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED, isRedirectToPlayStoreEnabled);
@@ -266,7 +244,6 @@ public class LoginActivity extends Activity {
     }
 
     protected void init() {
-        Log.d("yyyy", "intent is " + getIntent().getData());
         if (getIntent().getData() != null) {
             handleResponse(getIntent().getData());
         } else if (isParFlow(getIntent())) {
@@ -283,11 +260,11 @@ public class LoginActivity extends Activity {
     void handleParFlow() {
         responseType = (ResponseType) getIntent().getSerializableExtra(EXTRA_RESPONSE_TYPE);
         addProgressIndicator();
-        LoginPARDispatcher.dispatchPAR(
+        new LoginPushedAuthorizationRequest(
                 sessionConfiguration,
-                responseType,
+                responseType.name(),
                 new LoginPARCallback(responseType)
-        );
+        ).execute();
     }
 
     @Override

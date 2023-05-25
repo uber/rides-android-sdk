@@ -259,7 +259,7 @@ class AuthUtils {
             @NonNull String redirectUri,
             @NonNull ResponseType responseType,
             @NonNull SessionConfiguration configuration,
-            @NonNull String requestUri) {
+            String requestUri) {
 
         final String CLIENT_ID_PARAM = "client_id";
         final String ENDPOINT = "auth";

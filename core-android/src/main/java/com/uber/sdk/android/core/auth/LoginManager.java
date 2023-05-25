@@ -247,7 +247,6 @@ public class LoginManager {
                 productFlowPriority,
                 sessionConfiguration,
                 responseType,
-                "",
                 false,
                 isRedirectToPlayStoreEnabled);
         activity.startActivityForResult(intent, requestCode);

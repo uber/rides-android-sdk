@@ -20,16 +20,12 @@ def versions = [
         uberJava: '0.8.1',
 ]
 
-def network = [
-        moshi: 'com.squareup.moshi:moshi:1.9.2',
-]
-
 def build = [
         gradleVersion: '4.9',
         buildToolsVersion: '28.0.2',
         compileSdkVersion: 28,
         ci: 'true' == System.getenv('CI'),
-        minSdkVersion: 16,
+        minSdkVersion: 15,
         targetSdkVersion: 28,
 
         repositories: [
@@ -40,8 +36,7 @@ def build = [
                 android: 'com.android.tools.build:gradle:3.3.2',
                 release: 'net.researchgate:gradle-release:2.1.2',
                 github: 'co.riiid:gradle-github-plugin:0.4.2',
-                cobertura: 'net.saliman:gradle-cobertura-plugin:2.3.1',
-                buildConfig: 'gradle.plugin.de.fuerstenau:BuildConfigPlugin:1.1.8'
+                cobertura: 'net.saliman:gradle-cobertura-plugin:2.3.1'
         ]
 ]
 
@@ -77,6 +72,5 @@ ext.deps = [
         "support": support,
         "test": test,
         "versions": versions,
-        "uber": uber,
-        "network": network
+        "uber": uber
 ]
