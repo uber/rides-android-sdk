@@ -1,3 +1,13 @@
+v0.10.4 - 05/26/2023
+-------------
+
+### Added
+ - [Issue #194](https://github.com/uber/rides-android-sdk/issues/194) Integrated Login Pushed authorization request flow
+ - [Issue #193](https://github.com/uber/rides-android-sdk/issues/193) Deprecating embedded webviews
+ - Updated java version to 1.8
+ - Updated login endpoint to auth.uber.com from login.uber.com
+ - Replaced jcenter with mavenCentral
+
 v0.10.3 - 08/19/2021
 -------------
 
