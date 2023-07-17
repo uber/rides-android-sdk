@@ -26,6 +26,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,17 +37,23 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.auth.AccessTokenManager;
+import com.uber.sdk.android.core.auth.AuthUriAssembler;
 import com.uber.sdk.android.core.auth.AuthenticationError;
 import com.uber.sdk.android.core.auth.LoginButton;
 import com.uber.sdk.android.core.auth.LoginCallback;
 import com.uber.sdk.android.core.auth.LoginManager;
+import com.uber.sdk.android.core.auth.ResponseType;
+import com.uber.sdk.android.core.utils.PKCEUtil;
 import com.uber.sdk.android.rides.samples.BuildConfig;
 import com.uber.sdk.android.rides.samples.R;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenStorage;
+import com.uber.sdk.core.auth.AuthorizationCodeGrantFlow;
 import com.uber.sdk.core.auth.ProfileHint;
 import com.uber.sdk.core.auth.Scope;
+import com.uber.sdk.core.auth.internal.TokenRequestFlow;
 import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
 import com.uber.sdk.rides.client.UberRidesApi;
@@ -55,7 +62,10 @@ import com.uber.sdk.rides.client.error.ErrorParser;
 import com.uber.sdk.rides.client.model.UserProfile;
 import com.uber.sdk.rides.client.services.RidesService;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Collections;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -79,10 +89,13 @@ public class LoginSampleActivity extends AppCompatActivity {
     private static final int LOGIN_BUTTON_CUSTOM_REQUEST_CODE = 1112;
     private static final int CUSTOM_BUTTON_REQUEST_CODE = 1113;
 
+    private static final String CODE_VERIFIER = PKCEUtil.generateCodeVerifier();
+
 
     private LoginButton blackButton;
     private LoginButton whiteButton;
     private Button customButton;
+    private Button appLinkButton;
     private AccessTokenStorage accessTokenStorage;
     private LoginManager loginManager;
 
@@ -94,7 +107,7 @@ public class LoginSampleActivity extends AppCompatActivity {
         SessionConfiguration configuration = new SessionConfiguration.Builder()
                 .setClientId(CLIENT_ID)
                 .setRedirectUri(REDIRECT_URI)
-                .setScopes(Arrays.asList(Scope.PROFILE, Scope.RIDE_WIDGETS))
+                .setScopes(Arrays.asList(Scope.PROFILE))
                 .setProfileHint(new ProfileHint
                         .Builder()
                         .email("john@doe.com")
@@ -127,12 +140,33 @@ public class LoginSampleActivity extends AppCompatActivity {
                 new SampleLoginCallback(),
                 configuration,
                 CUSTOM_BUTTON_REQUEST_CODE);
-
         customButton = (Button) findViewById(R.id.custom_uber_button);
         customButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 loginManager.login(LoginSampleActivity.this);
+            }
+        });
+        appLinkButton = findViewById(R.id.applink_uber_button);
+        appLinkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                String codeChallenge = "";
+                try {
+                    codeChallenge = PKCEUtil.generateCodeChallange(CODE_VERIFIER);
+                } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+                    throw new RuntimeException(e);
+                }
+                intent.setData(
+                        AuthUriAssembler.assemble(
+                                        ResponseType.CODE,
+                                        loginManager.getSessionConfiguration(),
+                                        codeChallenge,
+                                        null
+                                )
+                );
+                startActivityForResult(intent, CUSTOM_BUTTON_REQUEST_CODE);
             }
         });
     }
@@ -179,9 +213,23 @@ public class LoginSampleActivity extends AppCompatActivity {
 
         @Override
         public void onAuthorizationCodeReceived(@NonNull String authorizationCode) {
-            Toast.makeText(LoginSampleActivity.this, getString(R.string.authorization_code_message, authorizationCode),
-                    Toast.LENGTH_LONG)
-                    .show();
+            new AuthorizationCodeGrantFlow(loginManager.getSessionConfiguration(),
+                    authorizationCode,
+                    CODE_VERIFIER).execute(new TokenRequestFlow.TokenRequestFlowCallback() {
+                @Override
+                public void onSuccess(AccessToken accessToken) {
+                    new AccessTokenManager(LoginSampleActivity.this).setAccessToken(accessToken);
+                }
+
+                @Override
+                public void onFailure(Throwable throwable) {
+                    Toast.makeText(
+                            LoginSampleActivity.this,
+                                    getString(R.string.authorization_code_error_message, throwable.getMessage()),
+                                    Toast.LENGTH_LONG
+                            ).show();
+                }
+            });
         }
     }
 
