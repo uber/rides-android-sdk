@@ -293,7 +293,7 @@ class AuthUtils {
         return builder.build().toString();
     }
 
-    private static String getScopes(SessionConfiguration configuration) {
+    static String getScopes(SessionConfiguration configuration) {
         String scopes = AuthUtils.scopeCollectionToString(configuration.getScopes());
         if (!configuration.getCustomScopes().isEmpty()) {
             scopes =  AuthUtils.mergeScopeStrings(scopes,

@@ -31,6 +31,8 @@
     <string name="user_cancels_message">User cancels login</string>
     <string name="login_error_message">Error occured during login: %s</string>
     <string name="custom_login_text">I want to sign in using my Uber app.</string>
+    <string name="app_link_sso">I want to sign in using App link</string>
     <string name="authorization_code_message">Received an authorization code:\n %s</string>
+    <string name="authorization_code_error_message">Could not get tokens via authorization code: %s</string>
     <string name="greeting">Hello %s!</string>
 </resources>
