@@ -27,12 +27,12 @@ buildscript {
 
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 33
+    compileSdkVersion 28
 
     defaultConfig {
         applicationId "com.uber.sdk.android.samples"
         minSdkVersion 26
-        targetSdkVersion 33
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         buildConfigField "String", "CLIENT_ID", "\"${loadSecret("UBER_CLIENT_ID")}\"" //Add your client id to gradle.properties
