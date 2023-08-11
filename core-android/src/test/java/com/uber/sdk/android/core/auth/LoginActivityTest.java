@@ -435,6 +435,13 @@ public class LoginActivityTest extends RobolectricTestBase {
         assertThat(loginActivity.progressBarLayoutContainer).isNull();
     }
 
+    @Test
+    public void removeProgressIndicator_whenProgressIndicatorIsNotAdded_shouldDoNothing() {
+        // calling removeProgressIndicator should not throw exception
+        loginActivity.removeProgressIndicator();
+        assertThat(loginActivity.progressBarLayoutContainer).isNull();
+    }
+
     private AuthenticationError getErrorFromIntent(Intent intent) {
         return AuthenticationError.fromString(intent.getStringExtra(LoginManager.EXTRA_ERROR));
     }
