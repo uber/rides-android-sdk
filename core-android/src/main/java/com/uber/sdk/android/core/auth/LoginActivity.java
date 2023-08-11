@@ -471,8 +471,10 @@ public class LoginActivity extends Activity {
     /**
      * Removes progress spinner from the activity
      */
-    @VisibleForTesting void removeProgressIndicator() {
-        if (progressBarLayoutContainer.getParent() != null) {
+    @VisibleForTesting
+    void removeProgressIndicator() {
+        if (progressBarLayoutContainer != null &&
+                progressBarLayoutContainer.getParent() != null) {
             ((ViewGroup) progressBarLayoutContainer.getParent()).removeView(progressBarLayoutContainer);
             progressBarLayoutContainer = null;
         }
