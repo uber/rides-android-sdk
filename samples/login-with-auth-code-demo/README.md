@@ -38,7 +38,7 @@ received `auth_code`. In successful response we would get the OAuth tokens (acce
 token) which are saved in the app's private shared preferences; or failure exception is propagated
 back to the caller.
 
-## Should I use this same configuration pattern in my own apps?
+## Should I use this same pattern in my own apps?
 
 We (the rides-android-sdk maintainers) have no strong opinion on this one way or another. The design
 considerations are at the discretion of the app developer.
