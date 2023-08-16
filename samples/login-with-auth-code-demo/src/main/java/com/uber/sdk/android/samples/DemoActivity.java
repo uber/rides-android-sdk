@@ -91,11 +91,6 @@ public class DemoActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.i(LOG_TAG, String.format("onActivityResult requestCode:[%s] resultCode [%s]",
                 requestCode, resultCode));
