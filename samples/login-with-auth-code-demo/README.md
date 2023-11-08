@@ -6,7 +6,7 @@ RFC-7636 (https://datatracker.ietf.org/doc/html/rfc7636).
 
 Here are the main components of the app -
 
-- `AuthUriAssembler` - to assemble the a launch uri which would launch an Uber app (rides or eats)
+- `AuthUriAssembler` - to assemble the a launch uri which would launch an Uber app (rides, eats or driver)
   if installed or a browser app otherwise
 - `PkceUtil` - Generates code challenge and code verifier pair
 - `AuthService` - A retrofit service which sends request to token endpoint
@@ -20,15 +20,15 @@ code verifier pair, a.k.a pkce pair) along with other relevant query parameters 
 , `redirect_uri`,`response_type` etc.). The launch uri is basically an applink on android which can
 be handled in 3 ways -
 
-1. When one of Uber app or Eats app is installed
+1. When one of Uber, Eats or Driver app is installed
    It will launch the specific app and show an authorization web page to the user to allow a third
    party app to use
    Uber's credentials to login. If the user grants permission, auth code is returned to the 3p app.
    If not, the SSO flow is canceled
-2. When both Uber and Eats app are installed
+2. When both all 3 Uber apps are installed
    User will be shown a disambiguation dialogue to choose the app they want to use for logging in.
    Once app is chosen it's same as #1
-3. When both apps are not installed
+3. When no Uber apps are not installed
    Uber auth flow is launched in a custom tab, if available, or system browser. User completes the
    flow and auth code is returned to the 3P app
 
