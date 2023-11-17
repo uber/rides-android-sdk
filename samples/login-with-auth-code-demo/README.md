@@ -1,7 +1,7 @@
 # Login via Uber without SDK - Demo App
 
 This app demonstrates how a third party app can integrate Login via Uber to their app without using
-the rides-android-sdk using proof-key code exchange,
+the rides-android-sdk using applink flow with proof-key code exchange,
 RFC-7636 (https://datatracker.ietf.org/doc/html/rfc7636).
 
 Here are the main components of the app -
@@ -42,7 +42,13 @@ back to the caller.
 
 We (the rides-android-sdk maintainers) have no strong opinion on this one way or another. The design
 considerations are at the discretion of the app developer.
+
 With this demo, we are merely presenting
 a new way of authentication supported by Uber for third parties. Previously, we
 supported `auth_code` flow with oauth secret and now, we added support for pkce flow as well which
 does not require the third party backend to maintain the oauth secret.
+
+## Uber App versions that support applink flow
+Rides - 4.482.10000+
+Eats - 6.172.10000+
+Driver - 4.447.10000+
