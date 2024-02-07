@@ -60,7 +60,7 @@ jobs:
 
   upload-snapshots:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs:
       - check
       - test
