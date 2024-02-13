@@ -50,6 +50,7 @@ import com.uber.sdk.rides.client.model.TimeEstimate;
 
 import java.util.concurrent.TimeUnit;
 
+import static com.uber.sdk.android.core.R.style.UberButton_Login;
 import static com.uber.sdk.android.core.utils.Preconditions.checkNotNull;
 
 /**
@@ -60,7 +61,10 @@ public class RideRequestButton extends FrameLayout implements RideRequestButtonV
 
     private static final
     @StyleRes
-    int[] STYLES = {R.style.UberButton, R.style.UberButton_White};
+    int[] STYLES = {
+            com.uber.sdk.android.core.R.style.UberButton,
+            com.uber.sdk.android.core.R.style.UberButton_White
+    };
 
     private static final String USER_AGENT_BUTTON = String.format("rides-android-v%s-button",
             BuildConfig.VERSION_NAME);
@@ -87,7 +91,7 @@ public class RideRequestButton extends FrameLayout implements RideRequestButtonV
     }
 
     public RideRequestButton(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, R.style.UberButton_Login);
+        this(context, attrs, defStyleAttr, UberButton_Login);
     }
 
     @TargetApi(21)
@@ -210,6 +214,7 @@ public class RideRequestButton extends FrameLayout implements RideRequestButtonV
         return this;
     }
 
+    @SuppressLint("ResourceType")
     private void setBackgroundAttributes(
             @NonNull Context context,
             @Nullable AttributeSet attrs,
@@ -230,6 +235,7 @@ public class RideRequestButton extends FrameLayout implements RideRequestButtonV
         }
     }
 
+    @SuppressLint("ResourceType")
     private void setTextAttributes(
             @NonNull Context context,
             @Nullable AttributeSet attrs,

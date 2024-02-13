@@ -1,5 +1,25 @@
-include ':rides-android'
-include ':core-android'
-include ':samples:request-button-sample'
-include ':samples:login-sample'
-include ':samples:login-with-auth-code-demo'
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url 'https://plugins.gradle.org/m2/' }
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+include(
+        ":core-android",
+        ":rides-android",
+//        ":samples:request-button-sample",
+        ":samples:login-sample",
+//        ":samples:login-with-auth-code-demo",
+        ":auth",
+)

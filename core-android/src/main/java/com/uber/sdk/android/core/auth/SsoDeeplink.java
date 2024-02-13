@@ -31,6 +31,7 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import android.util.Log;
+
 import com.uber.sdk.android.core.BuildConfig;
 import com.uber.sdk.android.core.Deeplink;
 import com.uber.sdk.android.core.SupportedAppType;
