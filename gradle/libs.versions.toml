@@ -2,23 +2,21 @@
 
 [versions]
 agp = "8.0.2"
-androidTest = "0.5"
 androidxVersion = "1.0.0"
 uberJava = "0.8.5"
-gradleVersion = "8.2.1"
-buildToolsVersion = "28.0.2"
 mavenPublish = "0.27.0"
 kotlin = "1.9.22"
 junit = "4.13.2"
 runner = "1.0.2"
 espresso-core = "3.0.2"
 appcompat-v7 = "28.0.0"
-compileSdkVersion = "33"
+compileSdkVersion = "34"
 minSdkVersion = "26"
-targetSdkVersion = "33"
+targetSdkVersion = "34"
 jvmTarget = "1.8"
 dokka = "1.9.10"
 jsr305 = "3.0.2"
+retrofit = "2.9.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -32,8 +30,6 @@ jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "jsr305" }
 annotations = { module ="androidx.annotation:annotation", version.ref="androidxVersion"}
 appCompat = { module ="androidx.appcompat:appcompat", version.ref="androidxVersion"}
 chrometabs = { module = "androidx.browser:browser" , version.ref = "androidxVersion"}
-androidRunner = { module="com.android.support.test:runner", version.ref = "androidTest"}
-androidRules = { module="com.android.support.test:rules", version.ref = "androidTest"}
 junit = "junit:junit:4.13.2"
 robolectric = "org.robolectric:robolectric:4.11.1"
 assertj = "org.assertj:assertj-core:3.25.1"
@@ -46,3 +42,5 @@ junit-junit = { group = "junit", name = "junit", version.ref = "junit" }
 runner = { group = "com.android.support.test", name = "runner", version.ref = "runner" }
 espresso-core = { group = "com.android.support.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 appcompat-v7 = { group = "com.android.support", name = "appcompat-v7", version.ref = "appcompat-v7" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit"}
+retrofit-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit"}

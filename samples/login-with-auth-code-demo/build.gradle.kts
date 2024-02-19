@@ -46,7 +46,7 @@ android {
 dependencies {
     implementation(libs.appCompat)
     implementation(libs.retrofit)
-    implementation(libs.moshi.retrofit)
+    implementation(libs.retrofit.moshi)
 }
 
 /**
