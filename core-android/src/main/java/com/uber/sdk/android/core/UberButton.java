@@ -158,7 +158,7 @@ public class UberButton extends AppCompatButton {
         int attrsResources[] = {
                 android.R.attr.background,
         };
-        TypedArray backgroundAttributes = context.getTheme().obtainStyledAttributes(
+        @SuppressLint("ResourceType") TypedArray backgroundAttributes = context.getTheme().obtainStyledAttributes(
                 attrs,
                 attrsResources,
                 defStyleAttr,

@@ -1,8 +1,10 @@
 import groovy.text.GStringTemplateEngine
 import org.codehaus.groovy.runtime.DateGroovyMethods
 
-apply plugin: 'net.researchgate.release'
-apply plugin: 'co.riiid.gradle'
+plugins {
+    id 'net.researchgate.release' version '2.1.2'
+    id 'co.riiid.github' version '0.4.2'
+}
 
 ext.set("oldVersion", VERSION_NAME.replaceAll("-SNAPSHOT", ""))
 ext.set("samples", project(":samples").subprojects.collect { it.path })
@@ -61,44 +63,50 @@ def generateChangelogSnippet() {
     return "  " + snippet.trim()
 }
 
-task updateReleaseVersionChangelog() << {
-    def newVersion = rootProject.version.replaceAll('-SNAPSHOT', '')
-    def changelog = rootProject.file('CHANGELOG.md')
-    def changelogText = changelog.text
-    def date = new Date().format('MM/dd/yyyy')
+task updateReleaseVersionChangelog() {
+    doLast {
+        def newVersion = rootProject.version.replaceAll('-SNAPSHOT', '')
+        def changelog = rootProject.file('CHANGELOG.md')
+        def changelogText = changelog.text
+        def date = new Date().format('MM/dd/yyyy')
 
-    if (changelogText.startsWith("v${oldVersion} - TBD")) {
-        def updatedChangelog = changelogText.replace("v${oldVersion} - TBD",
-                "v${newVersion} - ${date}")
-        changelog.write(updatedChangelog)
+        if (changelogText.startsWith("v${oldVersion} - TBD")) {
+            def updatedChangelog = changelogText.replace("v${oldVersion} - TBD",
+                    "v${newVersion} - ${date}")
+            changelog.write(updatedChangelog)
 
+        }
     }
 }
 
-task updateNewVersionChangelog() << {
-    def newVersion = rootProject.version.replaceAll('-SNAPSHOT', '')
-    def changelog = rootProject.file('CHANGELOG.md')
-    def changelogText = changelog.text
+task updateNewVersionChangelog() {
+    doLast {
+        def newVersion = rootProject.version.replaceAll('-SNAPSHOT', '')
+        def changelog = rootProject.file('CHANGELOG.md')
+        def changelogText = changelog.text
 
-    if (!changelogText.startsWith("v${newVersion} - TBD")) {
-        def updatedChangelog = "v${newVersion} - TBD\n"
-        def dashesCount = updatedChangelog.length()-1
-        updatedChangelog += "-"*dashesCount + "\n\n" + changelogText
-        changelog.write(updatedChangelog)
+        if (!changelogText.startsWith("v${newVersion} - TBD")) {
+            def updatedChangelog = "v${newVersion} - TBD\n"
+            def dashesCount = updatedChangelog.length() - 1
+            updatedChangelog += "-" * dashesCount + "\n\n" + changelogText
+            changelog.write(updatedChangelog)
+        }
     }
 }
 
-task configureGithub() << {
-    github {
-        owner = GITHUB_OWNER
-        repo = GITHUB_REPO
-        token = "${GITHUB_TOKEN}"
-        tagName = "v${rootProject.version}"
-        targetCommitish = GITHUB_BRANCH
-        name = "v${rootProject.version}"
-        body = generateReleaseNotes()
-        assets = project.samples.collect {
-            "${project(it).buildDir.absolutePath}/outputs/apk/${project(it).name}-debug.apk"
+task configureGithub() {
+    doLast {
+        github {
+            owner = GITHUB_OWNER
+            repo = GITHUB_REPO
+            token = "${GITHUB_TOKEN}"
+            tagName = "v${rootProject.version}"
+            targetCommitish = GITHUB_BRANCH
+            name = "v${rootProject.version}"
+            body = generateReleaseNotes()
+            assets = project.samples.collect {
+                "${project(it).buildDir.absolutePath}/outputs/apk/${project(it).name}-debug.apk"
+            }
         }
     }
 }

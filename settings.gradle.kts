@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017. Uber Technologies
+ * Copyright (C) 2024. Uber Technologies
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,28 @@
  * limitations under the License.
  */
 
-buildscript {
-    apply from: rootProject.file('gradle/dependencies.gradle')
-
+pluginManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url deps.build.repositories.plugins }
-    }
-    dependencies {
-        classpath deps.build.gradlePlugins.github
-        classpath deps.build.gradlePlugins.release
+        gradlePluginPortal()
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = deps.build.gradleVersion
-    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
 }
 
-apply from: rootProject.file('gradle/github-release.gradle')
-apply from: rootProject.file('gradle/verification.gradle')
+rootProject.name = "uber-android-sdk"
+
+include(
+    ":core-android",
+    ":rides-android",
+    ":samples:request-button-sample",
+    ":samples:login-sample",
+    ":samples:login-with-auth-code-demo",
+)

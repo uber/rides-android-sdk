@@ -219,7 +219,6 @@ public class RideRequestView extends LinearLayout {
 
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setGeolocationEnabled(true);
-        webView.getSettings().setAppCacheEnabled(true);
         webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         webView.setWebChromeClient(new RideRequestWebChromeClient());
         webView.setWebViewClient(new RideRequestWebViewClient(new RideRequestWebViewClientCallback() {
