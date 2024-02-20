@@ -154,7 +154,7 @@ public class LoginButtonTest extends RobolectricTestBase {
 
         loginButton.onActivityResult(LoginManager.REQUEST_CODE_LOGIN_DEFAULT, 1, intent);
 
-        verify(loginManager).onActivityResult(ArgumentMatchers.eq(activity), eq(LoginManager.REQUEST_CODE_LOGIN_DEFAULT), eq(1),
+        verify(loginManager).onActivityResult(eq(activity), eq(LoginManager.REQUEST_CODE_LOGIN_DEFAULT), eq(1),
                 eq(intent));
     }
 
