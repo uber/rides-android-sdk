@@ -36,6 +36,10 @@ val targetSdkVersion: Int = libs.versions.targetSdkVersion.get().toInt()
 val minSdkVersion: Int = libs.versions.minSdkVersion.get().toInt()
 val jvmTargetVersion = libs.versions.jvmTarget
 
+tasks.dokkaHtmlMultiModule {
+    outputDirectory.set(rootDir.resolve("docs/api/2.x"))
+    includes.from(project.layout.projectDirectory.file("README.md"))
+}
 
 subprojects {
 
@@ -93,11 +97,19 @@ subprojects {
             moduleVersion.set(project.property("VERSION_NAME").toString())
             dokkaSourceSets.configureEach {
                 skipDeprecated.set(true)
-                includes.from("README.md")
                 suppressGeneratedFiles.set(true)
                 suppressInheritedMembers.set(true)
                 externalDocumentationLink {
                     url.set(URI("https://kotlin.github.io/kotlinx.coroutines/index.html").toURL())
+                }
+                perPackageOption {
+                    // language=RegExp
+                    matchingRegex.set(".*\\.internal\\..*")
+                    suppress.set(true)
+                }
+                val moduleMd = project.layout.projectDirectory.file("README.md")
+                if (moduleMd.asFile.exists()) {
+                    includes.from(moduleMd)
                 }
             }
         }
