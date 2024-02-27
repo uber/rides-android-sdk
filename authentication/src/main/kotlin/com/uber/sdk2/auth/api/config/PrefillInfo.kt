@@ -19,5 +19,5 @@ data class PrefillInfo(
   val email: String,
   val firstName: String,
   val lastName: String,
-  val mobile: String,
+  val phoneNumber: String,
 )
