@@ -1,7 +1,7 @@
 # libs.versions.toml
 
 [versions]
-agp = "8.0.2"
+agp = "8.2.2"
 androidxVersion = "1.0.0"
 uberJava = "0.8.5"
 mavenPublish = "0.27.0"
@@ -14,9 +14,16 @@ compileSdkVersion = "34"
 minSdkVersion = "26"
 targetSdkVersion = "34"
 jvmTarget = "1.8"
+lintJvmTarget = "17"
 dokka = "1.9.10"
 jsr305 = "3.0.2"
 retrofit = "2.9.0"
+core-ktx = "1.12.0"
+androidx-test-ext-junit = "1.1.5"
+androidx-test-espresso-espresso-core = "3.5.1"
+material = "1.11.0"
+spotless = "6.25.0"
+ktfmt = "0.47"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -24,6 +31,7 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 
 [libraries]
 jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "jsr305" }
@@ -44,3 +52,7 @@ espresso-core = { group = "com.android.support.test.espresso", name = "espresso-
 appcompat-v7 = { group = "com.android.support", name = "appcompat-v7", version.ref = "appcompat-v7" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit"}
 retrofit-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit"}
+core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
+androidx-test-espresso-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-test-espresso-espresso-core" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }

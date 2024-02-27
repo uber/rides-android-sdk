@@ -39,11 +39,11 @@ SessionConfiguration config = new SessionConfiguration.Builder()
     .build();
 ```
 ## Ride Request Deeplink
-The Ride Request Deeplink provides an easy to use method to provide ride functionality against 
+The Ride Request Deeplink provides an easy to use method to provide ride functionality against
 the install Uber app or the mobile web experience.
 
 
-Without any extra configuration, the `RideRequestDeeplink` will deeplink to the Uber app. We 
+Without any extra configuration, the `RideRequestDeeplink` will deeplink to the Uber app. We
 suggest passing additional parameters to make the Uber experience even more seamless for your users. For example, dropoff location parameters can be used to automatically pass the user’s destination information over to the driver:
 
 ```java
@@ -68,9 +68,9 @@ RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context)
 ```
 
 ### Deeplink Fallbacks
-The Ride Request Deeplink will prefer to use deferred deeplinking by default, where the user is 
-taken to the Play Store to download the app, and then continue the deeplink behavior in the app 
-after installation. However, an alternate fallback may be used to prefer the mobile web 
+The Ride Request Deeplink will prefer to use deferred deeplinking by default, where the user is
+taken to the Play Store to download the app, and then continue the deeplink behavior in the app
+after installation. However, an alternate fallback may be used to prefer the mobile web
 experience instead.
 
 To prefer mobile web over an app installation, set the fallback on the builder:
@@ -128,7 +128,7 @@ For a button with a white background and black text:
       uber:ub__style="white"/>
 ```
 
-To specify the mobile web deeplink fallback over app installation when using the 
+To specify the mobile web deeplink fallback over app installation when using the
 `RideRequestButton`:
 
 ```java
@@ -191,11 +191,11 @@ To use SDK features, two configuration details must be set on the Uber Developer
 
  1. Sign into to the [developer dashboard](https://developer.uber.com/dashboard)
 
- 1. Register a redirect URI to be used to communication authentication results. The default used 
+ 1. Register a redirect URI to be used to communication authentication results. The default used
  by the SDK is in the format of `applicationId.uberauth://redirect`. ex: `com.example
- .uberauth://redirect`. To configure the SDK to use a different redirect URI, see the steps below. 
- 
- 1. To use Single Sign On you must register a hash of your application's signing certificate in the 
+ .uberauth://redirect`. To configure the SDK to use a different redirect URI, see the steps below.
+
+ 1. To use Single Sign On you must register a hash of your application's signing certificate in the
  Application Signature section of the settings page of your application.
 
 To get the hash of your signing certificate, run this command with the alias of your key and path to your keystore:
@@ -244,14 +244,14 @@ With Version 0.8 and above of the SDK, the redirect URI is more strongly enforce
 standards [IETF RFC](https://tools.ietf.org/html/draft-ietf-oauth-native-apps-12).
 
 The SDK will automatically created a redirect URI to be used in the oauth callbacks with
-the format "applicationId.uberauth://redirect", ex "com.example.app.uberauth://redirect". **This URI must be registered in 
+the format "applicationId.uberauth://redirect", ex "com.example.app.uberauth://redirect". **This URI must be registered in
 the [developer dashboard](https://developer.uber.com/dashboard)**
 
-If this differs from the previous specified redirect URI configured in the SessionConfiguration, 
+If this differs from the previous specified redirect URI configured in the SessionConfiguration,
 there are a few options.
 
- 1. Change the redirect URI to match the new scheme in the configuration of the Session. If this 
- is left out entirely, the default will be used. 
+ 1. Change the redirect URI to match the new scheme in the configuration of the Session. If this
+ is left out entirely, the default will be used.
 
 ```java
 SessionConfiguration config = new SessionConfiguration.Builder()
@@ -276,10 +276,10 @@ filter. Register this custom URI in the developer dashboard for your application
 </activity>
 ```
 
-3. If using [Authorization Code Flow](https://developer.uber.com/docs/riders/guides/authentication/user-access-token), you will need to configure your server to redirect to 
+3. If using [Authorization Code Flow](https://developer.uber.com/docs/riders/guides/authentication/user-access-token), you will need to configure your server to redirect to
    the Mobile Application with an access token either via the generated URI or a custom URI as defined in steps 1 and 2.
 
-The Session should be configured to redirect to the server to do a code exchange and the login 
+The Session should be configured to redirect to the server to do a code exchange and the login
 manager should indicate the SDK is operating in the Authorization Code Flow.
 
 ```java
@@ -291,7 +291,7 @@ loginManager.setAuthCodeFlowEnabled(true);
 loginManager.login(this);
 
 ```
- Once the code is exchanged, the server should redirect to a URI in the standard OAUTH format of 
+ Once the code is exchanged, the server should redirect to a URI in the standard OAUTH format of
  `com.example.app.uberauth://redirect#access_token=ACCESS_TOKEN&token_type=Bearer&expires_in=TTL&scope=SCOPES&refresh_token=REFRESH_TOKEN`
   for the SDK to receive the access token and continue operation.``
 
@@ -299,9 +299,9 @@ loginManager.login(this);
 ##### Authorization Code Flow
 
 
-The default behavior of calling   `LoginManager.login(activity)` is to activate Single Sign On, 
-and if SSO is unavailable, fallback to Implicit Grant if privileged scopes are not requested, 
-otherwise redirect to the Play Store. If you require Authorization Code Grant, set `LoginManager.setAuthCodeFlowEnabled(true)` 
+The default behavior of calling   `LoginManager.login(activity)` is to activate Single Sign On,
+and if SSO is unavailable, fallback to Implicit Grant if privileged scopes are not requested,
+otherwise redirect to the Play Store. If you require Authorization Code Grant, set `LoginManager.setAuthCodeFlowEnabled(true)`
 to use the Authorization Code Flow as the fallback mechanism instead of Implicit Grant or redirecting to the Play Store (regardless of scope).
 Implicit Grant will allow access to all non-privileged scopes (and will not grant a refresh token), whereas the other options grant access to privileged scopes. [Read more about scopes](https://developer.uber.com/docs/scopes).
 
@@ -448,9 +448,9 @@ For full documentation about our API, visit our Developer Site.
 
 ## Contributing
 
-We :heart: contributions. Found a bug or looking for a new feature? Open an issue and we'll 
-respond as fast as we can. Or, better yet, implement it yourself and open a pull request! We ask 
-that you open an issue to discuss feature development prior to undertaking the work and that you 
+We :heart: contributions. Found a bug or looking for a new feature? Open an issue and we'll
+respond as fast as we can. Or, better yet, implement it yourself and open a pull request! We ask
+that you open an issue to discuss feature development prior to undertaking the work and that you
 include tests to show the bug was fixed or the feature works as expected.
 
 ## MIT Licensed
