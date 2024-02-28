@@ -28,4 +28,4 @@ data class AuthResponse(
   val authCode: String,
   val accessToken: AccessToken,
   val authException: AuthException,
-) {}
+)

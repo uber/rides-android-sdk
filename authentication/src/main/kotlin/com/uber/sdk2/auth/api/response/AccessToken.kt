@@ -15,4 +15,5 @@
  */
 package com.uber.sdk2.auth.api.response
 
+/** Holds the access token that is returned after a successful authentication request. */
 data class AccessToken(val token: String, val scope: String, val expiresIn: Long)

@@ -15,6 +15,5 @@
  */
 package com.uber.sdk2.auth.api.response
 
-import com.uber.sdk2.auth.api.response.AccessToken
-
+/** Holds the OAuth token that is returned after a successful authentication request. */
 data class OAuthToken(val accessToken: AccessToken, val refreshToken: String)
