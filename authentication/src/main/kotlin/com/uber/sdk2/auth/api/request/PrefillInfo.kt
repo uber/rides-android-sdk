@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.config
-
-import com.uber.sdk2.auth.api.exception.AuthException
-import com.uber.sdk2.auth.api.service.AccessToken
+package com.uber.sdk2.auth.api.request
 
 /**
- * Represents the response from the authentication request.
+ * Provides a way to prefill the user's information in the authentication flow.
  *
- * @param authCode The authorization code to be used for the token exchange.
- * @param accessToken The access token to be used for the API requests.
- * @param authException The exception that occurred during the authentication request.
+ * @param email The email to prefill.
+ * @param firstName The first name to prefill.
+ * @param lastName The last name to prefill.
+ * @param phoneNumber The phone number to prefill.
  */
-data class AuthResponse(
-  val authCode: String,
-  val accessToken: AccessToken,
-  val authException: AuthException,
-) {}
+data class PrefillInfo(
+  val email: String,
+  val firstName: String,
+  val lastName: String,
+  val phoneNumber: String,
+)

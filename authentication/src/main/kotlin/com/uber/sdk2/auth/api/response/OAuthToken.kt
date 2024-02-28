@@ -13,16 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.config
+package com.uber.sdk2.auth.api.response
 
-/** Provides different apps that could be used for authentication using SSO flow. */
-sealed class CrossApp {
-  /** The Eats app. */
-  object Eats : CrossApp()
+import com.uber.sdk2.auth.api.response.AccessToken
 
-  /** The Rider app. */
-  object Rider : CrossApp()
-
-  /** The Driver app. */
-  object Driver : CrossApp()
-}
+data class OAuthToken(val accessToken: AccessToken, val refreshToken: String)

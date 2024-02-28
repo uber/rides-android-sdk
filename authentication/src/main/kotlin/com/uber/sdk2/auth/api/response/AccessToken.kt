@@ -13,19 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.config
+package com.uber.sdk2.auth.api.response
 
-/**
- * Provides a way to prefill the user's information in the authentication flow.
- *
- * @param email The email to prefill.
- * @param firstName The first name to prefill.
- * @param lastName The last name to prefill.
- * @param phoneNumber The phone number to prefill.
- */
-data class PrefillInfo(
-  val email: String,
-  val firstName: String,
-  val lastName: String,
-  val phoneNumber: String,
-)
+data class AccessToken(val token: String, val scope: String, val expiresIn: Long)

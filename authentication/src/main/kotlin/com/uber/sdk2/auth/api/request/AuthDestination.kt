@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.config
+package com.uber.sdk2.auth.api.request
 
 /** Represents the destination app to authenticate the user. */
 sealed class AuthDestination {

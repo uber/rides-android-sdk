@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.config
+package com.uber.sdk2.auth.api.request
 
 /**
- * Represents the context of the authentication request needed for Uber to authenticate the user.
+ * Represents the type of authentication to perform.
  *
- * @param authDestination The destination app to authenticate the user.
- * @param authType The type of authentication to perform.
- * @param prefillInfo The prefill information to be used for the authentication.
- * @param scopes The scopes to request for the authentication.
+ * @see AuthContext
  */
-data class AuthContext(
-  val authDestination: AuthDestination,
-  val authType: AuthType,
-  val prefillInfo: PrefillInfo?,
-  val scopes: String?,
-)
+sealed class AuthType {
+  /** The authorization code flow. */
+  object AuthCode : AuthType()
+
+  /** The proof key for code exchange (PKCE) flow. This is the recommended flow for mobile apps. */
+  object PKCE : AuthType()
+}

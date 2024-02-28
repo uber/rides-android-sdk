@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.config
+package com.uber.sdk2.auth.api.response
+
+import com.uber.sdk2.auth.api.exception.AuthException
 
 /**
- * Represents the type of authentication to perform.
+ * Represents the response from the authentication request.
  *
- * @see AuthContext
+ * @param authCode The authorization code to be used for the token exchange.
+ * @param accessToken The access token to be used for the API requests.
+ * @param authException The exception that occurred during the authentication request.
  */
-sealed class AuthType {
-  /** The authorization code flow. */
-  object AuthCode : AuthType()
-
-  /** The proof key for code exchange (PKCE) flow. This is the recommended flow for mobile apps. */
-  object PKCE : AuthType()
-}
+data class AuthResponse(
+  val authCode: String,
+  val accessToken: AccessToken,
+  val authException: AuthException,
+) {}
