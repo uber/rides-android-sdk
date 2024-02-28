@@ -15,6 +15,14 @@
  */
 package com.uber.sdk2.auth.api.config
 
+/**
+ * Provides a way to prefill the user's information in the authentication flow.
+ *
+ * @param email The email to prefill.
+ * @param firstName The first name to prefill.
+ * @param lastName The last name to prefill.
+ * @param phoneNumber The phone number to prefill.
+ */
 data class PrefillInfo(
   val email: String,
   val firstName: String,

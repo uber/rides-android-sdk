@@ -15,10 +15,14 @@
  */
 package com.uber.sdk2.auth.api.config
 
+/** Provides different apps that could be used for authentication using SSO flow. */
 sealed class CrossApp {
+  /** The Eats app. */
   object Eats : CrossApp()
 
+  /** The Rider app. */
   object Rider : CrossApp()
 
+  /** The Driver app. */
   object Driver : CrossApp()
 }

@@ -26,6 +26,6 @@ package com.uber.sdk2.auth.api.config
 data class AuthContext(
   val authDestination: AuthDestination,
   val authType: AuthType,
-  val prefillInfo: PrefillInfo,
-  val scopes: String,
+  val prefillInfo: PrefillInfo?,
+  val scopes: String?,
 )

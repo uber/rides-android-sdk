@@ -15,8 +15,15 @@
  */
 package com.uber.sdk2.auth.api.config
 
+/**
+ * Represents the type of authentication to perform.
+ *
+ * @see AuthContext
+ */
 sealed class AuthType {
+  /** The authorization code flow. */
   object AuthCode : AuthType()
 
+  /** The proof key for code exchange (PKCE) flow. This is the recommended flow for mobile apps. */
   object PKCE : AuthType()
 }
