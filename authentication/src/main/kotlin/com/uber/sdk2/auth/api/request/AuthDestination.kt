@@ -21,7 +21,7 @@ sealed class AuthDestination {
    * Authenticating within the same app by using a system webview, a.k.a Custom Tabs. If custom tabs
    * are unavailable the authentication flow will be launched in the system browser app.
    */
-  object InApp : AuthDestination()
+  data object InApp : AuthDestination()
 
   /**
    * Authenticating via one of the family of Uber apps using the Single Sign-On (SSO) flow in the

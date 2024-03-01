@@ -19,13 +19,15 @@ import com.uber.sdk2.auth.api.exception.AuthException
 
 /**
  * Represents the response from the authentication request.
- *
- * @param authCode The authorization code to be used for the token exchange.
- * @param accessToken The access token to be used for the API requests.
- * @param authException The exception that occurred during the authentication request.
  */
-data class AuthResponse(
-  val authCode: String,
-  val accessToken: AccessToken,
-  val authException: AuthException,
-)
+sealed class AuthResult {
+  /**
+   * Represents the success response from the authentication request.
+   */
+  data class Success(val authCode: String, val accessToken: AccessToken) : AuthResult()
+
+  /**
+   * Represents the error response from the authentication request.
+   */
+  data class Error(val authException: AuthException) : AuthResult()
+}

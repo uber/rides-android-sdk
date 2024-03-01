@@ -22,8 +22,8 @@ package com.uber.sdk2.auth.api.request
  */
 sealed class AuthType {
   /** The authorization code flow. */
-  object AuthCode : AuthType()
+  data object AuthCode : AuthType()
 
   /** The proof key for code exchange (PKCE) flow. This is the recommended flow for mobile apps. */
-  object PKCE : AuthType()
+  data object PKCE : AuthType()
 }

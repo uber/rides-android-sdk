@@ -16,7 +16,7 @@
 package com.uber.sdk2.auth.api.exception
 
 /** Represents the exception that occurred during the authentication request. */
-sealed class AuthException(override val message: String) : Throwable(message) {
+sealed class AuthException(override val message: String) : RuntimeException(message) {
   /** Represents the exception that occurred due to server error. */
   data class ServerError(override val message: String) : AuthException(message)
 
