@@ -42,8 +42,8 @@ plugins {
 tasks.withType<KotlinCompile>().configureEach {
   compilerOptions {
     // Lint forces its embedded kotlin version, so we need to match it.
-    apiVersion.set(KotlinVersion.KOTLIN_1_7)
-    languageVersion.set(KotlinVersion.KOTLIN_1_7)
+    apiVersion.set(KotlinVersion.KOTLIN_1_9)
+    languageVersion.set(KotlinVersion.KOTLIN_1_9)
     jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
   }
 }
