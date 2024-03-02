@@ -17,17 +17,11 @@ package com.uber.sdk2.auth.api.response
 
 import com.uber.sdk2.auth.api.exception.AuthException
 
-/**
- * Represents the response from the authentication request.
- */
+/** Represents the response from the authentication request. */
 sealed class AuthResult {
-  /**
-   * Represents the success response from the authentication request.
-   */
+  /** Represents the success response from the authentication request. */
   data class Success(val authCode: String, val accessToken: AccessToken) : AuthResult()
 
-  /**
-   * Represents the error response from the authentication request.
-   */
+  /** Represents the error response from the authentication request. */
   data class Error(val authException: AuthException) : AuthResult()
 }
