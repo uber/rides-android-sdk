@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1936. Uber Technologies
+ * Copyright (C) 2024. Uber Technologies
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ android {
   buildFeatures.buildConfig = true
   defaultConfig {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    consumerProguardFiles("consumer-rules.pro")
     buildConfigField("String", "VERSION_NAME", "\"${project.property("VERSION_NAME").toString()}\"")
   }
 
