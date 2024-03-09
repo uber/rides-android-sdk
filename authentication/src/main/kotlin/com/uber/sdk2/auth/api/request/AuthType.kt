@@ -15,15 +15,19 @@
  */
 package com.uber.sdk2.auth.api.request
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 /**
  * Represents the type of authentication to perform.
  *
  * @see AuthContext
  */
-sealed class AuthType {
+@Parcelize
+sealed class AuthType(val grantType: String) : Parcelable {
   /** The authorization code flow. */
-  data object AuthCode : AuthType()
+  data object AuthCode : AuthType("code")
 
   /** The proof key for code exchange (PKCE) flow. This is the recommended flow for mobile apps. */
-  data object PKCE : AuthType()
+  data object PKCE : AuthType("code")
 }

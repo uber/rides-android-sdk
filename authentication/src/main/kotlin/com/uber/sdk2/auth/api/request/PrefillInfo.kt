@@ -15,6 +15,9 @@
  */
 package com.uber.sdk2.auth.api.request
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 /**
  * Provides a way to prefill the user's information in the authentication flow.
  *
@@ -23,9 +26,10 @@ package com.uber.sdk2.auth.api.request
  * @param lastName The last name to prefill.
  * @param phoneNumber The phone number to prefill.
  */
+@Parcelize
 data class PrefillInfo(
   val email: String,
   val firstName: String,
   val lastName: String,
   val phoneNumber: String,
-)
+) : Parcelable
