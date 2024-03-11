@@ -19,7 +19,6 @@ import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.net.Uri
@@ -112,21 +111,19 @@ object CustomTabsHelper {
 
     // Now packagesSupportingCustomTabs contains all apps that can handle both VIEW intents
     // and service calls.
-    if (packagesSupportingCustomTabs.isEmpty()) {
-      packageNameToUse = null
-    } else if (packagesSupportingCustomTabs.size == 1) {
-      packageNameToUse = packagesSupportingCustomTabs[0]
-    } else if (
-      !TextUtils.isEmpty(defaultViewHandlerPackageName) &&
-        !hasSpecializedHandlerIntents(context, activityIntent) &&
-        packagesSupportingCustomTabs.contains(defaultViewHandlerPackageName)
-    ) {
-      packageNameToUse = defaultViewHandlerPackageName
-    } else if (packagesSupportingCustomTabs.contains(STABLE_PACKAGE)) {
-      packageNameToUse = STABLE_PACKAGE
-    } else if (packagesSupportingCustomTabs.contains(BETA_PACKAGE)) {
-      packageNameToUse = BETA_PACKAGE
-    }
+    packageNameToUse =
+      when {
+        packagesSupportingCustomTabs.isEmpty() -> null
+        packagesSupportingCustomTabs.size == 1 -> packagesSupportingCustomTabs[0]
+        !TextUtils.isEmpty(defaultViewHandlerPackageName) &&
+          !hasSpecializedHandlerIntents(context, activityIntent) &&
+          packagesSupportingCustomTabs.contains(defaultViewHandlerPackageName) ->
+          defaultViewHandlerPackageName
+        packagesSupportingCustomTabs.contains(STABLE_PACKAGE) -> STABLE_PACKAGE
+        packagesSupportingCustomTabs.contains(BETA_PACKAGE) -> BETA_PACKAGE
+        packagesSupportingCustomTabs.contains(DEV_PACKAGE) -> DEV_PACKAGE
+        packagesSupportingCustomTabs.contains(LOCAL_PACKAGE) -> LOCAL_PACKAGE
+      }
     return packageNameToUse
   }
 
@@ -144,11 +141,16 @@ object CustomTabsHelper {
       if (handlers.isEmpty()) {
         return false
       }
-      for (resolveInfo in handlers) {
-        val filter: IntentFilter = resolveInfo.filter ?: continue
-        if (filter.countDataAuthorities() == 0 || filter.countDataPaths() == 0) continue
-        if (resolveInfo.activityInfo == null) continue
-        return true
+      handlers.forEach { resolveInfo ->
+        resolveInfo.filter?.let { filter ->
+          if (
+            filter.countDataAuthorities() != 0 &&
+              filter.countDataPaths() != 0 &&
+              resolveInfo.activityInfo != null
+          ) {
+            return true // A suitable handler is found, return true immediately
+          }
+        }
       }
     } catch (e: RuntimeException) {
       Log.e(TAG, "Runtime exception while getting specialized handlers")
