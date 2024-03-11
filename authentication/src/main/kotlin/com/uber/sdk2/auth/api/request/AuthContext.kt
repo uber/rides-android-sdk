@@ -15,9 +15,6 @@
  */
 package com.uber.sdk2.auth.api.request
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
-
 /**
  * Represents the context of the authentication request needed for Uber to authenticate the user.
  *
@@ -26,9 +23,9 @@ import kotlinx.parcelize.Parcelize
  * @param prefillInfo The prefill information to be used for the authentication.
  * @param scopes The scopes to request for the authentication.
  */
-@Parcelize
 data class AuthContext(
   val authDestination: AuthDestination,
   val authType: AuthType,
   val prefillInfo: PrefillInfo?,
-) : Parcelable
+  val scopes: String?,
+)

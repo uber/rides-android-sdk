@@ -36,7 +36,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
   alias(libs.plugins.android.library)
   alias(libs.plugins.kotlin.android)
-  alias(libs.plugins.kotlin.parcelize)
   alias(libs.plugins.spotless)
 }
 
@@ -61,9 +60,9 @@ android {
 }
 
 dependencies {
+  implementation(libs.core.ktx)
   implementation(libs.appCompat)
   implementation(libs.material)
-  implementation(project(":core"))
   testImplementation(libs.junit.junit)
   androidTestImplementation(libs.androidx.test.ext.junit)
   androidTestImplementation(libs.androidx.test.espresso.espresso.core)
