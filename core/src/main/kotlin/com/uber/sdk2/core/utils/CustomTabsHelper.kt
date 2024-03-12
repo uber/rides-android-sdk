@@ -121,8 +121,7 @@ object CustomTabsHelper {
           defaultViewHandlerPackageName
         packagesSupportingCustomTabs.contains(STABLE_PACKAGE) -> STABLE_PACKAGE
         packagesSupportingCustomTabs.contains(BETA_PACKAGE) -> BETA_PACKAGE
-        packagesSupportingCustomTabs.contains(DEV_PACKAGE) -> DEV_PACKAGE
-        packagesSupportingCustomTabs.contains(LOCAL_PACKAGE) -> LOCAL_PACKAGE
+        else -> packagesSupportingCustomTabs[0]
       }
     return packageNameToUse
   }
