@@ -36,12 +36,15 @@ sealed class CrossApp(val packages: List<String>) : Parcelable {
 
   companion object {
     /** The list of all driver apps. */
-    private val DRIVER_APPS = listOf("com.ubercab.driver", "com.ubercab.driver.exo", "com.ubercab.driver.internal")
+    private val DRIVER_APPS =
+      listOf("com.ubercab.driver", "com.ubercab.driver.exo", "com.ubercab.driver.internal")
 
     /** The list of all rider apps. */
-    private val RIDER_APPS = listOf("com.ubercab", "com.ubercab.presidio.exo", "com.ubercab.rider.internal")
+    private val RIDER_APPS =
+      listOf("com.ubercab", "com.ubercab.presidio.exo", "com.ubercab.rider.internal")
 
     /** The list of all Eats apps. */
-    private val EATS_APPS = listOf("com.ubercab.eats", "com.ubercab.eats.exo", "com.ubercab.eats.internal")
+    private val EATS_APPS =
+      listOf("com.ubercab.eats", "com.ubercab.eats.exo", "com.ubercab.eats.internal")
   }
 }
