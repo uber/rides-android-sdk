@@ -41,6 +41,8 @@ dependencyResolutionManagement {
 rootProject.name = "uber-android-sdk"
 
 include(
+  ":authentication",
+  ":core",
   ":core-android",
   ":rides-android",
   ":samples:request-button-sample",

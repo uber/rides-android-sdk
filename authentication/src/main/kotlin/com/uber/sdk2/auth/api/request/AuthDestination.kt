@@ -15,8 +15,12 @@
  */
 package com.uber.sdk2.auth.api.request
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 /** Represents the destination app to authenticate the user. */
-sealed class AuthDestination {
+@Parcelize
+sealed class AuthDestination : Parcelable {
   /**
    * Authenticating within the same app by using a system webview, a.k.a Custom Tabs. If custom tabs
    * are unavailable the authentication flow will be launched in the system browser app.
@@ -25,7 +29,8 @@ sealed class AuthDestination {
 
   /**
    * Authenticating via one of the family of Uber apps using the Single Sign-On (SSO) flow in the
-   * order of priority mentioned.
+   * order of priority mentioned. If none of the apps are available we will fall back to the [InApp]
+   * flow
    *
    * @param appPriority The order of the apps to use for the SSO flow.
    */

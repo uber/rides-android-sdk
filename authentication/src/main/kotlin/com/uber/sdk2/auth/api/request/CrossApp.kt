@@ -15,14 +15,36 @@
  */
 package com.uber.sdk2.auth.api.request
 
-/** Provides different apps that could be used for authentication using SSO flow. */
-sealed class CrossApp {
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+/**
+ * Provides different apps that could be used for authentication using SSO flow.
+ *
+ * @param packages The list of packages that could be used for authentication.
+ */
+@Parcelize
+sealed class CrossApp(val packages: List<String>) : Parcelable {
   /** The Eats app. */
-  data object Eats : CrossApp()
+  data object Eats : CrossApp(EATS_APPS)
 
   /** The Rider app. */
-  data object Rider : CrossApp()
+  data object Rider : CrossApp(RIDER_APPS)
 
   /** The Driver app. */
-  data object Driver : CrossApp()
+  data object Driver : CrossApp(DRIVER_APPS)
+
+  companion object {
+    /** The list of all driver apps. */
+    private val DRIVER_APPS =
+      listOf("com.ubercab.driver", "com.ubercab.driver.exo", "com.ubercab.driver.internal")
+
+    /** The list of all rider apps. */
+    private val RIDER_APPS =
+      listOf("com.ubercab", "com.ubercab.presidio.exo", "com.ubercab.rider.internal")
+
+    /** The list of all Eats apps. */
+    private val EATS_APPS =
+      listOf("com.ubercab.eats", "com.ubercab.eats.exo", "com.ubercab.eats.internal")
+  }
 }
