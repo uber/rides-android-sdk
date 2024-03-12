@@ -26,14 +26,22 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 sealed class CrossApp(val packages: List<String>) : Parcelable {
   /** The Eats app. */
-  data object Eats :
-    CrossApp(listOf("com.ubercab.eats", "com.ubercab.eats.exo", "com.ubercab.eats.internal"))
+  data object Eats : CrossApp(EATS_APPS)
 
   /** The Rider app. */
-  data object Rider :
-    CrossApp(listOf("com.ubercab", "com.ubercab.presidio.exo", "com.ubercab.rider.internal"))
+  data object Rider : CrossApp(RIDER_APPS)
 
   /** The Driver app. */
-  data object Driver :
-    CrossApp(listOf("com.ubercab.driver", "com.ubercab.driver.exo", "com.ubercab.driver.internal"))
+  data object Driver : CrossApp(DRIVER_APPS)
+
+  companion object {
+    /** The list of all driver apps. */
+    private val DRIVER_APPS = listOf("com.ubercab.driver", "com.ubercab.driver.exo", "com.ubercab.driver.internal")
+
+    /** The list of all rider apps. */
+    private val RIDER_APPS = listOf("com.ubercab", "com.ubercab.presidio.exo", "com.ubercab.rider.internal")
+
+    /** The list of all Eats apps. */
+    private val EATS_APPS = listOf("com.ubercab.eats", "com.ubercab.eats.exo", "com.ubercab.eats.internal")
+  }
 }
