@@ -67,7 +67,6 @@ dependencies {
   implementation(libs.retrofit.moshi)
   implementation(project(":core"))
   testImplementation(libs.junit.junit)
-  testImplementation(libs.mockito)
   testImplementation(libs.mockito.kotlin)
   testImplementation(libs.robolectric)
   androidTestImplementation(libs.androidx.test.ext.junit)
