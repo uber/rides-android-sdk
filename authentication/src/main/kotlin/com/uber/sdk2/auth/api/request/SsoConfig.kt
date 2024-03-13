@@ -45,6 +45,7 @@ object SsoConfigProvider {
       val clientId = getRequiredConfigString(configJson, CLIENT_ID_PARAM)
       val scope = getConfigString(configJson, SCOPE_PARAM)
       val redirectUri = getRequiredConfigString(configJson, REDIRECT_PARAM)
+      configSource.close()
       return SsoConfig(clientId, redirectUri, scope)
     } catch (ex: IOException) {
       throw AuthException.ClientError("Failed to read configuration: " + ex.message)
