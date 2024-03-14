@@ -38,19 +38,20 @@ object SsoConfigProvider {
     val resourceId = resources.getIdentifier(SSO_CONFIG_FILE, "raw", context.packageName)
     val configSource: BufferedSource =
       Okio.buffer(Okio.source(resources.openRawResource(resourceId)))
-    val configData = Buffer()
-    try {
-      configSource.readAll(configData)
-      val configJson = JSONObject(configData.readString(Charset.forName("UTF-8")))
-      val clientId = getRequiredConfigString(configJson, CLIENT_ID_PARAM)
-      val scope = getConfigString(configJson, SCOPE_PARAM)
-      val redirectUri = getRequiredConfigString(configJson, REDIRECT_PARAM)
-      configSource.close()
-      return SsoConfig(clientId, redirectUri, scope)
-    } catch (ex: IOException) {
-      throw AuthException.ClientError("Failed to read configuration: " + ex.message)
-    } catch (ex: JSONException) {
-      throw AuthException.ClientError("Failed to read configuration: " + ex.message)
+    configSource.use {
+      val configData = Buffer()
+      try {
+        configSource.readAll(configData)
+        val configJson = JSONObject(configData.readString(Charset.forName("UTF-8")))
+        val clientId = getRequiredConfigString(configJson, CLIENT_ID_PARAM)
+        val scope = getConfigString(configJson, SCOPE_PARAM)
+        val redirectUri = getRequiredConfigString(configJson, REDIRECT_PARAM)
+        return SsoConfig(clientId, redirectUri, scope)
+      } catch (ex: IOException) {
+        throw AuthException.ClientError("Failed to read configuration: " + ex.message)
+      } catch (ex: JSONException) {
+        throw AuthException.ClientError("Failed to read configuration: " + ex.message)
+      }
     }
   }
 
@@ -63,11 +64,8 @@ object SsoConfigProvider {
   }
 
   private fun getConfigString(configJson: JSONObject, propName: String): String? {
-    var value: String = configJson.optString(propName) ?: return null
-    value = value.trim { it <= ' ' }
-    return if (TextUtils.isEmpty(value)) {
-      null
-    } else value
+    val value: String = configJson.optString(propName) ?: return null
+    return value.trim { it <= ' ' }.takeIf { it.isNotEmpty() }
   }
 
   private const val SSO_CONFIG_FILE = "sso_config"
