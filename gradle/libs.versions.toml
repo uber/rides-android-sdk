@@ -13,7 +13,7 @@ appcompat-v7 = "28.0.0"
 compileSdkVersion = "34"
 minSdkVersion = "26"
 targetSdkVersion = "34"
-jvmTarget = "1.8"
+jvmTarget = "11"
 lintJvmTarget = "17"
 dokka = "1.9.10"
 jsr305 = "3.0.2"
@@ -24,6 +24,8 @@ androidx-test-espresso-espresso-core = "3.5.1"
 material = "1.11.0"
 spotless = "6.25.0"
 ktfmt = "0.47"
+mockito = "5.11.0"
+mockito-kotlin = "5.2.1"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -42,7 +44,8 @@ chrometabs = { module = "androidx.browser:browser" , version.ref = "androidxVers
 junit = "junit:junit:4.13.2"
 robolectric = "org.robolectric:robolectric:4.11.1"
 assertj = "org.assertj:assertj-core:3.25.1"
-mockito = "org.mockito:mockito-core:5.10.0"
+mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-kotlin = {module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin"}
 guava = "com.google.guava:guava:23.4-android"
 wiremock = "com.github.tomakehurst:wiremock:2.10.1"
 uberCore = {module = "com.uber.sdk:uber-core", version.ref = "uberJava"}

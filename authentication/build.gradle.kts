@@ -63,8 +63,12 @@ android {
 dependencies {
   implementation(libs.appCompat)
   implementation(libs.material)
+  implementation(libs.retrofit)
+  implementation(libs.retrofit.moshi)
   implementation(project(":core"))
   testImplementation(libs.junit.junit)
+  testImplementation(libs.mockito.kotlin)
+  testImplementation(libs.robolectric)
   androidTestImplementation(libs.androidx.test.ext.junit)
   androidTestImplementation(libs.androidx.test.espresso.espresso.core)
 }

@@ -49,5 +49,3 @@ include(
   ":samples:login-sample",
   ":samples:login-with-auth-code-demo",
 )
-
-include(":authentication")
