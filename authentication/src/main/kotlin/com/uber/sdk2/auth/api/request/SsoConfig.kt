@@ -17,7 +17,6 @@ package com.uber.sdk2.auth.api.request
 
 import android.content.Context
 import android.content.res.Resources
-import android.text.TextUtils
 import com.uber.sdk2.auth.api.exception.AuthException
 import com.uber.sdk2.core.config.UriConfig.CLIENT_ID_PARAM
 import com.uber.sdk2.core.config.UriConfig.REDIRECT_PARAM
