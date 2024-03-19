@@ -18,6 +18,6 @@ package com.uber.sdk2.auth.api.response
 import com.squareup.moshi.Json
 
 data class PARResponse(
-  @Json(name = "request_uri") var requestUri: String,
-  @Json(name = "expires_in") var expiresIn: String,
+  @Json(name = "request_uri") val requestUri: String,
+  @Json(name = "expires_in") val expiresIn: String,
 )

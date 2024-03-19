@@ -18,7 +18,7 @@ package com.uber.sdk2.auth.api
 import com.uber.sdk2.auth.api.response.AuthResult
 
 /** Provides a way to authenticate the user using SSO flow. */
-interface AuthProviding {
+fun interface AuthProviding {
   /**
    * Executes the SSO flow.
    *

@@ -20,7 +20,7 @@ import com.uber.sdk2.auth.api.exception.AuthException
 /** Represents the response from the authentication request. */
 sealed class AuthResult {
   /** Represents the success response from the authentication request. */
-  data class Success(val uberToken: UberToken? = null) : AuthResult()
+  data class Success(val uberToken: UberToken) : AuthResult()
 
   /** Represents the error response from the authentication request. */
   data class Error(val authException: AuthException) : AuthResult()

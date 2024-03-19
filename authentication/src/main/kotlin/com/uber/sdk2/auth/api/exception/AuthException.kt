@@ -27,18 +27,18 @@ sealed class AuthException(override val message: String) : RuntimeException(mess
   data class NetworkError(override val message: String) : AuthException(message)
 
   companion object {
-    val CANCELED: String = "Canceled"
+    internal const val CANCELED: String = "Canceled"
 
-    val SCOPE_NOT_PROVIDED: String = "Scope not provided in the sso config file"
+    internal const val SCOPE_NOT_PROVIDED: String = "Scope not provided in the sso config file"
 
-    val REDIRECT_URI_NOT_PROVIDED: String = "Redirect URI not provided in the sso config file"
+    internal const val REDIRECT_URI_NOT_PROVIDED: String = "Redirect URI not provided in the sso config file"
 
-    val AUTH_CODE_INVALID = "Invalid auth code"
+    internal const val AUTH_CODE_INVALID = "Invalid auth code"
 
-    val EMPTY_RESPONSE = "Response is empty"
+    internal const val EMPTY_RESPONSE = "Response is empty"
 
-    val NULL_RESPONSE = "Response not received"
+    internal const val NULL_RESPONSE = "Response not received"
 
-    val UNKNOWN = "Unknown error occurred"
+    internal const val UNKNOWN = "Unknown error occurred"
   }
 }
