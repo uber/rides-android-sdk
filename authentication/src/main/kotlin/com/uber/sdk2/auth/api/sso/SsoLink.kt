@@ -22,8 +22,6 @@ import kotlinx.coroutines.flow.Flow
  * flow
  */
 fun interface SsoLink {
-  /**
-   * Executes the SSO link with the given optional query parameters.
-   */
+  /** Executes the SSO link with the given optional query parameters. */
   suspend fun execute(optionalQueryParams: Map<String, String>): Flow<String>
 }

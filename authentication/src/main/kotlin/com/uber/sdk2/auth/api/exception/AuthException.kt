@@ -31,7 +31,8 @@ sealed class AuthException(override val message: String) : RuntimeException(mess
 
     internal const val SCOPE_NOT_PROVIDED: String = "Scope not provided in the sso config file"
 
-    internal const val REDIRECT_URI_NOT_PROVIDED: String = "Redirect URI not provided in the sso config file"
+    internal const val REDIRECT_URI_NOT_PROVIDED: String =
+      "Redirect URI not provided in the sso config file"
 
     internal const val AUTH_CODE_INVALID = "Invalid auth code"
 
