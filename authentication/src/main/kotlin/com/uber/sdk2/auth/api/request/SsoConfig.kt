@@ -17,19 +17,23 @@ package com.uber.sdk2.auth.api.request
 
 import android.content.Context
 import android.content.res.Resources
+import android.os.Parcelable
 import com.uber.sdk2.auth.api.exception.AuthException
 import com.uber.sdk2.core.config.UriConfig.CLIENT_ID_PARAM
 import com.uber.sdk2.core.config.UriConfig.REDIRECT_PARAM
 import com.uber.sdk2.core.config.UriConfig.SCOPE_PARAM
 import java.io.IOException
 import java.nio.charset.Charset
+import kotlinx.parcelize.Parcelize
 import okio.Buffer
 import okio.BufferedSource
 import okio.Okio
 import org.json.JSONException
 import org.json.JSONObject
 
-data class SsoConfig(val clientId: String, val redirectUri: String, val scope: String? = null)
+@Parcelize
+data class SsoConfig(val clientId: String, val redirectUri: String, val scope: String? = null) :
+  Parcelable
 
 object SsoConfigProvider {
   fun getSsoConfig(context: Context): SsoConfig {

@@ -62,6 +62,7 @@ android {
 
 dependencies {
   implementation(libs.appCompat)
+  implementation(libs.chrometabs)
   implementation(libs.material)
   implementation(libs.retrofit)
   implementation(libs.retrofit.moshi)

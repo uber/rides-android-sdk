@@ -15,7 +15,6 @@
  */
 package com.uber.sdk2.auth.api
 
-import com.uber.sdk2.auth.api.internal.SsoLink
 import com.uber.sdk2.auth.api.response.AuthResult
 
 /** Provides a way to authenticate the user using SSO flow. */
@@ -26,5 +25,5 @@ interface AuthProviding {
    * @param ssoLink The SSO link to execute.
    * @return The result from the authentication flow encapsulated in [AuthResult]
    */
-  suspend fun authenticate(ssoLink: SsoLink): AuthResult
+  suspend fun authenticate(): AuthResult
 }

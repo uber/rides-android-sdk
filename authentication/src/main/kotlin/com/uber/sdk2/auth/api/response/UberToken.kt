@@ -15,5 +15,16 @@
  */
 package com.uber.sdk2.auth.api.response
 
+import android.os.Parcelable
+import com.squareup.moshi.Json
+import kotlinx.parcelize.Parcelize
+
 /** Holds the OAuth token that is returned after a successful authentication request. */
-data class OAuthToken(val accessToken: AccessToken, val refreshToken: String)
+@Parcelize
+data class UberToken(
+  val authCode: String? = null,
+  @Json(name = "access_token") val accessToken: String? = null,
+  @Json(name = "access_token") val refreshToken: String? = null,
+  @Json(name = "expires_in") val expiresIn: Long? = null,
+  @Json(name = "scope") val scope: String? = null,
+) : Parcelable
