@@ -16,7 +16,6 @@
 package com.uber.sdk2.auth.internal.sso
 
 import androidx.appcompat.app.AppCompatActivity
-import com.uber.sdk2.auth.AuthActivity
 import com.uber.sdk2.auth.RobolectricTestBase
 import com.uber.sdk2.auth.api.AppDiscovering
 import com.uber.sdk2.auth.api.request.AuthContext
@@ -43,7 +42,7 @@ import org.robolectric.Robolectric
 
 class UniversalSsoLinkTest : RobolectricTestBase() {
   private val activity: AppCompatActivity =
-    Robolectric.buildActivity(AuthActivity::class.java).get()
+    Robolectric.buildActivity(AppCompatActivity::class.java).get()
   private val ssoConfig: SsoConfig =
     SsoConfig(clientId = "clientId", redirectUri = "redirectUri", scope = "scope")
   private val authContext: AuthContext =
