@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.sso
+package com.uber.sdk2.auth.internal.sso
 
-/**
- * Represents the Single Sign-On (SSO) link for authentication. This class is used to start the SSO
- * flow
- */
-interface SsoLink {
-  /** Executes the SSO link with the given optional query parameters. */
-  suspend fun execute(optionalQueryParams: Map<String, String>): String
+import com.uber.sdk2.auth.AuthActivity
+import com.uber.sdk2.auth.api.request.AuthContext
+import com.uber.sdk2.auth.api.request.SsoConfigProvider
+import com.uber.sdk2.auth.api.sso.SsoLink
+import com.uber.sdk2.auth.internal.AppDiscovery
 
-  fun handleAuthCode(authCode: String)
+object SsoLinkFactory {
+
+  fun generateSsoLink(activity: AuthActivity, authContext: AuthContext): SsoLink {
+    val ssoConfig = SsoConfigProvider.getSsoConfig(activity)
+    val appDiscovering = AppDiscovery(activity)
+    return UniversalSsoLink(activity, ssoConfig, authContext, appDiscovering)
+  }
 }
