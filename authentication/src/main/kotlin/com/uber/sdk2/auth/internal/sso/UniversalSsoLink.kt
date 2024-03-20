@@ -28,7 +28,6 @@ import com.uber.sdk2.auth.api.AppDiscovering
 import com.uber.sdk2.auth.api.exception.AuthException
 import com.uber.sdk2.auth.api.request.AuthContext
 import com.uber.sdk2.auth.api.request.AuthDestination
-import com.uber.sdk2.auth.api.request.CrossApp
 import com.uber.sdk2.auth.api.request.SsoConfig
 import com.uber.sdk2.auth.api.sso.CustomTabsLauncher
 import com.uber.sdk2.auth.api.sso.SsoLink
@@ -74,10 +73,10 @@ internal class UniversalSsoLink(
       uri.buildUpon().appendQueryParameter(entry.key, entry.value).build()
     }
     withContext(Dispatchers.Main) {
-      val packageNames = appDiscovering.findAppForSso(uri)
       when (authContext.authDestination) {
         is AuthDestination.CrossAppSso -> {
-          val packageName = findBestPackage(authContext.authDestination.appPriority, packageNames)
+          val packageName =
+            appDiscovering.findAppForSso(uri, authContext.authDestination.appPriority)
           packageName?.let {
             val intent = Intent()
             intent.`package` = packageName
@@ -117,19 +116,6 @@ internal class UniversalSsoLink(
         throw AuthException.ClientError(AuthException.UNKNOWN)
       }
     }
-  }
-
-  private fun findBestPackage(appPriority: List<CrossApp>, packageNames: Set<String>): String? {
-    appPriority.forEach { app ->
-      // Iterate through all package names associated with the current app
-      app.packages.forEach { packageName ->
-        if (packageNames.contains(packageName)) {
-          // If a match is found, return the matching package name
-          return packageName
-        }
-      }
-    }
-    return null
   }
 
   private fun loadCustomtab(uri: Uri) {

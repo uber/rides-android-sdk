@@ -19,9 +19,14 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import com.uber.sdk2.auth.api.AppDiscovering
+import com.uber.sdk2.auth.api.request.CrossApp
 
+/**
+ * Default implementation of [AppDiscovering]. This implementation uses the [PackageManager] to find
+ * the best app to handle the given [Uri].
+ */
 class AppDiscovery(val context: Context) : AppDiscovering {
-  override fun findAppForSso(uri: Uri): Set<String> {
+  override fun findAppForSso(uri: Uri, appPriority: List<CrossApp>): String? {
     val intent = Intent(Intent.ACTION_VIEW, uri)
 
     // Use PackageManager to find activities that can handle the Intent
@@ -31,6 +36,15 @@ class AppDiscovery(val context: Context) : AppDiscovering {
     // Extract the package names from the ResolveInfo objects and return them
     val packageNames = appsList.map { resolveInfo -> resolveInfo.activityInfo.packageName }
 
-    return packageNames.toSet()
+    appPriority.forEach { app ->
+      // Iterate through all package names associated with the current app
+      app.packages.forEach { packageName ->
+        if (packageNames.contains(packageName)) {
+          // If a match is found, return the matching package name
+          return packageName
+        }
+      }
+    }
+    return null
   }
 }

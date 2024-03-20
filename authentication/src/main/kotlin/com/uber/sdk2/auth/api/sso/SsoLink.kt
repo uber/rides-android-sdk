@@ -23,5 +23,6 @@ interface SsoLink {
   /** Executes the SSO link with the given optional query parameters. */
   suspend fun execute(optionalQueryParams: Map<String, String>): String
 
+  /** Handles the authentication code received from the SSO flow via deeplink. */
   fun handleAuthCode(authCode: String)
 }

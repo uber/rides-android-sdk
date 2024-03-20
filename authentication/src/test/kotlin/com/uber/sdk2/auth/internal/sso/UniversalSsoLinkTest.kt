@@ -26,6 +26,7 @@ import com.uber.sdk2.auth.api.request.PrefillInfo
 import com.uber.sdk2.auth.api.request.SsoConfig
 import com.uber.sdk2.auth.api.sso.CustomTabsLauncher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -72,10 +73,11 @@ class UniversalSsoLinkTest : RobolectricTestBase() {
 
   private val testDispatcher = StandardTestDispatcher()
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
-    whenever(appDiscovering.findAppForSso(any())).thenReturn(CrossApp.Rider.packages.toSet())
+    whenever(appDiscovering.findAppForSso(any(), any())).thenReturn("com.uber")
   }
 
   @Test
@@ -106,14 +108,27 @@ class UniversalSsoLinkTest : RobolectricTestBase() {
   @Test
   fun `execute should use inApp authentication when apps are not present`() =
     runTest(testDispatcher) {
-      whenever(appDiscovering.findAppForSso(any())).thenReturn(emptySet())
+      whenever(appDiscovering.findAppForSso(any(), any())).thenReturn(null)
 
       doNothing().whenever(customTabsLauncher).launch(any())
       universalSsoLink.resultDeferred.complete("SuccessResult")
 
       // Simulate calling execute and handle outcomes.
-      val result = universalSsoLink.execute(mapOf("param1" to "value1"))
+      val result = universalSsoLink.execute(mapOf())
+
+      assertNotNull(result)
+      assertEquals("SuccessResult", result)
 
       verify(customTabsLauncher).launch(any())
+    }
+
+  @Test
+  fun `handleAuthCode when called should complete`() =
+    runTest(testDispatcher) {
+      universalSsoLink.handleAuthCode("authCode")
+      val result = universalSsoLink.execute(mapOf())
+
+      assertNotNull(result)
+      assertEquals("authCode", result)
     }
 }
