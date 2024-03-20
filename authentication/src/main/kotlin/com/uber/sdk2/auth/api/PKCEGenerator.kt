@@ -13,15 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.response
+package com.uber.sdk2.auth.api
 
-import com.uber.sdk2.auth.api.exception.AuthException
+/** Provides a way to generate PKCE code verifier and challenge. */
+interface PKCEGenerator {
+  /**
+   * Generates a code verifier.
+   *
+   * @return The generated code verifier.
+   */
+  fun generateCodeVerifier(): String
 
-/** Represents the response from the authentication request. */
-sealed class AuthResult {
-  /** Represents the success response from the authentication request. */
-  data class Success(val uberToken: UberToken) : AuthResult()
-
-  /** Represents the error response from the authentication request. */
-  data class Error(val authException: AuthException) : AuthResult()
+  /**
+   * Generates a code challenge for the given code verifier.
+   *
+   * @param codeVerifier The code verifier for which the code challenge needs to be generated.
+   * @return The generated code challenge.
+   */
+  fun generateCodeChallenge(codeVerifier: String): String
 }

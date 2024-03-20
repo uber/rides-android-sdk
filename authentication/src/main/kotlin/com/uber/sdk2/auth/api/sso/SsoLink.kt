@@ -13,7 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.response
+package com.uber.sdk2.auth.api.sso
 
-/** Holds the access token that is returned after a successful authentication request. */
-data class AccessToken(val token: String, val scope: String, val expiresIn: Long)
+import kotlinx.coroutines.flow.Flow
+
+/**
+ * Represents the Single Sign-On (SSO) link for authentication. This class is used to start the SSO
+ * flow
+ */
+fun interface SsoLink {
+  /** Executes the SSO link with the given optional query parameters. */
+  suspend fun execute(optionalQueryParams: Map<String, String>): Flow<String>
+}

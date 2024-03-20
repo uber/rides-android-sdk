@@ -15,13 +15,16 @@
  */
 package com.uber.sdk2.auth.api.response
 
-import com.uber.sdk2.auth.api.exception.AuthException
+import android.os.Parcelable
+import com.squareup.moshi.Json
+import kotlinx.parcelize.Parcelize
 
-/** Represents the response from the authentication request. */
-sealed class AuthResult {
-  /** Represents the success response from the authentication request. */
-  data class Success(val uberToken: UberToken) : AuthResult()
-
-  /** Represents the error response from the authentication request. */
-  data class Error(val authException: AuthException) : AuthResult()
-}
+/** Holds the OAuth token that is returned after a successful authentication request. */
+@Parcelize
+data class UberToken(
+  val authCode: String? = null,
+  @Json(name = "access_token") val accessToken: String? = null,
+  @Json(name = "access_token") val refreshToken: String? = null,
+  @Json(name = "expires_in") val expiresIn: Long? = null,
+  @Json(name = "scope") val scope: String? = null,
+) : Parcelable

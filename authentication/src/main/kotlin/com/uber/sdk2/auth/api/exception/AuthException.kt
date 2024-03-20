@@ -25,4 +25,21 @@ sealed class AuthException(override val message: String) : RuntimeException(mess
 
   /** Represents the exception that occurred due to network error. */
   data class NetworkError(override val message: String) : AuthException(message)
+
+  companion object {
+    internal const val CANCELED: String = "Canceled"
+
+    internal const val SCOPE_NOT_PROVIDED: String = "Scope not provided in the sso config file"
+
+    internal const val REDIRECT_URI_NOT_PROVIDED: String =
+      "Redirect URI not provided in the sso config file"
+
+    internal const val AUTH_CODE_INVALID = "Invalid auth code"
+
+    internal const val EMPTY_RESPONSE = "Response is empty"
+
+    internal const val NULL_RESPONSE = "Response not received"
+
+    internal const val UNKNOWN = "Unknown error occurred"
+  }
 }

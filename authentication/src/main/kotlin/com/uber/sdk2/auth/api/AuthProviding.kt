@@ -13,7 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.response
+package com.uber.sdk2.auth.api
 
-/** Holds the OAuth token that is returned after a successful authentication request. */
-data class OAuthToken(val accessToken: AccessToken, val refreshToken: String)
+import com.uber.sdk2.auth.api.response.AuthResult
+
+/** Provides a way to authenticate the user using SSO flow. */
+fun interface AuthProviding {
+  /**
+   * Executes the SSO flow.
+   *
+   * @param ssoLink The SSO link to execute.
+   * @return The result from the authentication flow encapsulated in [AuthResult]
+   */
+  suspend fun authenticate(): AuthResult
+}

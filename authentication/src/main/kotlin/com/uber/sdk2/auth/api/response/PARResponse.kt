@@ -15,13 +15,9 @@
  */
 package com.uber.sdk2.auth.api.response
 
-import com.uber.sdk2.auth.api.exception.AuthException
+import com.squareup.moshi.Json
 
-/** Represents the response from the authentication request. */
-sealed class AuthResult {
-  /** Represents the success response from the authentication request. */
-  data class Success(val uberToken: UberToken) : AuthResult()
-
-  /** Represents the error response from the authentication request. */
-  data class Error(val authException: AuthException) : AuthResult()
-}
+data class PARResponse(
+  @Json(name = "request_uri") val requestUri: String,
+  @Json(name = "expires_in") val expiresIn: String,
+)
