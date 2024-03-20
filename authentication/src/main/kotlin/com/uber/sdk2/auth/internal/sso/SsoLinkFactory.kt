@@ -15,7 +15,7 @@
  */
 package com.uber.sdk2.auth.internal.sso
 
-import com.uber.sdk2.auth.AuthActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.uber.sdk2.auth.api.request.AuthContext
 import com.uber.sdk2.auth.api.request.SsoConfigProvider
 import com.uber.sdk2.auth.api.sso.SsoLink
@@ -25,7 +25,7 @@ import com.uber.sdk2.auth.internal.AppDiscovery
 object SsoLinkFactory {
 
   /** Generates a [SsoLink] based on the [AuthContext]. */
-  fun generateSsoLink(activity: AuthActivity, authContext: AuthContext): SsoLink {
+  fun generateSsoLink(activity: AppCompatActivity, authContext: AuthContext): SsoLink {
     val ssoConfig = SsoConfigProvider.getSsoConfig(activity)
     val appDiscovering = AppDiscovery(activity)
     return UniversalSsoLink(activity, ssoConfig, authContext, appDiscovering)
