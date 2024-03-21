@@ -16,7 +16,7 @@
 package com.uber.sdk2.auth.internal.service
 
 // import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import com.squareup.moshi.Moshi
+
 import com.uber.sdk2.auth.api.request.PrefillInfo
 import com.uber.sdk2.auth.api.response.PARResponse
 import com.uber.sdk2.auth.api.response.UberToken
@@ -30,15 +30,6 @@ import retrofit2.http.POST
 
 /** Service for making network requests to the auth server. */
 interface AuthService {
-
-  //  @FormUrlEncoded
-  //  @POST("/oauth/v2/par")
-  //  suspend fun loginParRequest(
-  //    @Field("client_id") clientId: String,
-  //    @Field("response_type") responseType: String,
-  //    @Field("login_hint") loginHint: String,
-  //    @Field("scope") scope: String,
-  //  ): Response<PARResponse>
 
   @FormUrlEncoded
   @POST("/oauth/v2/par")
@@ -62,14 +53,9 @@ interface AuthService {
   companion object {
     /** Creates an instance of [AuthService]. */
     fun create(): AuthService {
-      val moshi =
-        Moshi.Builder()
-          .add(Base64PrefillInfoAdapter())
-          //        .add(KotlinJsonAdapterFactory()) // Needed for Kotlin data classes
-          .build()
       return Retrofit.Builder()
         .baseUrl(UriConfig.getAuthHost())
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .addConverterFactory(MoshiConverterFactory.create())
         .build()
         .create(AuthService::class.java)
     }
