@@ -26,6 +26,7 @@ import com.uber.sdk2.auth.api.response.AuthResult
 import com.uber.sdk2.auth.api.response.PARResponse
 import com.uber.sdk2.auth.api.response.UberToken
 import com.uber.sdk2.auth.internal.service.AuthService
+import com.uber.sdk2.auth.internal.service.PrefillRequest
 import com.uber.sdk2.auth.internal.sso.SsoLinkFactory
 
 class AuthProvider(
@@ -42,13 +43,12 @@ class AuthProvider(
     val ssoConfig = SsoConfigProvider.getSsoConfig(activity)
     val parResponse =
       authContext.prefillInfo?.let {
-        val response =
-          authService.loginParRequest(ssoConfig.clientId, "code", it, ssoConfig.scope ?: "profile")
-        if (response.isSuccessful && response.body() != null) {
-          response.body()
-        } else {
-          throw AuthException.ServerError("bad response ${response.code()}")
-        }
+        PrefillRequest.pushedAuthorizationRequest(
+          authService,
+          ssoConfig.clientId,
+          it,
+          ssoConfig.scope ?: "profile",
+        )
       } ?: PARResponse("", "")
 
     val queryParams: Map<String, String> =

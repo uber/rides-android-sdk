@@ -24,10 +24,11 @@ import kotlinx.parcelize.Parcelize
  * @see AuthContext
  */
 @Parcelize
-sealed class AuthType(val grantType: String) : Parcelable {
+sealed class AuthType() : Parcelable {
+
   /** The authorization code flow. */
-  data object AuthCode : AuthType("code")
+  data object AuthCode : AuthType()
 
   /** The proof key for code exchange (PKCE) flow. This is the recommended flow for mobile apps. */
-  data object PKCE : AuthType("code")
+  data class PKCE(val grantType: String = "authorization_code") : AuthType()
 }
