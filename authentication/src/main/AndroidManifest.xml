@@ -17,4 +17,39 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <queries>
+        <package android:name="com.ubercab" />
+        <package android:name="com.ubercab.presidio.exo" />
+        <package android:name="com.ubercab.rider.internal" />
+        <package android:name="com.ubercab.driver" />
+        <package android:name="com.ubercab.driver.internal" />
+        <package android:name="com.ubercab.driver.exo" />
+        <package android:name="com.ubercab.eats" />
+        <package android:name="com.ubercab.eats.exo" />
+        <package android:name="com.ubercab.eats.internal" />
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries>
+
+    <application android:networkSecurityConfig="@xml/network_security_config">
+        <activity
+            android:name=".AuthActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".AuthRedirectActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.uber.sdk.android.rides.samples.uberauth"
+                    android:host="redirect" />
+            </intent-filter>
+        </activity>
+    </application>
 </manifest>
