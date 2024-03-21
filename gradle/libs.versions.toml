@@ -27,6 +27,7 @@ ktfmt = "0.47"
 mockito = "5.11.0"
 mockito-kotlin = "5.2.1"
 kotlin-coroutines-test = "1.8.0"
+moshi = "1.15.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -57,6 +58,7 @@ espresso-core = { group = "com.android.support.test.espresso", name = "espresso-
 appcompat-v7 = { group = "com.android.support", name = "appcompat-v7", version.ref = "appcompat-v7" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit"}
 retrofit-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit"}
+moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin" , version.ref = "moshi"}
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 androidx-test-espresso-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-test-espresso-espresso-core" }
