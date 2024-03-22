@@ -18,12 +18,15 @@ package com.uber.sdk2.auth
 import android.app.Activity
 import android.os.Bundle
 
+/**
+ * Activity that handles the redirect from the browser after the user has authenticated. while this
+ * does not appear to be achieving much, handling the redirect in this way ensures that we can
+ * remove the browser tab from the back stack. See AuthorizationManagementActivity in App-Auth
+ * public repo for more details.
+ */
 class AuthRedirectActivity : Activity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    // while this does not appear to be achieving much, handling the redirect in this way
-    // ensures that we can remove the browser tab from the back stack. See the documentation
-    // on AuthorizationManagementActivity for more details.
     startActivity(AuthActivity.newResponseIntent(this, intent.data))
     finish()
   }
