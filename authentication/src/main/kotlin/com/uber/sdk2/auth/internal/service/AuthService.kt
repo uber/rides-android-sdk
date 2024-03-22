@@ -17,7 +17,6 @@ package com.uber.sdk2.auth.internal.service
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import com.uber.sdk2.auth.api.request.PrefillInfo
 import com.uber.sdk2.auth.api.response.PARResponse
 import com.uber.sdk2.auth.api.response.UberToken
 import com.uber.sdk2.core.config.UriConfig
@@ -36,7 +35,7 @@ interface AuthService {
   suspend fun loginParRequest(
     @Field("client_id") clientId: String,
     @Field("response_type") responseType: String,
-    @Field("login_hint") prefillInfo: PrefillInfo,
+    @Field("login_hint") prefillInfoString: String,
     @Field("scope") scope: String,
   ): Response<PARResponse>
 

@@ -28,6 +28,7 @@ import com.uber.sdk2.auth.api.response.UberToken
 import com.uber.sdk2.auth.internal.service.AuthService
 import com.uber.sdk2.auth.internal.sso.SsoLinkFactory
 import com.uber.sdk2.auth.internal.sso.UniversalSsoLink.Companion.RESPONSE_TYPE
+import com.uber.sdk2.auth.internal.utils.Base64Util
 
 class AuthProvider(
   private val activity: AppCompatActivity,
@@ -47,7 +48,7 @@ class AuthProvider(
           authService.loginParRequest(
             ssoConfig.clientId,
             RESPONSE_TYPE,
-            it,
+            Base64Util.encodePrefillInfoToString(it),
             ssoConfig.scope ?: "profile",
           )
         val body = response.body()
