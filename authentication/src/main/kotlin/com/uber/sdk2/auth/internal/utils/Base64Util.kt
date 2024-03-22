@@ -13,48 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.internal.service
+package com.uber.sdk2.auth.internal.utils
 
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import com.uber.sdk2.auth.api.exception.AuthException
-import com.uber.sdk2.auth.api.exception.AuthException.ServerError
 import com.uber.sdk2.auth.api.request.PrefillInfo
-import com.uber.sdk2.auth.api.response.PARResponse
-import com.uber.sdk2.auth.internal.sso.UniversalSsoLink
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 
-object PrefillRequest {
-
-  suspend fun pushedAuthorizationRequest(
-    authService: AuthService,
-    clientId: String,
-    prefillInfo: PrefillInfo,
-    scope: String,
-  ): PARResponse {
+object Base64Util {
+  fun encodePrefillInfoToString(prefillInfo: PrefillInfo): String {
     val moshi =
       Moshi.Builder()
         .add(KotlinJsonAdapterFactory()) // Needed for Kotlin data classes
         .build()
     val profileHintJsonAdapter: JsonAdapter<PrefillInfo> = moshi.adapter(PrefillInfo::class.java)
-    val profileHintString =
-      String(
-        Base64.getEncoder()
-          .encode(profileHintJsonAdapter.toJson(prefillInfo).toByteArray(StandardCharsets.UTF_8))
+    return Base64.getEncoder()
+      .encodeToString(
+        profileHintJsonAdapter.toJson(prefillInfo).toByteArray(StandardCharsets.UTF_8)
       )
-    val response =
-      authService.loginParRequest(
-        clientId,
-        UniversalSsoLink.RESPONSE_TYPE,
-        profileHintString,
-        scope,
-      )
-    if (response.isSuccessful && response.body() != null) {
-      return response.body() ?: throw ServerError(AuthException.EMPTY_RESPONSE)
-    } else {
-      throw ServerError("Bad response from server. code: ${response.code()}")
-    }
   }
 }

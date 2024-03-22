@@ -27,6 +27,8 @@ import com.uber.sdk2.auth.api.response.PARResponse
 import com.uber.sdk2.auth.api.response.UberToken
 import com.uber.sdk2.auth.internal.service.AuthService
 import com.uber.sdk2.auth.internal.sso.SsoLinkFactory
+import com.uber.sdk2.auth.internal.sso.UniversalSsoLink.Companion.RESPONSE_TYPE
+import com.uber.sdk2.auth.internal.utils.Base64Util
 
 class AuthProvider(
   private val activity: AppCompatActivity,
@@ -43,7 +45,7 @@ class AuthProvider(
     val parResponse =
       authContext.prefillInfo?.let {
         val response =
-          authService.loginParRequest(ssoConfig.clientId, "code", it, ssoConfig.scope ?: "profile")
+          authService.loginParRequest(ssoConfig.clientId, RESPONSE_TYPE, it, ssoConfig.scope ?: "profile")
         val body = response.body()
         body?.takeIf { response.isSuccessful }
           ?: throw AuthException.ServerError("Bad response ${response.code()}")
