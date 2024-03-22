@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api
+package com.uber.sdk2.auth.internal.shadow
 
-import com.uber.sdk2.auth.api.response.AuthResult
+import androidx.appcompat.app.AppCompatActivity
+import com.uber.sdk2.auth.api.request.AuthContext
+import com.uber.sdk2.auth.api.sso.SsoLink
+import com.uber.sdk2.auth.internal.sso.SsoLinkFactory
+import org.mockito.kotlin.mock
+import org.robolectric.annotation.Implementation
+import org.robolectric.annotation.Implements
 
-/** Provides a way to authenticate the user using SSO flow. */
-interface AuthProviding {
-  /**
-   * Executes the SSO flow.
-   *
-   * @param ssoLink The SSO link to execute.
-   * @return The result from the authentication flow encapsulated in [AuthResult]
-   */
-  suspend fun authenticate(): AuthResult
+@Implements(SsoLinkFactory::class)
+class ShadowSsoLinkFactory {
+  internal val ssoLink: SsoLink = mock()
 
-  /** Handles the authentication code received from the SSO flow via deeplink. */
-  fun handleAuthCode(authCode: String)
+  @Implementation
+  fun generateSsoLink(activity: AppCompatActivity, authContext: AuthContext): SsoLink {
+    return ssoLink
+  }
 }

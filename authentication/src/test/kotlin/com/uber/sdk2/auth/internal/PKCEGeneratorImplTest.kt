@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api
+package com.uber.sdk2.auth.internal
 
-import com.uber.sdk2.auth.api.response.AuthResult
+import com.uber.sdk2.auth.RobolectricTestBase
+import org.junit.Test
 
-/** Provides a way to authenticate the user using SSO flow. */
-interface AuthProviding {
-  /**
-   * Executes the SSO flow.
-   *
-   * @param ssoLink The SSO link to execute.
-   * @return The result from the authentication flow encapsulated in [AuthResult]
-   */
-  suspend fun authenticate(): AuthResult
+class PKCEGeneratorImplTest : RobolectricTestBase() {
+  @Test
+  fun testGenerateCodeVerifier() {
+    val codeVerifier = PKCEGeneratorImpl.generateCodeVerifier()
+    assert(!codeVerifier.isNullOrBlank())
+  }
 
-  /** Handles the authentication code received from the SSO flow via deeplink. */
-  fun handleAuthCode(authCode: String)
+  @Test
+  fun testGenerateCodeChallenge() {
+    val codeVerifier = PKCEGeneratorImpl.generateCodeVerifier()
+    val codeChallenge = PKCEGeneratorImpl.generateCodeChallenge(codeVerifier)
+    assert(!codeChallenge.isNullOrBlank())
+  }
 }

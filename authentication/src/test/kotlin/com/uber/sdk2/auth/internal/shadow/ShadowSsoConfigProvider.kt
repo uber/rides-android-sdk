@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api
+package com.uber.sdk2.auth.internal.shadow
 
-import com.uber.sdk2.auth.api.response.AuthResult
+import android.content.Context
+import com.uber.sdk2.auth.api.request.SsoConfig
+import com.uber.sdk2.auth.api.request.SsoConfigProvider
+import org.robolectric.annotation.Implementation
+import org.robolectric.annotation.Implements
 
-/** Provides a way to authenticate the user using SSO flow. */
-interface AuthProviding {
-  /**
-   * Executes the SSO flow.
-   *
-   * @param ssoLink The SSO link to execute.
-   * @return The result from the authentication flow encapsulated in [AuthResult]
-   */
-  suspend fun authenticate(): AuthResult
-
-  /** Handles the authentication code received from the SSO flow via deeplink. */
-  fun handleAuthCode(authCode: String)
+@Implements(SsoConfigProvider::class)
+class ShadowSsoConfigProvider {
+  companion object {
+    @JvmStatic
+    @Implementation
+    fun getSsoConfig(context: Context): SsoConfig {
+      return SsoConfig("clientId", "redirectUri", "profile")
+    }
+  }
 }
