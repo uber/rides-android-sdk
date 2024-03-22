@@ -33,5 +33,5 @@ fun interface AppDiscovering {
    * @return The package name of the best application to handle the given [Uri], or `null` if no app
    *   is found.
    */
-  fun findAppForSso(uri: Uri, appPriority: List<CrossApp>): String?
+  fun findAppForSso(uri: Uri, appPriority: Iterable<CrossApp>): String?
 }

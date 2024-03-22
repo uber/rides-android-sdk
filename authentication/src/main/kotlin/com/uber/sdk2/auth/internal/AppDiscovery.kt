@@ -26,7 +26,7 @@ import com.uber.sdk2.auth.api.request.CrossApp
  * the best app to handle the given [Uri].
  */
 class AppDiscovery(val context: Context) : AppDiscovering {
-  override fun findAppForSso(uri: Uri, appPriority: List<CrossApp>): String? {
+  override fun findAppForSso(uri: Uri, appPriority: Iterable<CrossApp>): String? {
     val intent = Intent(Intent.ACTION_VIEW, uri)
 
     // Use PackageManager to find activities that can handle the Intent
@@ -34,17 +34,10 @@ class AppDiscovery(val context: Context) : AppDiscovering {
     val appsList = packageManager.queryIntentActivities(intent, 0)
 
     // Extract the package names from the ResolveInfo objects and return them
-    val packageNames = appsList.map { resolveInfo -> resolveInfo.activityInfo.packageName }
+    val packageNames = appsList.map { it.activityInfo.packageName }
 
-    appPriority.forEach { app ->
-      // Iterate through all package names associated with the current app
-      app.packages.forEach { packageName ->
-        if (packageNames.contains(packageName)) {
-          // If a match is found, return the matching package name
-          return packageName
-        }
-      }
-    }
-    return null
+    // Find the first package in appPriority that is in packageNames
+
+    return appPriority.flatMap { it.packages }.firstOrNull { it in packageNames }
   }
 }
