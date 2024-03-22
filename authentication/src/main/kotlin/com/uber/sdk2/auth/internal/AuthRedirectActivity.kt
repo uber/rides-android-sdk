@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth
+package com.uber.sdk2.auth.internal
 
 import android.app.Activity
 import android.os.Bundle
 
 /**
- * Activity that handles the redirect from the browser after the user has authenticated. while this
+ * Activity that handles the redirect from the browser after the user has authenticated. While this
  * does not appear to be achieving much, handling the redirect in this way ensures that we can
  * remove the browser tab from the back stack. See AuthorizationManagementActivity in App-Auth
  * public repo for more details.

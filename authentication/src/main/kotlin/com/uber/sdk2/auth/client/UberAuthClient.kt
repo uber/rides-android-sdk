@@ -19,18 +19,13 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
-import com.uber.sdk2.auth.AuthActivity
 import com.uber.sdk2.auth.api.request.AuthContext
 
 /**
  * Client to authenticate the user against one of the available Uber apps. It is entrypoint for the
  * consumers to initiate the authentication flow
  */
-object UberAuthClient {
-
-  /** Request code for the authentication flow used when launching the [AuthActivity]. */
-  const val UBER_AUTH_REQUEST_CODE = 1001
-
+interface UberAuthClient {
   /**
    * Authenticate the user against one of the available Uber apps. If no app is available it will
    * fallback to using a system webview to launch the authentication flow on web.
@@ -38,10 +33,7 @@ object UberAuthClient {
    * @param authContext Context of the authentication request
    * @param activity Activity to launch the authentication flow
    */
-  fun authenticate(activity: Activity, authContext: AuthContext) {
-    val intent = AuthActivity.newIntent(activity, authContext)
-    activity.startActivityForResult(intent, UBER_AUTH_REQUEST_CODE)
-  }
+  fun authenticate(activity: Activity, authContext: AuthContext)
 
   /**
    * Authenticate the user against one of the available Uber apps. If no app is available it will
@@ -56,8 +48,5 @@ object UberAuthClient {
     context: Context,
     activityResultLauncher: ActivityResultLauncher<Intent>,
     authContext: AuthContext,
-  ) {
-    val intent = AuthActivity.newIntent(context, authContext)
-    activityResultLauncher.launch(intent)
-  }
+  )
 }

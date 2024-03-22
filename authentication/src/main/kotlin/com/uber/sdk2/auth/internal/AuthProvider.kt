@@ -29,6 +29,8 @@ import com.uber.sdk2.auth.internal.service.AuthService
 import com.uber.sdk2.auth.internal.sso.SsoLinkFactory
 import com.uber.sdk2.auth.internal.sso.UniversalSsoLink.Companion.RESPONSE_TYPE
 import com.uber.sdk2.auth.internal.utils.Base64Util
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class AuthProvider(
   private val activity: AppCompatActivity,
@@ -61,34 +63,38 @@ class AuthProvider(
         "request_uri" to parResponse.requestUri,
         "code_challenge" to codeVerifierGenerator.generateCodeChallenge(verifier),
       )
-    try {
-      val authCode = ssoLink.execute(queryParams)
-      return when (authContext.authType) {
-        AuthType.AuthCode -> AuthResult.Success(UberToken(authCode = authCode))
-        is AuthType.PKCE -> {
-          val tokenResponse =
-            authService.token(
-              ssoConfig.clientId,
-              verifier,
-              authContext.authType.grantType,
-              ssoConfig.redirectUri,
-              authCode,
-            )
-
-          if (tokenResponse.isSuccessful) {
-            tokenResponse.body()?.let { AuthResult.Success(it) }
-              ?: AuthResult.Error(
-                AuthException.ClientError("Token request failed with empty response")
+    val result =
+      try {
+        val authCode = ssoLink.execute(queryParams)
+        when (authContext.authType) {
+          AuthType.AuthCode -> AuthResult.Success(UberToken(authCode = authCode))
+          is AuthType.PKCE -> {
+            val tokenResponse =
+              authService.token(
+                ssoConfig.clientId,
+                verifier,
+                authContext.authType.grantType,
+                ssoConfig.redirectUri,
+                authCode,
               )
-          } else {
-            AuthResult.Error(
-              AuthException.ClientError("Token request failed with code: ${tokenResponse.code()}")
-            )
+
+            if (tokenResponse.isSuccessful) {
+              tokenResponse.body()?.let { AuthResult.Success(it) }
+                ?: AuthResult.Error(
+                  AuthException.ClientError("Token request failed with empty response")
+                )
+            } else {
+              AuthResult.Error(
+                AuthException.ClientError("Token request failed with code: ${tokenResponse.code()}")
+              )
+            }
           }
         }
+      } catch (e: AuthException) {
+        return AuthResult.Error(e)
       }
-    } catch (e: AuthException) {
-      return AuthResult.Error(e)
+    return withContext(Dispatchers.Main) {
+      return@withContext result
     }
   }
 

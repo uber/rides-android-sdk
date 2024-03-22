@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth
+package com.uber.sdk2.auth.internal
 
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.text.TextUtils
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.uber.sdk2.auth.api.AuthProviding
@@ -27,11 +26,9 @@ import com.uber.sdk2.auth.api.exception.AuthException
 import com.uber.sdk2.auth.api.exception.AuthException.Companion.AUTH_CODE_INVALID
 import com.uber.sdk2.auth.api.request.AuthContext
 import com.uber.sdk2.auth.api.response.AuthResult
-import com.uber.sdk2.auth.internal.AuthProvider
 import com.uber.sdk2.core.utils.CustomTabsHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class AuthActivity : AppCompatActivity() {
 
@@ -51,19 +48,17 @@ class AuthActivity : AppCompatActivity() {
     authProvider?.let {
       lifecycleScope.launch(Dispatchers.IO) {
         val authResult = it.authenticate()
-        withContext(Dispatchers.Main) {
-          when (authResult) {
-            is AuthResult.Success -> {
-              val intent = Intent().apply { putExtra("EXTRA_UBER_TOKEN", authResult.uberToken) }
-              setResult(RESULT_OK, intent)
-              finish()
-            }
-            is AuthResult.Error -> {
-              val intent =
-                Intent().apply { putExtra("EXTRA_ERROR", authResult.authException.message) }
-              setResult(RESULT_CANCELED, intent)
-              finish()
-            }
+        when (authResult) {
+          is AuthResult.Success -> {
+            val intent = Intent().apply { putExtra("EXTRA_UBER_TOKEN", authResult.uberToken) }
+            setResult(RESULT_OK, intent)
+            finish()
+          }
+          is AuthResult.Error -> {
+            val intent =
+              Intent().apply { putExtra("EXTRA_ERROR", authResult.authException.message) }
+            setResult(RESULT_CANCELED, intent)
+            finish()
           }
         }
       }
@@ -91,7 +86,7 @@ class AuthActivity : AppCompatActivity() {
   }
 
   private fun isAuthorizationCodePresent(uri: Uri): Boolean {
-    return !TextUtils.isEmpty(uri.getQueryParameter(KEY_AUTHENTICATION_CODE))
+    return !uri.getQueryParameter(KEY_AUTHENTICATION_CODE).isNullOrEmpty()
   }
 
   override fun onDestroy() {

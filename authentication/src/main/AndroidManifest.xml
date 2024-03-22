@@ -36,12 +36,12 @@
 
     <application android:networkSecurityConfig="@xml/network_security_config">
         <activity
-            android:name=".AuthActivity"
+            android:name=".internal.AuthActivity"
             android:exported="false"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".AuthRedirectActivity"
+        <activity android:name=".internal.AuthRedirectActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
