@@ -29,6 +29,8 @@ import com.uber.sdk2.auth.internal.service.AuthService
 import com.uber.sdk2.auth.internal.sso.SsoLinkFactory
 import com.uber.sdk2.auth.internal.sso.UniversalSsoLink.Companion.RESPONSE_TYPE
 import com.uber.sdk2.auth.internal.utils.Base64Util
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class AuthProvider(
   private val activity: AppCompatActivity,
@@ -41,7 +43,7 @@ class AuthProvider(
   private val ssoLink = SsoLinkFactory.generateSsoLink(activity, authContext)
 
   override suspend fun authenticate(): AuthResult {
-    val ssoConfig = SsoConfigProvider.getSsoConfig(activity)
+    val ssoConfig = withContext(Dispatchers.IO) { SsoConfigProvider.getSsoConfig(activity) }
     val parResponse =
       authContext.prefillInfo?.let {
         val response =
@@ -61,9 +63,9 @@ class AuthProvider(
         "request_uri" to parResponse.requestUri,
         "code_challenge" to codeVerifierGenerator.generateCodeChallenge(verifier),
       )
-    try {
+    return try {
       val authCode = ssoLink.execute(queryParams)
-      return when (authContext.authType) {
+      when (authContext.authType) {
         AuthType.AuthCode -> AuthResult.Success(UberToken(authCode = authCode))
         is AuthType.PKCE -> {
           val tokenResponse =
@@ -88,7 +90,7 @@ class AuthProvider(
         }
       }
     } catch (e: AuthException) {
-      return AuthResult.Error(e)
+      AuthResult.Error(e)
     }
   }
 
