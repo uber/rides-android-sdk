@@ -16,9 +16,10 @@
 package com.uber.sdk2.auth.api
 
 import android.net.Uri
+import com.uber.sdk2.auth.api.request.CrossApp
 
 /** Provides a way to discover the app to authenticate the user. */
-interface AppDiscovering {
+fun interface AppDiscovering {
 
   /**
    * Finds the best application to handle a given [Uri].
@@ -29,8 +30,8 @@ interface AppDiscovering {
    * @param uri The [Uri] for which the best application needs to be found. The [Uri] should be
    *   well-formed and include a scheme (e.g., http, https) that applications can recognize and
    *   handle.
-   * @return A set of package names of the best applications to handle the URI. If no suitable
-   *   application is found, it returns an empty set.
+   * @return The package name of the best application to handle the given [Uri], or `null` if no app
+   *   is found.
    */
-  fun findAppForSso(uri: Uri): Set<String>
+  fun findAppForSso(uri: Uri, appPriority: Iterable<CrossApp>): String?
 }
