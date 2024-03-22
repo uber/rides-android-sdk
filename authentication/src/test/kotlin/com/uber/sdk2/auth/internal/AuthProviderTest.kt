@@ -33,10 +33,7 @@ import com.uber.sdk2.auth.internal.shadow.ShadowSsoConfigProvider
 import com.uber.sdk2.auth.internal.shadow.ShadowSsoLinkFactory
 import com.uber.sdk2.auth.internal.sso.SsoLinkFactory
 import com.uber.sdk2.auth.internal.utils.Base64Util
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -53,13 +50,12 @@ class AuthProviderTest : RobolectricTestBase() {
   private val activity: AppCompatActivity = mock()
   private val authService: AuthService = mock()
   private val codeVerifierGenerator: PKCEGenerator = mock()
-  private val testDispatcher = StandardTestDispatcher()
+
   private lateinit var ssoLink: SsoLink
 
   @Before
   fun setUp() {
     ssoLink = Shadow.extract<ShadowSsoLinkFactory>(SsoLinkFactory).ssoLink
-    Dispatchers.setMain(testDispatcher)
   }
 
   @Test

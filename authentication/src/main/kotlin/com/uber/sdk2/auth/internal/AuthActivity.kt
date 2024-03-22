@@ -46,9 +46,8 @@ class AuthActivity : AppCompatActivity() {
 
   private fun init() {
     authProvider?.let {
-      lifecycleScope.launch(Dispatchers.IO) {
-        val authResult = it.authenticate()
-        when (authResult) {
+      lifecycleScope.launch(Dispatchers.Main) {
+        when (val authResult = it.authenticate()) {
           is AuthResult.Success -> {
             val intent = Intent().apply { putExtra("EXTRA_UBER_TOKEN", authResult.uberToken) }
             setResult(RESULT_OK, intent)
