@@ -67,7 +67,12 @@ internal class UniversalSsoLink(
 
   override suspend fun execute(optionalQueryParams: Map<String, String>): String {
     val uri =
-      UriConfig.assembleUri(ssoConfig.clientId, "code", ssoConfig.redirectUri, ssoConfig.scope)
+      UriConfig.assembleUri(
+        ssoConfig.clientId,
+        RESPONSE_TYPE,
+        ssoConfig.redirectUri,
+        ssoConfig.scope,
+      )
 
     optionalQueryParams.entries.forEach { entry ->
       uri.buildUpon().appendQueryParameter(entry.key, entry.value).build()
@@ -120,5 +125,10 @@ internal class UniversalSsoLink(
 
   private fun loadCustomtab(uri: Uri) {
     customTabsLauncher.launch(uri)
+  }
+
+  companion object {
+    /** The response type constant for the SSO authentication. */
+    internal const val RESPONSE_TYPE = "code"
   }
 }

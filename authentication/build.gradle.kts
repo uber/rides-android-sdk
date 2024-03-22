@@ -64,6 +64,7 @@ dependencies {
   implementation(libs.appCompat)
   implementation(libs.chrometabs)
   implementation(libs.material)
+  implementation(libs.moshi.kotlin)
   implementation(libs.retrofit)
   implementation(libs.retrofit.moshi)
   implementation(project(":core"))

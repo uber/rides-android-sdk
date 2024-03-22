@@ -32,6 +32,7 @@ import com.uber.sdk2.auth.internal.service.AuthService
 import com.uber.sdk2.auth.internal.shadow.ShadowSsoConfigProvider
 import com.uber.sdk2.auth.internal.shadow.ShadowSsoLinkFactory
 import com.uber.sdk2.auth.internal.sso.SsoLinkFactory
+import com.uber.sdk2.auth.internal.utils.Base64Util
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -67,11 +68,11 @@ class AuthProviderTest : RobolectricTestBase() {
     whenever(authService.token(any(), any(), any(), any(), any()))
       .thenReturn(Response.success(UberToken(accessToken = "accessToken")))
     val authContext =
-      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE, null)
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), null)
     val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
     val result = authProvider.authenticate()
     verify(authService, never()).loginParRequest(any(), any(), any(), any())
-    verify(authService).token("clientId", "verifier", "code", "redirectUri", "code")
+    verify(authService).token("clientId", "verifier", "authorization_code", "redirectUri", "code")
     assert(result is AuthResult.Success)
     assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")
   }
@@ -87,11 +88,18 @@ class AuthProviderTest : RobolectricTestBase() {
       .thenReturn(Response.success(UberToken(accessToken = "accessToken")))
     val prefillInfo = PrefillInfo("email", "firstName", "lastName", "phoneNumber")
     val authContext =
-      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE, prefillInfo)
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), prefillInfo)
     val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
     val result = authProvider.authenticate()
-    verify(authService).loginParRequest("clientId", "code", prefillInfo, "profile")
-    verify(authService).token("clientId", "verifier", "code", "redirectUri", "authCode")
+    verify(authService)
+      .loginParRequest(
+        "clientId",
+        "code",
+        Base64Util.encodePrefillInfoToString(prefillInfo),
+        "profile",
+      )
+    verify(authService)
+      .token("clientId", "verifier", "authorization_code", "redirectUri", "authCode")
     assert(result is AuthResult.Success)
     assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")
   }

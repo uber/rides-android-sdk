@@ -27,7 +27,8 @@ import java.nio.charset.Charset
 import kotlinx.parcelize.Parcelize
 import okio.Buffer
 import okio.BufferedSource
-import okio.Okio
+import okio.buffer
+import okio.source
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -39,8 +40,7 @@ object SsoConfigProvider {
   fun getSsoConfig(context: Context): SsoConfig {
     val resources: Resources = context.resources
     val resourceId = resources.getIdentifier(SSO_CONFIG_FILE, "raw", context.packageName)
-    val configSource: BufferedSource =
-      Okio.buffer(Okio.source(resources.openRawResource(resourceId)))
+    val configSource: BufferedSource = resources.openRawResource(resourceId).source().buffer()
     configSource.use {
       val configData = Buffer()
       try {

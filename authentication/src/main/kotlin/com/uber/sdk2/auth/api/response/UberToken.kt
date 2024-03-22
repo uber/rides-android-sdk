@@ -24,7 +24,7 @@ import kotlinx.parcelize.Parcelize
 data class UberToken(
   val authCode: String? = null,
   @Json(name = "access_token") val accessToken: String? = null,
-  @Json(name = "access_token") val refreshToken: String? = null,
+  @Json(name = "refresh_token") val refreshToken: String? = null,
   @Json(name = "expires_in") val expiresIn: Long? = null,
   @Json(name = "scope") val scope: String? = null,
 ) : Parcelable
