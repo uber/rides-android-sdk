@@ -15,8 +15,6 @@
  */
 package com.uber.sdk2.auth.internal.service
 
-// import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-
 import com.uber.sdk2.auth.api.request.PrefillInfo
 import com.uber.sdk2.auth.api.response.PARResponse
 import com.uber.sdk2.auth.api.response.UberToken

@@ -44,14 +44,12 @@ class AuthProvider(
       authContext.prefillInfo?.let {
         val response =
           authService.loginParRequest(ssoConfig.clientId, "code", it, ssoConfig.scope ?: "profile")
-        if (response.isSuccessful && response.body() != null) {
-          response.body()
-        } else {
-          throw AuthException.ServerError("bad response ${response.code()}")
-        }
+        val body = response.body()
+        body?.takeIf { response.isSuccessful }
+          ?: throw AuthException.ServerError("Bad response ${response.code()}")
       } ?: PARResponse("", "")
 
-    val queryParams: Map<String, String> =
+    val queryParams =
       mapOf(
         "request_uri" to parResponse.requestUri,
         "code_challenge" to codeVerifierGenerator.generateCodeChallenge(verifier),

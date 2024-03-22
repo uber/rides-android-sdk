@@ -16,7 +16,6 @@
 package com.uber.sdk2.auth.internal
 
 import android.util.Base64
-import androidx.annotation.VisibleForTesting
 import com.uber.sdk2.auth.api.PKCEGenerator
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -33,7 +32,7 @@ object PKCEGeneratorImpl : PKCEGenerator {
 
   override fun generateCodeChallenge(codeVerifier: String): String {
     val bytes = codeVerifier.toByteArray(StandardCharsets.US_ASCII)
-    return try { // StandardLoginAvailabilityHelper#supportsSha256 already checks for this
+    return try {
       val md = MessageDigest.getInstance(SHA_256)
       md.update(bytes, 0, bytes.size)
       val digest = md.digest()
@@ -43,6 +42,6 @@ object PKCEGeneratorImpl : PKCEGenerator {
     }
   }
 
-  @VisibleForTesting private const val BYTE_ARRAY_SIZE: Int = 32
+  private const val BYTE_ARRAY_SIZE: Int = 32
   private const val SHA_256 = "SHA-256"
 }

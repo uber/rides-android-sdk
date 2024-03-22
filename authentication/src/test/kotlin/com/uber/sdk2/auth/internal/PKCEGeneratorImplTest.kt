@@ -22,13 +22,13 @@ class PKCEGeneratorImplTest : RobolectricTestBase() {
   @Test
   fun testGenerateCodeVerifier() {
     val codeVerifier = PKCEGeneratorImpl.generateCodeVerifier()
-    assert(codeVerifier.isNullOrBlank().not())
+    assert(!codeVerifier.isNullOrBlank())
   }
 
   @Test
   fun testGenerateCodeChallenge() {
     val codeVerifier = PKCEGeneratorImpl.generateCodeVerifier()
     val codeChallenge = PKCEGeneratorImpl.generateCodeChallenge(codeVerifier)
-    assert(codeChallenge.isNullOrBlank().not())
+    assert(!codeChallenge.isNullOrBlank())
   }
 }
