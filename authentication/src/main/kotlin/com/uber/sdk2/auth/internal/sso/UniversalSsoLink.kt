@@ -17,7 +17,7 @@ package com.uber.sdk2.auth.internal.sso
 
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
+import android.provider.DocumentsContract.EXTRA_ERROR
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.VisibleForTesting
@@ -105,19 +105,15 @@ internal class UniversalSsoLink(
   private fun handleResult(result: ActivityResult): String {
     return when (result.resultCode) {
       RESULT_OK -> {
-        Log.d("xxxx", result.data?.getStringExtra("CODE_RECEIVED").orEmpty())
-        result.data?.let {
-          if (!it.getStringExtra("CODE_RECEIVED").isNullOrEmpty()) {
-            it.getStringExtra("CODE_RECEIVED").orEmpty()
-          } else if (!it.getStringExtra("EXTRA_ERROR").isNullOrEmpty()) {
-            throw AuthException.ClientError(it.getStringExtra("EXTRA_ERROR").orEmpty())
-          } else {
-            throw AuthException.ClientError(AuthException.EMPTY_RESPONSE)
-          }
+        result.data?.getStringExtra(EXTRA_CODE_RECEIVED)?.ifEmpty {
+          throw AuthException.ClientError(AuthException.AUTH_CODE_NOT_PRESENT)
         } ?: throw AuthException.ClientError(AuthException.NULL_RESPONSE)
       }
+
       RESULT_CANCELED -> {
-        throw AuthException.ClientError(AuthException.CANCELED)
+        result.data?.getStringExtra(EXTRA_ERROR)?.let {
+          throw AuthException.ClientError(it)
+        } ?: throw AuthException.ClientError(AuthException.CANCELED)
       }
       else -> {
         // should never happen
@@ -133,5 +129,8 @@ internal class UniversalSsoLink(
   companion object {
     /** The response type constant for the SSO authentication. */
     internal const val RESPONSE_TYPE = "code"
+
+    private const val EXTRA_CODE_RECEIVED = "CODE_RECEIVED"
+    private const val EXTRA_ERROR = "ERROR"
   }
 }
