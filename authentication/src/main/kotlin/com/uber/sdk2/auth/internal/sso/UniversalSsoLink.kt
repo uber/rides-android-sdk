@@ -109,11 +109,9 @@ internal class UniversalSsoLink(
           throw AuthException.ClientError(AuthException.AUTH_CODE_NOT_PRESENT)
         } ?: throw AuthException.ClientError(AuthException.NULL_RESPONSE)
       }
-
       RESULT_CANCELED -> {
-        result.data?.getStringExtra(EXTRA_ERROR)?.let {
-          throw AuthException.ClientError(it)
-        } ?: throw AuthException.ClientError(AuthException.CANCELED)
+        result.data?.getStringExtra(EXTRA_ERROR)?.let { throw AuthException.ClientError(it) }
+          ?: throw AuthException.ClientError(AuthException.CANCELED)
       }
       else -> {
         // should never happen
