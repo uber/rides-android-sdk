@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.request
+package com.uber.sdk2.auth.request
 
 import android.content.Context
 import android.content.res.Resources
 import android.os.Parcelable
-import com.uber.sdk2.auth.api.exception.AuthException
+import com.uber.sdk2.auth.exception.AuthException
 import com.uber.sdk2.core.config.UriConfig.CLIENT_ID_PARAM
 import com.uber.sdk2.core.config.UriConfig.REDIRECT_PARAM
 import com.uber.sdk2.core.config.UriConfig.SCOPE_PARAM

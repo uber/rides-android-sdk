@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api
+package com.uber.sdk2.auth.request
 
-/** Provides a way to generate PKCE code verifier and challenge. */
-interface PKCEGenerator {
-  /**
-   * Generates a code verifier.
-   *
-   * @return The generated code verifier.
-   */
-  fun generateCodeVerifier(): String
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-  /**
-   * Generates a code challenge for the given code verifier.
-   *
-   * @param codeVerifier The code verifier for which the code challenge needs to be generated.
-   * @return The generated code challenge.
-   */
-  fun generateCodeChallenge(codeVerifier: String): String
+/**
+ * Represents the type of authentication to perform.
+ *
+ * @see AuthContext
+ */
+@Parcelize
+sealed class AuthType() : Parcelable {
+
+  /** The authorization code flow. */
+  data object AuthCode : AuthType()
+
+  /** The proof key for code exchange (PKCE) flow. This is the recommended flow for mobile apps. */
+  data class PKCE(val grantType: String = "authorization_code") : AuthType()
 }

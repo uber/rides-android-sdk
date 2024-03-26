@@ -16,15 +16,15 @@
 package com.uber.sdk2.auth.internal.sso
 
 import androidx.appcompat.app.AppCompatActivity
+import com.uber.sdk2.auth.AppDiscovering
 import com.uber.sdk2.auth.RobolectricTestBase
-import com.uber.sdk2.auth.api.AppDiscovering
-import com.uber.sdk2.auth.api.request.AuthContext
-import com.uber.sdk2.auth.api.request.AuthDestination
-import com.uber.sdk2.auth.api.request.AuthType
-import com.uber.sdk2.auth.api.request.CrossApp
-import com.uber.sdk2.auth.api.request.PrefillInfo
-import com.uber.sdk2.auth.api.request.SsoConfig
-import com.uber.sdk2.auth.api.sso.CustomTabsLauncher
+import com.uber.sdk2.auth.request.AuthContext
+import com.uber.sdk2.auth.request.AuthDestination
+import com.uber.sdk2.auth.request.AuthType
+import com.uber.sdk2.auth.request.CrossApp
+import com.uber.sdk2.auth.request.PrefillInfo
+import com.uber.sdk2.auth.request.SsoConfig
+import com.uber.sdk2.auth.sso.CustomTabsLauncher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher

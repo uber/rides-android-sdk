@@ -13,22 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.request
+package com.uber.sdk2.auth.response
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+import com.uber.sdk2.auth.exception.AuthException
 
-/**
- * Represents the type of authentication to perform.
- *
- * @see AuthContext
- */
-@Parcelize
-sealed class AuthType() : Parcelable {
+/** Represents the response from the authentication request. */
+sealed class AuthResult {
+  /** Represents the success response from the authentication request. */
+  data class Success(val uberToken: UberToken) : AuthResult()
 
-  /** The authorization code flow. */
-  data object AuthCode : AuthType()
-
-  /** The proof key for code exchange (PKCE) flow. This is the recommended flow for mobile apps. */
-  data class PKCE(val grantType: String = "authorization_code") : AuthType()
+  /** Represents the error response from the authentication request. */
+  data class Error(val authException: AuthException) : AuthResult()
 }

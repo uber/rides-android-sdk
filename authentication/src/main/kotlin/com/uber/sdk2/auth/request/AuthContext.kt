@@ -13,23 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.request
+package com.uber.sdk2.auth.request
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 /**
- * Provides a way to prefill the user's information in the authentication flow.
+ * Represents the context of the authentication request needed for Uber to authenticate the user.
  *
- * @param email The email to prefill.
- * @param firstName The first name to prefill.
- * @param lastName The last name to prefill.
- * @param phoneNumber The phone number to prefill.
+ * @param authDestination The destination app to authenticate the user.
+ * @param authType The type of authentication to perform.
+ * @param prefillInfo The prefill information to be used for the authentication.
+ * @param scopes The scopes to request for the authentication.
  */
 @Parcelize
-data class PrefillInfo(
-  val email: String,
-  val firstName: String,
-  val lastName: String,
-  val phoneNumber: String,
+data class AuthContext(
+  val authDestination: AuthDestination,
+  val authType: AuthType,
+  val prefillInfo: PrefillInfo?,
 ) : Parcelable

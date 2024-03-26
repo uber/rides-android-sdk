@@ -16,10 +16,10 @@
 package com.uber.sdk2.auth.internal.sso
 
 import androidx.appcompat.app.AppCompatActivity
-import com.uber.sdk2.auth.api.request.AuthContext
-import com.uber.sdk2.auth.api.request.SsoConfigProvider
-import com.uber.sdk2.auth.api.sso.SsoLink
 import com.uber.sdk2.auth.internal.AppDiscovery
+import com.uber.sdk2.auth.request.AuthContext
+import com.uber.sdk2.auth.request.SsoConfigProvider
+import com.uber.sdk2.auth.sso.SsoLink
 
 /** Factory to generate [SsoLink] */
 object SsoLinkFactory {

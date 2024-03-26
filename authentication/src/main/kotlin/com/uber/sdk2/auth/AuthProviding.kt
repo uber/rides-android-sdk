@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api
+package com.uber.sdk2.auth
 
-import com.uber.sdk2.auth.api.response.AuthResult
+import com.uber.sdk2.auth.response.AuthResult
 
 /** Provides a way to authenticate the user using SSO flow. */
 interface AuthProviding {

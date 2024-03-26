@@ -18,7 +18,7 @@ package com.uber.sdk2.auth.internal.utils
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import com.uber.sdk2.auth.api.request.PrefillInfo
+import com.uber.sdk2.auth.request.PrefillInfo
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 

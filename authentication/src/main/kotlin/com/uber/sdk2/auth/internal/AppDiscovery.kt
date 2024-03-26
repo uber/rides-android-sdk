@@ -18,8 +18,8 @@ package com.uber.sdk2.auth.internal
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import com.uber.sdk2.auth.api.AppDiscovering
-import com.uber.sdk2.auth.api.request.CrossApp
+import com.uber.sdk2.auth.AppDiscovering
+import com.uber.sdk2.auth.request.CrossApp
 
 /**
  * Default implementation of [AppDiscovering]. This implementation uses the [PackageManager] to find

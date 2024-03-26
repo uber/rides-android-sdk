@@ -13,22 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.request
+package com.uber.sdk2.auth.response
 
 import android.os.Parcelable
+import com.squareup.moshi.Json
 import kotlinx.parcelize.Parcelize
 
-/**
- * Represents the context of the authentication request needed for Uber to authenticate the user.
- *
- * @param authDestination The destination app to authenticate the user.
- * @param authType The type of authentication to perform.
- * @param prefillInfo The prefill information to be used for the authentication.
- * @param scopes The scopes to request for the authentication.
- */
+/** Holds the OAuth token that is returned after a successful authentication request. */
 @Parcelize
-data class AuthContext(
-  val authDestination: AuthDestination,
-  val authType: AuthType,
-  val prefillInfo: PrefillInfo?,
+data class UberToken(
+  val authCode: String? = null,
+  @Json(name = "access_token") val accessToken: String? = null,
+  @Json(name = "refresh_token") val refreshToken: String? = null,
+  @Json(name = "expires_in") val expiresIn: Long? = null,
+  @Json(name = "scope") val scope: String? = null,
 ) : Parcelable

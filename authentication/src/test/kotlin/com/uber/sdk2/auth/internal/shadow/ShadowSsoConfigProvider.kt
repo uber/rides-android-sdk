@@ -16,8 +16,8 @@
 package com.uber.sdk2.auth.internal.shadow
 
 import android.content.Context
-import com.uber.sdk2.auth.api.request.SsoConfig
-import com.uber.sdk2.auth.api.request.SsoConfigProvider
+import com.uber.sdk2.auth.request.SsoConfig
+import com.uber.sdk2.auth.request.SsoConfigProvider
 import org.robolectric.annotation.Implementation
 import org.robolectric.annotation.Implements
 

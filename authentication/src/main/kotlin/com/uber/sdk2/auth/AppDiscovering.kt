@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api
+package com.uber.sdk2.auth
 
 import android.net.Uri
-import com.uber.sdk2.auth.api.request.CrossApp
+import com.uber.sdk2.auth.request.CrossApp
 
 /** Provides a way to discover the app to authenticate the user. */
 fun interface AppDiscovering {
