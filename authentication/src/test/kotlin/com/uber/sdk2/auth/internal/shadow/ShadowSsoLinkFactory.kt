@@ -16,9 +16,9 @@
 package com.uber.sdk2.auth.internal.shadow
 
 import androidx.appcompat.app.AppCompatActivity
-import com.uber.sdk2.auth.api.request.AuthContext
-import com.uber.sdk2.auth.api.sso.SsoLink
 import com.uber.sdk2.auth.internal.sso.SsoLinkFactory
+import com.uber.sdk2.auth.request.AuthContext
+import com.uber.sdk2.auth.sso.SsoLink
 import org.mockito.kotlin.mock
 import org.robolectric.annotation.Implementation
 import org.robolectric.annotation.Implements

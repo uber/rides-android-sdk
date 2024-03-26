@@ -16,7 +16,7 @@
 package com.uber.sdk2.auth.internal
 
 import android.util.Base64
-import com.uber.sdk2.auth.api.PKCEGenerator
+import com.uber.sdk2.auth.PKCEGenerator
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException

@@ -16,19 +16,19 @@
 package com.uber.sdk2.auth.internal
 
 import androidx.appcompat.app.AppCompatActivity
-import com.uber.sdk2.auth.api.AuthProviding
-import com.uber.sdk2.auth.api.PKCEGenerator
-import com.uber.sdk2.auth.api.exception.AuthException
-import com.uber.sdk2.auth.api.request.AuthContext
-import com.uber.sdk2.auth.api.request.AuthType
-import com.uber.sdk2.auth.api.request.SsoConfigProvider
-import com.uber.sdk2.auth.api.response.AuthResult
-import com.uber.sdk2.auth.api.response.PARResponse
-import com.uber.sdk2.auth.api.response.UberToken
+import com.uber.sdk2.auth.AuthProviding
+import com.uber.sdk2.auth.PKCEGenerator
+import com.uber.sdk2.auth.exception.AuthException
 import com.uber.sdk2.auth.internal.service.AuthService
 import com.uber.sdk2.auth.internal.sso.SsoLinkFactory
 import com.uber.sdk2.auth.internal.sso.UniversalSsoLink.Companion.RESPONSE_TYPE
 import com.uber.sdk2.auth.internal.utils.Base64Util
+import com.uber.sdk2.auth.request.AuthContext
+import com.uber.sdk2.auth.request.AuthType
+import com.uber.sdk2.auth.request.SsoConfigProvider
+import com.uber.sdk2.auth.response.AuthResult
+import com.uber.sdk2.auth.response.PARResponse
+import com.uber.sdk2.auth.response.UberToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

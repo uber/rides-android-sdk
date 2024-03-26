@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.request
+package com.uber.sdk2.auth.request
 
 import android.os.Parcelable
 import com.squareup.moshi.Json

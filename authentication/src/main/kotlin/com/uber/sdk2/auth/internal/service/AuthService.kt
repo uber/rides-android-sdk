@@ -17,8 +17,8 @@ package com.uber.sdk2.auth.internal.service
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import com.uber.sdk2.auth.api.response.PARResponse
-import com.uber.sdk2.auth.api.response.UberToken
+import com.uber.sdk2.auth.response.PARResponse
+import com.uber.sdk2.auth.response.UberToken
 import com.uber.sdk2.core.config.UriConfig
 import retrofit2.Response
 import retrofit2.Retrofit

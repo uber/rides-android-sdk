@@ -19,9 +19,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
-import com.uber.sdk2.auth.api.request.AuthContext
 import com.uber.sdk2.auth.client.UberAuthClient
 import com.uber.sdk2.auth.internal.AuthActivity
+import com.uber.sdk2.auth.request.AuthContext
 
 /** Implementation of [UberAuthClient] that uses the [AuthActivity] to authenticate the user. */
 class UberAuthClientImpl : UberAuthClient {

@@ -13,20 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api
+package com.uber.sdk2.auth.response
 
-import com.uber.sdk2.auth.api.response.AuthResult
+import com.squareup.moshi.Json
 
-/** Provides a way to authenticate the user using SSO flow. */
-interface AuthProviding {
-  /**
-   * Executes the SSO flow.
-   *
-   * @param ssoLink The SSO link to execute.
-   * @return The result from the authentication flow encapsulated in [AuthResult]
-   */
-  suspend fun authenticate(): AuthResult
-
-  /** Handles the authentication code received from the SSO flow via deeplink. */
-  fun handleAuthCode(authCode: String)
-}
+data class PARResponse(
+  @Json(name = "request_uri") val requestUri: String,
+  @Json(name = "expires_in") val expiresIn: String,
+)

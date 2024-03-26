@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.sso
+package com.uber.sdk2.auth.sso
 
-/**
- * Represents the Single Sign-On (SSO) link for authentication. This class is used to start the SSO
- * flow
- */
-interface SsoLink {
-  /** Executes the SSO link with the given optional query parameters. */
-  suspend fun execute(optionalQueryParams: Map<String, String>): String
+import android.net.Uri
 
-  /** Handles the authentication code received from the SSO flow via deeplink. */
-  fun handleAuthCode(authCode: String)
+/** Provides a way to launch a custom tab. */
+internal interface CustomTabsLauncher {
+  /** Launches a custom tab with the given [uri]. */
+  fun launch(uri: Uri)
 }

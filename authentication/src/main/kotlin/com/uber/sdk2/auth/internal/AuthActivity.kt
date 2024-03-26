@@ -21,11 +21,11 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.uber.sdk2.auth.api.AuthProviding
-import com.uber.sdk2.auth.api.exception.AuthException
-import com.uber.sdk2.auth.api.exception.AuthException.Companion.AUTH_CODE_INVALID
-import com.uber.sdk2.auth.api.request.AuthContext
-import com.uber.sdk2.auth.api.response.AuthResult
+import com.uber.sdk2.auth.AuthProviding
+import com.uber.sdk2.auth.exception.AuthException
+import com.uber.sdk2.auth.exception.AuthException.Companion.AUTH_CODE_INVALID
+import com.uber.sdk2.auth.request.AuthContext
+import com.uber.sdk2.auth.response.AuthResult
 import com.uber.sdk2.core.utils.CustomTabsHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

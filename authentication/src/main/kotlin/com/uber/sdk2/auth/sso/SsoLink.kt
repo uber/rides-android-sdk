@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.response
+package com.uber.sdk2.auth.sso
 
-import com.uber.sdk2.auth.api.exception.AuthException
+/**
+ * Represents the Single Sign-On (SSO) link for authentication. This class is used to start the SSO
+ * flow
+ */
+interface SsoLink {
+  /** Executes the SSO link with the given optional query parameters. */
+  suspend fun execute(optionalQueryParams: Map<String, String>): String
 
-/** Represents the response from the authentication request. */
-sealed class AuthResult {
-  /** Represents the success response from the authentication request. */
-  data class Success(val uberToken: UberToken) : AuthResult()
-
-  /** Represents the error response from the authentication request. */
-  data class Error(val authException: AuthException) : AuthResult()
+  /** Handles the authentication code received from the SSO flow via deeplink. */
+  fun handleAuthCode(authCode: String)
 }
