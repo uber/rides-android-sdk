@@ -36,7 +36,7 @@ sealed class AuthException(override val message: String) : RuntimeException(mess
 
     internal const val AUTH_CODE_INVALID = "Invalid auth code"
 
-    internal const val EMPTY_RESPONSE = "Response is empty"
+    internal const val AUTH_CODE_NOT_PRESENT = "Auth code is not present"
 
     internal const val NULL_RESPONSE = "Response not received"
 
