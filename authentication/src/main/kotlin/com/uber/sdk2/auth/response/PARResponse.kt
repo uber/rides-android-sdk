@@ -13,16 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.sso
+package com.uber.sdk2.auth.response
 
-/**
- * Represents the Single Sign-On (SSO) link for authentication. This class is used to start the SSO
- * flow
- */
-interface SsoLink {
-  /** Executes the SSO link with the given optional query parameters. */
-  suspend fun execute(optionalQueryParams: Map<String, String>): String
+import com.squareup.moshi.Json
 
-  /** Handles the authentication code received from the SSO flow via deeplink. */
-  fun handleAuthCode(authCode: String)
-}
+data class PARResponse(
+  @Json(name = "request_uri") val requestUri: String,
+  @Json(name = "expires_in") val expiresIn: String,
+)

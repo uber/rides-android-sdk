@@ -13,18 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.response
+package com.uber.sdk2.auth.sso
 
-import android.os.Parcelable
-import com.squareup.moshi.Json
-import kotlinx.parcelize.Parcelize
+/**
+ * Represents the Single Sign-On (SSO) link for authentication. This class is used to start the SSO
+ * flow
+ */
+interface SsoLink {
+  /** Executes the SSO link with the given optional query parameters. */
+  suspend fun execute(optionalQueryParams: Map<String, String>): String
 
-/** Holds the OAuth token that is returned after a successful authentication request. */
-@Parcelize
-data class UberToken(
-  val authCode: String? = null,
-  @Json(name = "access_token") val accessToken: String? = null,
-  @Json(name = "refresh_token") val refreshToken: String? = null,
-  @Json(name = "expires_in") val expiresIn: Long? = null,
-  @Json(name = "scope") val scope: String? = null,
-) : Parcelable
+  /** Handles the authentication code received from the SSO flow via deeplink. */
+  fun handleAuthCode(authCode: String)
+}

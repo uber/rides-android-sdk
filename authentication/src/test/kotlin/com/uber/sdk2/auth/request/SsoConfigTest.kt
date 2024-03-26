@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.request
+package com.uber.sdk2.auth.request
 
 import android.content.Context
 import android.content.res.Resources
 import com.uber.sdk2.auth.RobolectricTestBase
-import com.uber.sdk2.auth.api.request.SsoConfigProvider.getSsoConfig
 import java.io.ByteArrayInputStream
-import org.junit.Assert.assertEquals
+import org.junit.Assert
 import org.junit.Test
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
@@ -39,15 +37,22 @@ class SsoConfigTest : RobolectricTestBase() {
 
     whenever(context.resources).thenReturn(resources)
     whenever(context.packageName).thenReturn("com.uber.sdk2.auth")
-    whenever(resources.getIdentifier(any(), any(), any())).thenReturn(resourceId)
-    whenever(resources.openRawResource(anyInt()))
+    whenever(
+        resources.getIdentifier(
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any(),
+        )
+      )
+      .thenReturn(resourceId)
+    whenever(resources.openRawResource(ArgumentMatchers.anyInt()))
       .thenReturn(ByteArrayInputStream(configJsonString.toByteArray()))
 
-    val result = getSsoConfig(context)
+    val result = SsoConfigProvider.getSsoConfig(context)
 
-    assertEquals("testClientId", result.clientId)
-    assertEquals("testRedirectUri", result.redirectUri)
-    assertEquals("testScope", result.scope)
+    Assert.assertEquals("testClientId", result.clientId)
+    Assert.assertEquals("testRedirectUri", result.redirectUri)
+    Assert.assertEquals("testScope", result.scope)
   }
 
   @Test
@@ -59,15 +64,22 @@ class SsoConfigTest : RobolectricTestBase() {
 
     whenever(context.resources).thenReturn(resources)
     whenever(context.packageName).thenReturn("com.uber.sdk2.auth")
-    whenever(resources.getIdentifier(any(), any(), any())).thenReturn(resourceId)
-    whenever(resources.openRawResource(anyInt()))
+    whenever(
+        resources.getIdentifier(
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any(),
+        )
+      )
+      .thenReturn(resourceId)
+    whenever(resources.openRawResource(ArgumentMatchers.anyInt()))
       .thenReturn(ByteArrayInputStream(configJsonString.toByteArray()))
 
-    val result = getSsoConfig(context)
+    val result = SsoConfigProvider.getSsoConfig(context)
 
-    assertEquals("testClientId", result.clientId)
-    assertEquals("testRedirectUri", result.redirectUri)
-    assertEquals(null, result.scope)
+    Assert.assertEquals("testClientId", result.clientId)
+    Assert.assertEquals("testRedirectUri", result.redirectUri)
+    Assert.assertEquals(null, result.scope)
   }
 
   @Test(expected = Exception::class)
@@ -78,9 +90,16 @@ class SsoConfigTest : RobolectricTestBase() {
 
     whenever(context.resources).thenReturn(resources)
     whenever(context.packageName).thenReturn("com.uber.sdk2.auth")
-    whenever(resources.getIdentifier(any(), any(), any())).thenReturn(resourceId)
+    whenever(
+        resources.getIdentifier(
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any(),
+        )
+      )
+      .thenReturn(resourceId)
 
-    getSsoConfig(context)
+    SsoConfigProvider.getSsoConfig(context)
   }
 
   @Test(expected = Exception::class)
@@ -92,11 +111,18 @@ class SsoConfigTest : RobolectricTestBase() {
 
     whenever(context.resources).thenReturn(resources)
     whenever(context.packageName).thenReturn("com.uber.sdk2.auth")
-    whenever(resources.getIdentifier(any(), any(), any())).thenReturn(resourceId)
-    whenever(resources.openRawResource(anyInt()))
+    whenever(
+        resources.getIdentifier(
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any(),
+        )
+      )
+      .thenReturn(resourceId)
+    whenever(resources.openRawResource(ArgumentMatchers.anyInt()))
       .thenReturn(ByteArrayInputStream(configJsonString.toByteArray()))
 
-    getSsoConfig(context)
+    SsoConfigProvider.getSsoConfig(context)
   }
 
   @Test(expected = Exception::class)
@@ -108,11 +134,18 @@ class SsoConfigTest : RobolectricTestBase() {
 
     whenever(context.resources).thenReturn(resources)
     whenever(context.packageName).thenReturn("com.uber.sdk2.auth")
-    whenever(resources.getIdentifier(any(), any(), any())).thenReturn(resourceId)
-    whenever(resources.openRawResource(anyInt()))
+    whenever(
+        resources.getIdentifier(
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any(),
+        )
+      )
+      .thenReturn(resourceId)
+    whenever(resources.openRawResource(ArgumentMatchers.anyInt()))
       .thenReturn(ByteArrayInputStream(configJsonString.toByteArray()))
 
-    getSsoConfig(context)
+    SsoConfigProvider.getSsoConfig(context)
   }
 
   @Test(expected = Exception::class)
@@ -124,10 +157,17 @@ class SsoConfigTest : RobolectricTestBase() {
 
     whenever(context.resources).thenReturn(resources)
     whenever(context.packageName).thenReturn("com.uber.sdk2.auth")
-    whenever(resources.getIdentifier(any(), any(), any())).thenReturn(resourceId)
-    whenever(resources.openRawResource(anyInt()))
+    whenever(
+        resources.getIdentifier(
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any(),
+        )
+      )
+      .thenReturn(resourceId)
+    whenever(resources.openRawResource(ArgumentMatchers.anyInt()))
       .thenReturn(ByteArrayInputStream(configJsonString.toByteArray()))
 
-    getSsoConfig(context)
+    SsoConfigProvider.getSsoConfig(context)
   }
 }

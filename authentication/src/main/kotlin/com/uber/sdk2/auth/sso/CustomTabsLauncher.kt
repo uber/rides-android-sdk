@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.response
+package com.uber.sdk2.auth.sso
 
-import com.uber.sdk2.auth.api.exception.AuthException
+import android.net.Uri
 
-/** Represents the response from the authentication request. */
-sealed class AuthResult {
-  /** Represents the success response from the authentication request. */
-  data class Success(val uberToken: UberToken) : AuthResult()
-
-  /** Represents the error response from the authentication request. */
-  data class Error(val authException: AuthException) : AuthResult()
+/** Provides a way to launch a custom tab. */
+internal interface CustomTabsLauncher {
+  /** Launches a custom tab with the given [uri]. */
+  fun launch(uri: Uri)
 }

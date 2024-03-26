@@ -21,7 +21,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.net.Uri
 import com.uber.sdk2.auth.RobolectricTestBase
-import com.uber.sdk2.auth.api.request.CrossApp
+import com.uber.sdk2.auth.request.CrossApp
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before

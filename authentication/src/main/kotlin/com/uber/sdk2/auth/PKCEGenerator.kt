@@ -13,12 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.sso
+package com.uber.sdk2.auth
 
-import android.net.Uri
+/** Provides a way to generate PKCE code verifier and challenge. */
+interface PKCEGenerator {
+  /**
+   * Generates a code verifier.
+   *
+   * @return The generated code verifier.
+   */
+  fun generateCodeVerifier(): String
 
-/** Provides a way to launch a custom tab. */
-internal interface CustomTabsLauncher {
-  /** Launches a custom tab with the given [uri]. */
-  fun launch(uri: Uri)
+  /**
+   * Generates a code challenge for the given code verifier.
+   *
+   * @param codeVerifier The code verifier for which the code challenge needs to be generated.
+   * @return The generated code challenge.
+   */
+  fun generateCodeChallenge(codeVerifier: String): String
 }

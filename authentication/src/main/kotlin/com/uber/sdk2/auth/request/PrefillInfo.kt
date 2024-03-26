@@ -13,11 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.response
+package com.uber.sdk2.auth.request
 
-import com.squareup.moshi.Json
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-data class PARResponse(
-  @Json(name = "request_uri") val requestUri: String,
-  @Json(name = "expires_in") val expiresIn: String,
-)
+/**
+ * Provides a way to prefill the user's information in the authentication flow.
+ *
+ * @param email The email to prefill.
+ * @param firstName The first name to prefill.
+ * @param lastName The last name to prefill.
+ * @param phoneNumber The phone number to prefill.
+ */
+@Parcelize
+data class PrefillInfo(
+  val email: String,
+  val firstName: String,
+  val lastName: String,
+  val phoneNumber: String,
+) : Parcelable

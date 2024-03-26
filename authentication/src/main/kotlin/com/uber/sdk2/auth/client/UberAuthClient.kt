@@ -19,7 +19,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
-import com.uber.sdk2.auth.api.request.AuthContext
+import com.uber.sdk2.auth.request.AuthContext
 
 /**
  * Client to authenticate the user against one of the available Uber apps. It is entrypoint for the

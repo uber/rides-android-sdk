@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.uber.sdk2.auth.api.exception
+package com.uber.sdk2.auth.exception
 
 /** Represents the exception that occurred during the authentication request. */
 sealed class AuthException(override val message: String) : RuntimeException(message) {

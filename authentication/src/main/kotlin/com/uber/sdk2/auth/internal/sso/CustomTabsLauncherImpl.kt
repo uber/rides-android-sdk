@@ -18,7 +18,7 @@ package com.uber.sdk2.auth.internal.sso
 import android.content.Context
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
-import com.uber.sdk2.auth.api.sso.CustomTabsLauncher
+import com.uber.sdk2.auth.sso.CustomTabsLauncher
 import com.uber.sdk2.core.utils.CustomTabsHelper
 
 /** Default implementation of [CustomTabsLauncher]. */
