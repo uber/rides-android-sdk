@@ -68,15 +68,18 @@ internal class UniversalSsoLink(
   override suspend fun execute(optionalQueryParams: Map<String, String>): String {
     val uri =
       UriConfig.assembleUri(
-        ssoConfig.clientId,
-        RESPONSE_TYPE,
-        ssoConfig.redirectUri,
-        ssoConfig.scope,
-      )
-
-    optionalQueryParams.entries.forEach { entry ->
-      uri.buildUpon().appendQueryParameter(entry.key, entry.value).build()
-    }
+          ssoConfig.clientId,
+          RESPONSE_TYPE,
+          ssoConfig.redirectUri,
+          ssoConfig.scope,
+        )
+        .buildUpon()
+        .also { builder ->
+          optionalQueryParams.entries.forEach { entry ->
+            builder.appendQueryParameter(entry.key, entry.value)
+          }
+        }
+        .build()
     withContext(Dispatchers.Main) {
       when (authContext.authDestination) {
         is AuthDestination.CrossAppSso -> {

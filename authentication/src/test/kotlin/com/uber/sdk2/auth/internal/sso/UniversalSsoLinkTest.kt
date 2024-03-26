@@ -35,6 +35,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -130,5 +131,20 @@ class UniversalSsoLinkTest : RobolectricTestBase() {
 
       assertNotNull(result)
       assertEquals("authCode", result)
+    }
+
+  @Test
+  fun `execute when query params are provided and auth destination is InApp should updated the uri`() =
+    runTest(testDispatcher) {
+      universalSsoLink.resultDeferred.complete("SuccessResult")
+      whenever(appDiscovering.findAppForSso(any(), any())).thenReturn(null)
+      doNothing().whenever(customTabsLauncher).launch(any())
+
+      // Simulate calling execute and handle outcomes.
+      val result = universalSsoLink.execute(mapOf("param1" to "value1"))
+
+      assertNotNull(result)
+      assertEquals("SuccessResult", result)
+      verify(customTabsLauncher).launch(argThat { getQueryParameter("param1") == "value1" })
     }
 }
