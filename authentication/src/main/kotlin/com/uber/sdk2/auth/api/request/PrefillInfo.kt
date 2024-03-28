@@ -16,6 +16,7 @@
 package com.uber.sdk2.auth.api.request
 
 import android.os.Parcelable
+import com.squareup.moshi.Json
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -28,8 +29,8 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class PrefillInfo(
-  val email: String,
-  val firstName: String,
-  val lastName: String,
-  val phoneNumber: String,
+  @Json(name = "email") val email: String,
+  @Json(name = "first_name") val firstName: String,
+  @Json(name = "last_name") val lastName: String,
+  @Json(name = "phone") val phoneNumber: String,
 ) : Parcelable
