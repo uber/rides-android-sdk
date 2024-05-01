@@ -28,7 +28,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class AuthContext(
-  val authDestination: AuthDestination,
-  val authType: AuthType,
-  val prefillInfo: PrefillInfo?,
+  val authDestination: AuthDestination = AuthDestination.CrossAppSso(),
+  val authType: AuthType = AuthType.PKCE(),
+  val prefillInfo: PrefillInfo? = null,
 ) : Parcelable
