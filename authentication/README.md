@@ -7,19 +7,19 @@ This SDK is designed to work with Android SDK 26 and beyond.
 ### App Registration
 Start by registering your application in the [Uber Developer's Portal](https://developer.uber.com/dashboard/create). Note the ClientID under the `Application ID` field.
     <p align="center">
-    <img src="img/client_id.png?raw=true" alt="Request Buttons Screenshot"/>
+    <img src="../img/client_id.png?raw=true" alt="Request Buttons Screenshot"/>
 </p>
 
 In the [Uber Developer Dashboard](https://developer.uber.com/dashboard), under the Security section, enter your application's Bundle ID in the `App Signatures` text field and tap the plus icon.
 
 <p align="center">
-    <img src="../../img/app_signatures.png?raw=true" alt="App Signatures Screenshot"/>
+    <img src="../img/app_signatures.png?raw=true" alt="App Signatures Screenshot"/>
 </p>
 
 Next, add your application's Redirect URI to the list of URLs under `Redirect URIs`. The preferred format is `[Your App's Bundle ID]://oauth/consumer`, however any redirect URI may be used.
 
 <p align="center">
-    <img src="../../img/redirect_uri.png?raw=true" alt="Request Buttons Screenshot"/>
+    <img src="../img/redirect_uri.png?raw=true" alt="Request Buttons Screenshot"/>
 </p>
 
 ## Installation
