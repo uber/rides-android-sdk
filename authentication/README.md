@@ -31,7 +31,7 @@ To use the Uber authentication, add the implementation dependency with the lates
 
 ```gradle
 dependencies {
-    implementation 'com.uber.sdk:authentication:x.y.z'  
+    implementation 'com.uber.sdk:authentication:x.y.z'
 }
 ```
 
