@@ -32,7 +32,16 @@ sealed class AuthDestination : Parcelable {
    * order of priority mentioned. If none of the apps are available we will fall back to the [InApp]
    * flow
    *
-   * @param appPriority The order of the apps to use for the SSO flow.
+   * @param appPriority The order of the apps to use for the SSO flow. Defaults to
+   *   [CrossApp.Rider, CrossApp.Eats, CrossApp.Driver] priority
    */
-  data class CrossAppSso(val appPriority: List<CrossApp>) : AuthDestination()
+  data class CrossAppSso(val appPriority: List<CrossApp> = DEFAULT_APP_PRIORITY) :
+    AuthDestination()
+
+  companion object {
+    /**
+     * Default app priority to use for the SSO flow. The order of the apps to use for the SSO flow
+     */
+    private val DEFAULT_APP_PRIORITY = listOf(CrossApp.Rider, CrossApp.Eats, CrossApp.Driver)
+  }
 }
