@@ -29,7 +29,7 @@ jobs:
     runs-on: macOS-latest # enables hardware acceleration in the virtual machine, required for emulator testing
     strategy:
       matrix:
-        api-level: [ 21, 23, 26 ]
+        api-level: [ 26, 30, 33 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
