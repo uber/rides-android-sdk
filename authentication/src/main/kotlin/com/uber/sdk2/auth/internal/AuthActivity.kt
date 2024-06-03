@@ -74,14 +74,16 @@ class AuthActivity : AppCompatActivity() {
     // Check if the intent has the auth code. This happens when user has authenticated using custom
     // tabs
     intent?.data?.let {
-      if (isAuthorizationCodePresent(it)) {
-        val authCode = it.getQueryParameter(KEY_AUTHENTICATION_CODE)
-        if (authCode.isNullOrEmpty()) {
-          throw AuthException.ClientError(AUTH_CODE_INVALID)
-        }
-        authProvider?.handleAuthCode(authCode)
+      val authCode = it.getQueryParameter(KEY_AUTHENTICATION_CODE)
+      if (authCode.isNullOrEmpty()) {
+        throw AuthException.ClientError(AUTH_CODE_INVALID)
       }
+      authProvider?.handleAuthCode(authCode)
     }
+      ?: {
+        // If the intent does not have the auth code, then the user has cancelled the authentication
+        finish()
+      }
   }
 
   private fun isAuthorizationCodePresent(uri: Uri): Boolean {

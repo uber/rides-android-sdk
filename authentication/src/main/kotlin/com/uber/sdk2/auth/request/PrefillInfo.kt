@@ -28,7 +28,9 @@ import kotlinx.parcelize.Parcelize
  * @param phoneNumber The phone number to prefill.
  */
 @Parcelize
-data class PrefillInfo(
+data class PrefillInfo
+@JvmOverloads
+constructor(
   @Json(name = "email") val email: String?,
   @Json(name = "first_name") val firstName: String?,
   @Json(name = "last_name") val lastName: String?,

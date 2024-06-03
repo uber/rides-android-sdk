@@ -33,8 +33,9 @@ import org.json.JSONException
 import org.json.JSONObject
 
 @Parcelize
-data class SsoConfig(val clientId: String, val redirectUri: String, val scope: String? = null) :
-  Parcelable
+data class SsoConfig
+@JvmOverloads
+constructor(val clientId: String, val redirectUri: String, val scope: String? = null) : Parcelable
 
 object SsoConfigProvider {
   fun getSsoConfig(context: Context): SsoConfig {
