@@ -27,7 +27,9 @@ import kotlinx.parcelize.Parcelize
  * @param scopes The scopes to request for the authentication.
  */
 @Parcelize
-data class AuthContext(
+data class AuthContext
+@JvmOverloads
+constructor(
   val authDestination: AuthDestination = AuthDestination.CrossAppSso(),
   val authType: AuthType = AuthType.PKCE(),
   val prefillInfo: PrefillInfo? = null,
