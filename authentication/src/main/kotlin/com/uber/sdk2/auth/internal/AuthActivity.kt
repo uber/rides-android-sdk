@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 class AuthActivity : AppCompatActivity() {
 
   private var authProvider: AuthProviding? = null
+  private var authStarted: Boolean = false
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -41,7 +42,6 @@ class AuthActivity : AppCompatActivity() {
         ?: throw IllegalStateException("AuthContext is required")
 
     authProvider = AuthProvider(this, authContext)
-    init()
   }
 
   private fun init() {
@@ -71,6 +71,12 @@ class AuthActivity : AppCompatActivity() {
 
   override fun onResume() {
     super.onResume()
+
+    if (!authStarted) {
+      init()
+      authStarted = true
+      return
+    }
     // Check if the intent has the auth code. This happens when user has authenticated using custom
     // tabs
     intent?.data?.let {
@@ -80,8 +86,9 @@ class AuthActivity : AppCompatActivity() {
       }
       authProvider?.handleAuthCode(authCode)
     }
-      ?: {
+      ?: run {
         // If the intent does not have the auth code, then the user has cancelled the authentication
+        setResult(RESULT_CANCELED, intent)
         finish()
       }
   }
