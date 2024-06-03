@@ -50,29 +50,33 @@ object UriConfig {
     clientId: String,
     responseType: String,
     redirectUri: String,
+    environment: Environment = AUTH,
+    path: String = AUTHORIZE_PATH,
     scopes: String? = null,
   ): Uri {
     val builder = Uri.Builder()
     builder
       .scheme(HTTPS.scheme)
-      .authority(AUTH.subDomain + "." + DEFAULT.domain)
-      .appendEncodedPath(PATH)
+      .authority(environment.subDomain + "." + DEFAULT.domain)
+      .appendEncodedPath(AUTHORIZE_PATH)
       .appendQueryParameter(CLIENT_ID_PARAM, clientId)
       .appendQueryParameter(RESPONSE_TYPE_PARAM, responseType.lowercase(Locale.US))
       .appendQueryParameter(REDIRECT_PARAM, redirectUri)
       .appendQueryParameter(SCOPE_PARAM, scopes)
       .appendQueryParameter(SDK_VERSION_PARAM, BuildConfig.VERSION_NAME)
+      .appendQueryParameter(PLATFORM_PARAM, "android")
+      .appendQueryParameter(CODE_CHALLENGE_METHOD, CODE_CHALLENGE_METHOD_VAL)
     return builder.build()
   }
 
   /** Gets the endpoint host used to hit the Uber API. */
-  fun getEndpointHost(): String = "${HTTPS.scheme}://$API.${DEFAULT.domain}"
+  fun getEndpointHost(): String = "${HTTPS.scheme}://${API.subDomain}.${DEFAULT.domain}"
 
   /** Gets the login host used to sign in to the Uber API. */
-  fun getAuthHost(): String = "${HTTPS.scheme}://$AUTH.${DEFAULT.domain}"
+  fun getAuthHost(): String = "${HTTPS.scheme}://${AUTH.subDomain}.${DEFAULT.domain}"
 
   const val CLIENT_ID_PARAM = "client_id"
-  const val PATH = "oauth/v2/universal/authorize"
+  const val AUTHORIZE_PATH = "oauth/v2/universal/authorize/"
   const val REDIRECT_PARAM = "redirect_uri"
   const val RESPONSE_TYPE_PARAM = "response_type"
   const val SCOPE_PARAM = "scope"
@@ -80,4 +84,6 @@ object UriConfig {
   const val SDK_VERSION_PARAM = "sdk_version"
   const val CODE_CHALLENGE_PARAM = "code_challenge"
   const val REQUEST_URI = "request_uri"
+  const val CODE_CHALLENGE_METHOD = "code_challenge_method"
+  const val CODE_CHALLENGE_METHOD_VAL = "S256"
 }

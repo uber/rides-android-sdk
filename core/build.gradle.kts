@@ -40,6 +40,7 @@ dependencies {
   implementation(libs.appCompat)
   implementation(libs.material)
   testImplementation(libs.junit.junit)
+  testImplementation(libs.robolectric)
   androidTestImplementation(libs.androidx.test.ext.junit)
   androidTestImplementation(libs.androidx.test.espresso.espresso.core)
 }

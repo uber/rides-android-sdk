@@ -70,7 +70,7 @@ internal class UniversalSsoLink(
           ssoConfig.clientId,
           RESPONSE_TYPE,
           ssoConfig.redirectUri,
-          ssoConfig.scope,
+          scopes = ssoConfig.scope,
         )
         .buildUpon()
         .also { builder ->
