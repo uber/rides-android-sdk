@@ -21,13 +21,13 @@
 
     <queries>
         <package android:name="com.ubercab" />
-        <package android:name="com.ubercab.presidio.exo" />
+        <package android:name="com.ubercab.presidio.development" />
         <package android:name="com.ubercab.rider.internal" />
         <package android:name="com.ubercab.driver" />
         <package android:name="com.ubercab.driver.internal" />
-        <package android:name="com.ubercab.driver.exo" />
+        <package android:name="com.ubercab.driver.debug" />
         <package android:name="com.ubercab.eats" />
-        <package android:name="com.ubercab.eats.exo" />
+        <package android:name="com.ubercab.eats.debug" />
         <package android:name="com.ubercab.eats.internal" />
         <intent>
             <action android:name="android.support.customtabs.action.CustomTabsService" />
