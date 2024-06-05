@@ -27,7 +27,7 @@ sealed class AuthException(override val message: String) : RuntimeException(mess
   data class NetworkError(override val message: String) : AuthException(message)
 
   companion object {
-    internal const val CANCELED: String = "Canceled"
+    internal const val CANCELED: String = "User Canceled"
 
     internal const val SCOPE_NOT_PROVIDED: String = "Scope not provided in the sso config file"
 
