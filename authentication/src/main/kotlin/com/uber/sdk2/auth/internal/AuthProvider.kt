@@ -44,26 +44,27 @@ class AuthProvider(
 
   override suspend fun authenticate(): AuthResult {
     val ssoConfig = withContext(Dispatchers.IO) { SsoConfigProvider.getSsoConfig(activity) }
-    val parResponse =
-      authContext.prefillInfo?.let {
-        val response =
-          authService.loginParRequest(
-            ssoConfig.clientId,
-            RESPONSE_TYPE,
-            Base64Util.encodePrefillInfoToString(it),
-            ssoConfig.scope ?: "profile",
-          )
-        val body = response.body()
-        body?.takeIf { response.isSuccessful }
-          ?: throw AuthException.ServerError("Bad response ${response.code()}")
-      } ?: PARResponse("", "")
-
-    val queryParams =
-      mapOf(
-        "request_uri" to parResponse.requestUri,
-        "code_challenge" to codeVerifierGenerator.generateCodeChallenge(verifier),
-      )
     return try {
+      val parResponse =
+        authContext.prefillInfo?.let {
+          val response =
+            authService.loginParRequest(
+              ssoConfig.clientId,
+              RESPONSE_TYPE,
+              Base64Util.encodePrefillInfoToString(it),
+              ssoConfig.scope ?: "profile",
+            )
+          val body = response.body()
+          body?.takeIf { response.isSuccessful }
+            ?: throw AuthException.ServerError("Bad response ${response.code()}")
+        } ?: PARResponse("", "")
+
+      val queryParams =
+        mapOf(
+          "request_uri" to parResponse.requestUri,
+          "code_challenge" to codeVerifierGenerator.generateCodeChallenge(verifier),
+        )
+
       val authCode = ssoLink.execute(queryParams)
       when (authContext.authType) {
         AuthType.AuthCode -> AuthResult.Success(UberToken(authCode = authCode))

@@ -24,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import com.uber.sdk2.auth.AuthProviding
 import com.uber.sdk2.auth.exception.AuthException
 import com.uber.sdk2.auth.exception.AuthException.Companion.AUTH_CODE_INVALID
+import com.uber.sdk2.auth.exception.AuthException.Companion.CANCELED
 import com.uber.sdk2.auth.request.AuthContext
 import com.uber.sdk2.auth.response.AuthResult
 import com.uber.sdk2.core.utils.CustomTabsHelper
@@ -33,6 +34,7 @@ import kotlinx.coroutines.launch
 class AuthActivity : AppCompatActivity() {
 
   private var authProvider: AuthProviding? = null
+  private var authStarted: Boolean = false
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -41,7 +43,6 @@ class AuthActivity : AppCompatActivity() {
         ?: throw IllegalStateException("AuthContext is required")
 
     authProvider = AuthProvider(this, authContext)
-    init()
   }
 
   private fun init() {
@@ -71,6 +72,12 @@ class AuthActivity : AppCompatActivity() {
 
   override fun onResume() {
     super.onResume()
+
+    if (!authStarted) {
+      init()
+      authStarted = true
+      return
+    }
     // Check if the intent has the auth code. This happens when user has authenticated using custom
     // tabs
     intent?.data?.let {
@@ -80,8 +87,10 @@ class AuthActivity : AppCompatActivity() {
       }
       authProvider?.handleAuthCode(authCode)
     }
-      ?: {
+      ?: run {
         // If the intent does not have the auth code, then the user has cancelled the authentication
+        intent.putExtra("EXTRA_ERROR", CANCELED)
+        setResult(RESULT_CANCELED, intent)
         finish()
       }
   }
