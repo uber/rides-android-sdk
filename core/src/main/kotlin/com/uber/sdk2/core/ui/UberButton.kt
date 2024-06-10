@@ -15,12 +15,10 @@
  */
 package com.uber.sdk2.core.ui
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -37,35 +35,33 @@ import com.uber.sdk2.core.R
 
 /** A button that looks like the Uber button. */
 @Composable
-fun UberButton(
-  text: String,
-  isWhite: Boolean = false,
-  onClick: () -> Unit
-) {
+fun UberButton(text: String, isWhite: Boolean = false, onClick: () -> Unit) {
   val interactionSource = remember { MutableInteractionSource() }
   val isPressed = interactionSource.collectIsPressedAsState().value
-  val backgroundColor = if (isPressed) {
-    if (isWhite) colorResource(id = R.color.uber_white_40) else colorResource(id = R.color.uber_black_90)
-  } else {
-    if (isWhite) colorResource(id = R.color.uber_white) else colorResource(id = R.color.uber_black)
-  }
+  val backgroundColor =
+    if (isPressed) {
+      if (isWhite) colorResource(id = R.color.uber_white_40)
+      else colorResource(id = R.color.uber_black_90)
+    } else {
+      if (isWhite) colorResource(id = R.color.uber_white)
+      else colorResource(id = R.color.uber_black)
+    }
 
-  val textColor = if (isWhite) {
-    colorResource(id = R.color.uber_black)
-  } else {
-    colorResource(id = R.color.uber_white)
-  }
+  val textColor =
+    if (isWhite) {
+      colorResource(id = R.color.uber_black)
+    } else {
+      colorResource(id = R.color.uber_white)
+    }
 
   Text(
     text = text,
     color = textColor,
-    style = TextStyle(
-      fontSize = dimensionResource(id = R.dimen.ub__text_size).value.sp
-    ),
-    modifier = Modifier
-      .clip(RoundedCornerShape(4.dp))
-      .background(backgroundColor)
-      .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
-      .padding(16.dp)
+    style = TextStyle(fontSize = dimensionResource(id = R.dimen.ub__text_size).value.sp),
+    modifier =
+      Modifier.clip(RoundedCornerShape(4.dp))
+        .background(backgroundColor)
+        .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+        .padding(16.dp),
   )
 }

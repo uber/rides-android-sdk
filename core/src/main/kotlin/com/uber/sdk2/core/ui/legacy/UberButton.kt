@@ -71,22 +71,22 @@ constructor(
    */
   init {
     val uberStyle =
-        UberStyle.getStyleFromAttribute(
-            context,
-            attrs,
-            defStyleRes,
-            R.styleable.UberButton,
-            R.styleable.UberButton_ub__style,
-        )
+      UberStyle.getStyleFromAttribute(
+        context,
+        attrs,
+        defStyleRes,
+        R.styleable.UberButton,
+        R.styleable.UberButton_ub__style,
+      )
     init(context, 0, attrs, defStyleAttr, uberStyle)
   }
 
   protected open fun init(
-      context: Context,
-      @StringRes defaultText: Int,
-      attrs: AttributeSet?,
-      defStyleAttr: Int,
-      uberStyle: UberStyle,
+    context: Context,
+    @StringRes defaultText: Int,
+    attrs: AttributeSet?,
+    defStyleAttr: Int,
+    uberStyle: UberStyle,
   ) {
     val defStyleRes = STYLES[uberStyle.value]
 
