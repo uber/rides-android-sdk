@@ -42,9 +42,17 @@ android {
   }
 
   buildTypes { release { isMinifyEnabled = false } }
+
+  buildFeatures { compose = true }
+  composeOptions { kotlinCompilerExtensionVersion = "1.5.11" }
 }
 
 dependencies {
+  implementation(libs.androidx.ui.tooling.preview.android)
+  val composeBom = platform(libs.compose.bom)
+  implementation(composeBom)
+  implementation(libs.androidx.compose.foundation)
+  implementation(libs.material3)
   implementation(libs.appCompat)
   implementation(libs.chrometabs)
   implementation(libs.material)
