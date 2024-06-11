@@ -45,7 +45,6 @@ include(
   ":core",
   ":core-android",
   ":rides-android",
-  ":samples:auth-demo",
   ":samples:request-button-sample",
   ":samples:login-sample",
   ":samples:login-with-auth-code-demo",

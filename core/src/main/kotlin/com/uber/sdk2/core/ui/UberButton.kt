@@ -15,21 +15,16 @@
  */
 package com.uber.sdk2.core.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.uber.sdk2.core.R
 
@@ -54,14 +49,15 @@ fun UberButton(text: String, isWhite: Boolean = false, onClick: () -> Unit) {
       colorResource(id = R.color.uber_white)
     }
 
-  Text(
-    text = text,
-    color = textColor,
-    style = TextStyle(fontSize = dimensionResource(id = R.dimen.ub__text_size).value.sp),
-    modifier =
-      Modifier.clip(RoundedCornerShape(4.dp))
-        .background(backgroundColor)
-        .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
-        .padding(16.dp),
+  Button(
+    onClick = onClick,
+    content = {
+      Text(
+        text = text,
+        color = textColor,
+        style = TextStyle(fontSize = dimensionResource(id = R.dimen.ub__text_size).value.sp),
+      )
+    },
+    colors = ButtonDefaults.buttonColors(containerColor = backgroundColor, contentColor = textColor),
   )
 }
