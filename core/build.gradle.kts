@@ -32,17 +32,19 @@ android {
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
   }
+  buildFeatures { compose = true }
+  composeOptions { kotlinCompilerExtensionVersion = "1.5.11" }
 }
 
 dependencies {
-  val composeBom = platform(libs.androidx.compose.bom)
+  val composeBom = platform(libs.compose.bom)
   implementation(composeBom)
   implementation(libs.androidx.compose.foundation)
-  implementation(libs.androidx.compose.material3)
+  implementation(libs.material3)
   implementation(libs.chrometabs)
   implementation(libs.core.ktx)
   implementation(libs.appCompat)
-  implementation(libs.material)
+  debugImplementation(libs.androidx.ui.tooling)
   testImplementation(libs.junit.junit)
   testImplementation(libs.robolectric)
   androidTestImplementation(libs.androidx.test.ext.junit)
