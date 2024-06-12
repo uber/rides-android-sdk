@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,11 +40,11 @@ import com.uber.sdk2.core.R
 
 @Composable
 fun UberAuthButton(
-  text: String,
   isWhite: Boolean = false,
   shape: Shape = RoundedCornerShape(4.dp),
   onClick: () -> Unit,
 ) {
+  val text = stringResource(id = com.uber.sdk2.auth.R.string.ub__sign_in)
   val interactionSource = remember { MutableInteractionSource() }
   val isPressed = interactionSource.collectIsPressedAsState().value
 
