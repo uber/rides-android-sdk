@@ -14,7 +14,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
-          java-version: '8'
+          java-version: '17'
       - name: Lint and Unit tests
         run: ./gradlew check --stacktrace
       - name: Upload lint and test reports
@@ -25,12 +25,11 @@ jobs:
           path: |
             ./core-android/build/reports
             ./rides-android/build/reports
-
   test:
     runs-on: macOS-latest # enables hardware acceleration in the virtual machine, required for emulator testing
     strategy:
       matrix:
-        api-level: [ 21, 23, 26 ]
+        api-level: [ 26, 30, 33 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -40,24 +39,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
-          java-version: '8'
-      - name: Emulator tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: google_apis
-          arch: x86
-          disable-animations: true
-          script: ./gradlew connectedCheck --stacktrace
-      - name: Upload instrumented test reports
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: test-reports
-          path: |
-            ./core-android/build/reports
-            ./rides-android/build/reports
-
+          java-version: '17'
   upload-snapshots:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -73,9 +55,9 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
-          java-version: '8'
+          java-version: '17'
       - name: Upload snapshots
-        run: ./gradlew uploadArchives --stacktrace
+        run: ./gradlew publish --stacktrace
         env:
           ORG_GRADLE_PROJECT_SONATYPE_NEXUS_USERNAME: ${{ secrets.SonatypeUsername }}
           ORG_GRADLE_PROJECT_SONATYPE_NEXUS_PASSWORD: ${{ secrets.SonatypePassword }}

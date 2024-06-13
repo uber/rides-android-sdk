@@ -353,7 +353,6 @@ public class LoginActivity extends Activity {
         setContentView(R.layout.ub__login_activity);
         webView = (WebView) findViewById(R.id.ub__login_webview);
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setAppCacheEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
         webView.setWebViewClient(createOAuthClient(redirectUri));
         webView.loadUrl(url);

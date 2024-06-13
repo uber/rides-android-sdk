@@ -1,0 +1,79 @@
+# libs.versions.toml
+
+[versions]
+agp = "8.2.2"
+androidxVersion = "1.0.0"
+uberJava = "0.8.5"
+mavenPublish = "0.27.0"
+kotlin = "1.9.23"
+junit = "4.13.2"
+runner = "1.0.2"
+espresso-core = "3.0.2"
+appcompat-v7 = "28.0.0"
+compileSdkVersion = "34"
+minSdkVersion = "26"
+targetSdkVersion = "34"
+jvmTarget = "11"
+lintJvmTarget = "17"
+dokka = "1.9.10"
+jsr305 = "3.0.2"
+retrofit = "2.9.0"
+core-ktx = "1.12.0"
+androidx-test-ext-junit = "1.1.5"
+androidx-test-espresso-espresso-core = "3.5.1"
+material = "1.11.0"
+spotless = "6.25.0"
+ktfmt = "0.47"
+mockito = "5.11.0"
+mockito-kotlin = "5.2.1"
+kotlin-coroutines-test = "1.8.0"
+moshi = "1.15.0"
+constraintlayout = "2.1.4"
+lifecycle-runtime-ktx = "2.7.0"
+activity-compose = "1.8.2"
+compose-bom = "2023.08.00"
+androidx-ui-tooling = "1.6.7"
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+
+[libraries]
+jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "jsr305" }
+annotations = { module ="androidx.annotation:annotation", version.ref="androidxVersion"}
+appCompat = { module ="androidx.appcompat:appcompat", version.ref="androidxVersion"}
+chrometabs = { module = "androidx.browser:browser" , version.ref = "androidxVersion"}
+junit = "junit:junit:4.13.2"
+robolectric = "org.robolectric:robolectric:4.11.1"
+assertj = "org.assertj:assertj-core:3.25.1"
+mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-kotlin = {module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin"}
+guava = "com.google.guava:guava:23.4-android"
+wiremock = "com.github.tomakehurst:wiremock:2.10.1"
+uberCore = {module = "com.uber.sdk:uber-core", version.ref = "uberJava"}
+uberRides = {module = "com.uber.sdk:uber-rides", version.ref = "uberJava"}
+junit-junit = { group = "junit", name = "junit", version.ref = "junit" }
+runner = { group = "com.android.support.test", name = "runner", version.ref = "runner" }
+espresso-core = { group = "com.android.support.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+appcompat-v7 = { group = "com.android.support", name = "appcompat-v7", version.ref = "appcompat-v7" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit"}
+retrofit-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit"}
+moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin" , version.ref = "moshi"}
+core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
+androidx-test-espresso-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-test-espresso-espresso-core" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlin-coroutines-test" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
+activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
+compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling"}
+androidx-ui-tooling-preview-android = { group = "androidx.compose.ui", name = "ui-tooling-preview-android"}
+
