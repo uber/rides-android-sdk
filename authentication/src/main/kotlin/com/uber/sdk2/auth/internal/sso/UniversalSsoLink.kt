@@ -54,6 +54,7 @@ internal class UniversalSsoLink(
 ) : SsoLink {
 
   @VisibleForTesting val resultDeferred = CompletableDeferred<String>()
+  private var isAuthInProgress: Boolean = false
 
   private val launcher =
     activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -62,6 +63,7 @@ internal class UniversalSsoLink(
       } catch (e: AuthException) {
         resultDeferred.completeExceptionally(e)
       }
+      isAuthInProgress = true
     }
 
   override suspend fun execute(optionalQueryParams: Map<String, String>): String {
@@ -117,6 +119,10 @@ internal class UniversalSsoLink(
         throw AuthException.ClientError(AuthException.UNKNOWN)
       }
     }
+  }
+
+  override fun isAuthInProgress(): Boolean {
+    return isAuthInProgress
   }
 
   private fun loadCustomtab(uri: Uri) {

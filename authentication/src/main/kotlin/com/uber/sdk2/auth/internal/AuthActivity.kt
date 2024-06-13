@@ -22,8 +22,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.uber.sdk2.auth.AuthProviding
-import com.uber.sdk2.auth.exception.AuthException
-import com.uber.sdk2.auth.exception.AuthException.Companion.AUTH_CODE_INVALID
 import com.uber.sdk2.auth.exception.AuthException.Companion.CANCELED
 import com.uber.sdk2.auth.request.AuthContext
 import com.uber.sdk2.auth.response.AuthResult
@@ -82,17 +80,27 @@ class AuthActivity : AppCompatActivity() {
     // tabs
     intent?.data?.let {
       val authCode = it.getQueryParameter(KEY_AUTHENTICATION_CODE)
-      if (authCode.isNullOrEmpty()) {
-        throw AuthException.ClientError(AUTH_CODE_INVALID)
+      if (!authCode.isNullOrEmpty()) {
+        authProvider?.handleAuthCode(authCode)
+      } else {
+        // If the intent does not have the auth code, then the user denied the authentication
+        val error = it.getQueryParameter(KEY_ERROR) ?: CANCELED
+        finishAuthWithError(error)
       }
-      authProvider?.handleAuthCode(authCode)
     }
       ?: run {
-        // If the intent does not have the auth code, then the user has cancelled the authentication
-        intent.putExtra("EXTRA_ERROR", CANCELED)
-        setResult(RESULT_CANCELED, intent)
-        finish()
+        if (authProvider?.isAuthInProgress() == true) {
+          return
+        }
+        finishAuthWithError()
       }
+  }
+
+  private fun finishAuthWithError(error: String = CANCELED) {
+    // If the intent does not have the auth code, then the user has cancelled the authentication
+    intent.putExtra("EXTRA_ERROR", error)
+    setResult(RESULT_CANCELED, intent)
+    finish()
   }
 
   private fun isAuthorizationCodePresent(uri: Uri): Boolean {
@@ -107,6 +115,7 @@ class AuthActivity : AppCompatActivity() {
   companion object {
     private const val AUTH_CONTEXT = "auth_context"
     private const val KEY_AUTHENTICATION_CODE = "code"
+    private const val KEY_ERROR = "error"
 
     fun newIntent(context: Context, authContext: AuthContext): Intent {
       val intent = Intent(context, AuthActivity::class.java)

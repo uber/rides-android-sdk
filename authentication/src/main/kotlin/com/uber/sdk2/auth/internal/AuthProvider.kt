@@ -98,4 +98,8 @@ class AuthProvider(
   override fun handleAuthCode(authCode: String) {
     ssoLink.handleAuthCode(authCode)
   }
+
+  override fun isAuthInProgress(): Boolean {
+    return ssoLink.isAuthInProgress()
+  }
 }
