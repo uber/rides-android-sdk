@@ -76,7 +76,7 @@ object UriConfig {
   fun getAuthHost(): String = "${HTTPS.scheme}://${AUTH.subDomain}.${DEFAULT.domain}"
 
   const val CLIENT_ID_PARAM = "client_id"
-  const val AUTHORIZE_PATH = "oauth/v2/universal/authorize/"
+  const val AUTHORIZE_PATH = "oauth/v2/universal/authorize"
   const val REDIRECT_PARAM = "redirect_uri"
   const val RESPONSE_TYPE_PARAM = "response_type"
   const val SCOPE_PARAM = "scope"

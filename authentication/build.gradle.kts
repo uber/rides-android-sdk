@@ -22,6 +22,7 @@ plugins {
   alias(libs.plugins.kotlin.android)
   alias(libs.plugins.kotlin.parcelize)
   alias(libs.plugins.spotless)
+  alias(libs.plugins.mavenPublish)
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -35,7 +36,11 @@ tasks.withType<KotlinCompile>().configureEach {
 
 android {
   namespace = "com.uber.sdk2.auth"
+  buildFeatures { buildConfig = true }
 
+  defaultConfig {
+    buildConfigField("String", "VERSION_NAME", "\"${project.property("VERSION_NAME").toString()}\"")
+  }
   defaultConfig {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     consumerProguardFiles("consumer-proguard-rules.txt")
