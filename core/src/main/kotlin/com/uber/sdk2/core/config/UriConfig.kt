@@ -51,14 +51,14 @@ object UriConfig {
     responseType: String,
     redirectUri: String,
     environment: Environment = AUTH,
-    path: String = AUTHORIZE_PATH,
+    path: String = UNIVERSAL_AUTHORIZE_PATH,
     scopes: String? = null,
   ): Uri {
     val builder = Uri.Builder()
     builder
       .scheme(HTTPS.scheme)
       .authority(environment.subDomain + "." + DEFAULT.domain)
-      .appendEncodedPath(AUTHORIZE_PATH)
+      .appendEncodedPath(UNIVERSAL_AUTHORIZE_PATH)
       .appendQueryParameter(CLIENT_ID_PARAM, clientId)
       .appendQueryParameter(RESPONSE_TYPE_PARAM, responseType.lowercase(Locale.US))
       .appendQueryParameter(REDIRECT_PARAM, redirectUri)
@@ -76,7 +76,8 @@ object UriConfig {
   fun getAuthHost(): String = "${HTTPS.scheme}://${AUTH.subDomain}.${DEFAULT.domain}"
 
   const val CLIENT_ID_PARAM = "client_id"
-  const val AUTHORIZE_PATH = "oauth/v2/universal/authorize"
+  const val UNIVERSAL_AUTHORIZE_PATH = "oauth/v2/universal/authorize"
+  const val AUTHORIZE_PATH = "oauth/v2/authorize"
   const val REDIRECT_PARAM = "redirect_uri"
   const val RESPONSE_TYPE_PARAM = "response_type"
   const val SCOPE_PARAM = "scope"

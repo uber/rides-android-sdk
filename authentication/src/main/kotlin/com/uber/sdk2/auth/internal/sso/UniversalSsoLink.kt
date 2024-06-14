@@ -91,13 +91,16 @@ internal class UniversalSsoLink(
             intent.`package` = packageName
             intent.data = uri
             launcher.launch(intent)
-          } ?: loadCustomtab(uri)
+          } ?: loadCustomtab(getSecureWebviewUri(uri))
         }
-        is AuthDestination.InApp -> loadCustomtab(uri)
+        is AuthDestination.InApp -> loadCustomtab(getSecureWebviewUri(uri))
       }
     }
     return resultDeferred.await()
   }
+
+  private fun getSecureWebviewUri(uri: Uri) = uri.buildUpon().path(UriConfig.AUTHORIZE_PATH).build()
+
 
   override fun handleAuthCode(authCode: String) {
     resultDeferred.complete(authCode)

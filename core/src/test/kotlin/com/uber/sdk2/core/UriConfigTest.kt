@@ -16,7 +16,7 @@
 package com.uber.sdk2.core
 
 import com.uber.sdk2.core.config.UriConfig
-import com.uber.sdk2.core.config.UriConfig.AUTHORIZE_PATH
+import com.uber.sdk2.core.config.UriConfig.UNIVERSAL_AUTHORIZE_PATH
 import com.uber.sdk2.core.config.UriConfig.CLIENT_ID_PARAM
 import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_METHOD
 import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_METHOD_VAL
@@ -40,7 +40,7 @@ class UriConfigTest : RobolectricTestBase() {
     println(uri.toString())
     assertEquals("auth.uber.com", uri.authority)
     assertEquals("https", uri.scheme)
-    assertEquals("/$AUTHORIZE_PATH", uri.path)
+    assertEquals("/$UNIVERSAL_AUTHORIZE_PATH", uri.path)
     assertEquals(clientId, uri.getQueryParameter(CLIENT_ID_PARAM))
     assertEquals(responseType.lowercase(Locale.US), uri.getQueryParameter(RESPONSE_TYPE_PARAM))
     assertEquals(redirectUri, uri.getQueryParameter(REDIRECT_PARAM))

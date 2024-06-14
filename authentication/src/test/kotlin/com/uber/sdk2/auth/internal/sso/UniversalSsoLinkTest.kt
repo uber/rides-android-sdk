@@ -25,11 +25,13 @@ import com.uber.sdk2.auth.request.CrossApp
 import com.uber.sdk2.auth.request.PrefillInfo
 import com.uber.sdk2.auth.request.SsoConfig
 import com.uber.sdk2.auth.sso.CustomTabsLauncher
+import com.uber.sdk2.core.config.UriConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.hamcrest.MatcherAssert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
@@ -121,6 +123,27 @@ class UniversalSsoLinkTest : RobolectricTestBase() {
       assertEquals("SuccessResult", result)
 
       verify(customTabsLauncher).launch(any())
+    }
+
+  @Test
+  fun `execute should use inApp authentication with authorize path when apps are not present`() =
+    runTest(testDispatcher) {
+      whenever(appDiscovering.findAppForSso(any(), any())).thenReturn(null)
+
+      doNothing().whenever(customTabsLauncher).launch(any())
+      universalSsoLink.resultDeferred.complete("SuccessResult")
+
+      // Simulate calling execute and handle outcomes.
+      val result = universalSsoLink.execute(mapOf())
+
+      assertNotNull(result)
+      assertEquals("SuccessResult", result)
+
+      verify(customTabsLauncher).launch(
+        argThat {
+          this.path.equals("/${UriConfig.AUTHORIZE_PATH}")
+        }
+      )
     }
 
   @Test
