@@ -31,7 +31,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.hamcrest.MatcherAssert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
@@ -139,11 +138,8 @@ class UniversalSsoLinkTest : RobolectricTestBase() {
       assertNotNull(result)
       assertEquals("SuccessResult", result)
 
-      verify(customTabsLauncher).launch(
-        argThat {
-          this.path.equals("/${UriConfig.AUTHORIZE_PATH}")
-        }
-      )
+      verify(customTabsLauncher)
+        .launch(argThat { this.path.equals("/${UriConfig.AUTHORIZE_PATH}") })
     }
 
   @Test

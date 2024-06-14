@@ -101,7 +101,6 @@ internal class UniversalSsoLink(
 
   private fun getSecureWebviewUri(uri: Uri) = uri.buildUpon().path(UriConfig.AUTHORIZE_PATH).build()
 
-
   override fun handleAuthCode(authCode: String) {
     resultDeferred.complete(authCode)
   }
