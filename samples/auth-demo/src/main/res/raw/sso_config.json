@@ -1,5 +1,5 @@
 {
-  "client_id": "hqA0RVHZuLdXaGuBJ0fani3lljLRCuGr",
-  "redirect_uri": "com.ubercab.presidio.demo.uberauth://redirect",
-  "scope": "profile"
+  "client_id": "your_client_id",
+  "redirect_uri": "your_redirect_uri",
+  "scope": "your_scopes_comma_separated"
 }
