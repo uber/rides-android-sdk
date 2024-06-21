@@ -183,7 +183,7 @@ requestButton.loadRideInformation();
 If you want to provide a more custom experience in your app, there are a few classes to familiarize yourself with. Read the sections below and you'll be requesting rides in no time!
 
 ### Login
-[Integration guide](https://github.com/uber/rides-android-sdk/tree/main/authentication) - Integrating a new client using Uber android authentication sdk
+[Integration guide](https://github.com/uber/rides-android-sdk/tree/main/authentication) - Integrating a new client using Uber android authentication sdk\
 [Migration guide](https://github.com/uber/rides-android-sdk/blob/2.x/MIGRATION.md) - Upgrading an old integration (using version 0.10.X and below) to the new authentication sdk (version 2.X and above)
 
 ## Making an API Request
