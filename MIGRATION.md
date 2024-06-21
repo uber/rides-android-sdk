@@ -1,4 +1,4 @@
-# Migration Guide from Old SDK
+# Migration Guide from old Authentication sdk (<=0.10.10) to new sdk (>=2.0.0-BETA)
 
 We've simplified the SDK for consumers by providing a single point of entry. Information passing from the client app to the library is now divided into two parts:
 
