@@ -16,7 +16,8 @@ In the [Uber Developer Dashboard](https://developer.uber.com/dashboard), under t
     <img src="../img/app_signatures.png?raw=true" alt="App Signatures Screenshot"/>
 </p>
 
-Next, add your application's Redirect URI to the list of URLs under `Redirect URIs`. The preferred format is `[Your App's Bundle ID]://oauth/consumer`, however any redirect URI may be used.
+Next, add your application's Redirect URI to the list of URLs under `Redirect URIs`. The format you need to use is `[Your App's Bundle ID].uberauth://redirect`. The redirect URI is strongly enforced to meet IETF standards [IETF RFC](https://tools.ietf.org/html/draft-ietf-oauth-native-apps-12).
+
 
 <p align="center">
     <img src="../img/redirect_uri.png?raw=true" alt="Request Buttons Screenshot"/>
