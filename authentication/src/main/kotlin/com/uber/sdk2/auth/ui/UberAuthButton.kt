@@ -31,32 +31,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import com.uber.sdk2.auth.ui.theme.UberBlack
-import com.uber.sdk2.auth.ui.theme.UberBlack90
 import com.uber.sdk2.auth.ui.theme.UberDimens
 import com.uber.sdk2.auth.ui.theme.UberTypography
-import com.uber.sdk2.auth.ui.theme.UberWhite
-import com.uber.sdk2.auth.ui.theme.UberWhite40
 import com.uber.sdk2.core.R
 
 @Composable
 fun UberAuthButton(
   isWhite: Boolean = false,
-  shape: Shape = MaterialTheme.shapes.small,
+  shape: Shape = MaterialTheme.shapes.large,
   onClick: () -> Unit,
 ) {
   val text = stringResource(id = com.uber.sdk2.auth.R.string.ub__sign_in)
   val interactionSource = remember { MutableInteractionSource() }
   val isPressed = interactionSource.collectIsPressedAsState().value
-
   val backgroundColor =
     if (isPressed) {
-      if (isWhite) UberWhite40 else UberBlack90
+      MaterialTheme.colorScheme.onSecondary
     } else {
-      if (isWhite) UberWhite else UberBlack
+      MaterialTheme.colorScheme.onPrimary
     }
 
-  val textColor = MaterialTheme.colorScheme.onPrimary
+  val textColor = MaterialTheme.colorScheme.primary
 
   val iconResId = if (isWhite) R.drawable.uber_logotype_black else R.drawable.uber_logotype_white
 
@@ -66,6 +61,7 @@ fun UberAuthButton(
     colors =
       ButtonDefaults.buttonColors(containerColor = backgroundColor, contentColor = textColor),
     shape = shape,
+    interactionSource = interactionSource,
   ) {
     Icon(
       painter = painterResource(id = iconResId),
@@ -75,7 +71,7 @@ fun UberAuthButton(
     Text(
       text = text.uppercase(),
       color = textColor,
-      style = UberTypography.bodySmall,
+      style = UberTypography.bodyMedium,
       modifier = Modifier.padding(UberDimens.standardPadding).wrapContentWidth(),
     )
   }

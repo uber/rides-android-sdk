@@ -25,27 +25,9 @@ import androidx.compose.runtime.Composable
 fun UberTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
   val colors =
     if (darkTheme) {
-      darkColorScheme(
-        primary = UberBlack,
-        onPrimary = UberWhite,
-        secondary = UberWhite,
-        onSecondary = UberBlack,
-        background = UberBlack90,
-        surface = UberBlack90,
-        onBackground = UberWhite,
-        onSurface = UberWhite,
-      )
+      darkColorScheme(primary = UberBlack, onPrimary = UberWhite, onSecondary = UberWhite40)
     } else {
-      lightColorScheme(
-        primary = UberBlack,
-        onPrimary = UberWhite,
-        secondary = UberBlack90,
-        onSecondary = UberWhite,
-        background = UberWhite,
-        surface = UberWhite40,
-        onBackground = UberBlack,
-        onSurface = UberBlack,
-      )
+      lightColorScheme(primary = UberWhite, onPrimary = UberBlack, onSecondary = UberBlack90)
     }
 
   MaterialTheme(
