@@ -48,10 +48,10 @@ object CustomTabsHelper {
   ) {
     val packageName = getPackageNameToUse(context)
     if (packageName != null) {
-      connection =
+      val connection =
         object : CustomTabsServiceConnection() {
           override fun onCustomTabsServiceConnected(
-            componentName: ComponentName?,
+            componentName: ComponentName,
             client: CustomTabsClient,
           ) {
             client.warmup(0L) // This prevents backgrounding after redirection
@@ -63,6 +63,7 @@ object CustomTabsHelper {
           override fun onServiceDisconnected(name: ComponentName?) {}
         }
       CustomTabsClient.bindCustomTabsService(context, packageName, connection)
+      this.connection = connection
     } else
       fallback?.openUri(context, uri)
         ?: Log.e(
