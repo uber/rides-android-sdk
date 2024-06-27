@@ -1,24 +1,57 @@
-v0.10.1 - TBD
+v0.10.8 - 09/22/2023
 -------------
+
+### Update
+- Updated [rides-java-sdk](https://github.com/uber/rides-java-sdk) version to 0.8.4
+
+v0.10.7 - 08/17/2023
+-------------
+
+### Fixed
+- [Issue #204](https://github.com/uber/rides-android-sdk/issues/204) NullPointerException when login via SSO with pushed authorization request
+
+v0.10.4 - 05/26/2023
+-------------
+
+### Added
+- [Issue #194](https://github.com/uber/rides-android-sdk/issues/194) Integrated Login Pushed authorization request flow
+- [Issue #193](https://github.com/uber/rides-android-sdk/issues/193) Deprecating embedded webviews
+- Updated java version to 1.8
+- Updated login endpoint to auth.uber.com from login.uber.com
+- Replaced jcenter with mavenCentral
+
+v0.10.3 - 08/19/2021
+-------------
+
+v0.10.2 - 12/03/2019
+-------------
+
+v0.10.1 - 02/27/2019
+-------------
+
+### Fixed
+- [Issue #153](https://github.com/uber/rides-android-sdk/issues/153) NullPointerException when login via SSO without setting product flow priority
+- [Issue #151](https://github.com/uber/rides-android-sdk/issues/151) Login throws IllegalStateException when using only CustomScopes
+
 
 v0.10.0 - 12/14/2018
 ------------
 
 ### Added
- - [Issue #144](https://github.com/uber/rides-android-sdk/issues/144) Allow SSO Client to dictate which Uber Apps can be used for SSO
- - [Issue #138](https://github.com/uber/rides-android-sdk/issues/138) Support for IETF RFC 8252
- - [Issue #130](https://github.com/uber/rides-android-sdk/issues/130) Support for Uber Eats SSO
+- [Issue #144](https://github.com/uber/rides-android-sdk/issues/144) Allow SSO Client to dictate which Uber Apps can be used for SSO
+- [Issue #138](https://github.com/uber/rides-android-sdk/issues/138) Support for IETF RFC 8252
+- [Issue #130](https://github.com/uber/rides-android-sdk/issues/130) Support for Uber Eats SSO
 
 ### Fixed
- - [Issue #129](https://github.com/uber/rides-android-sdk/issues/129) Allow use of refresh token for non-privileged scopes
- - [Issue #119](https://github.com/uber/rides-android-sdk/issues/119) Redirect URL documentation issue
+- [Issue #129](https://github.com/uber/rides-android-sdk/issues/129) Allow use of refresh token for non-privileged scopes
+- [Issue #119](https://github.com/uber/rides-android-sdk/issues/119) Redirect URL documentation issue
 
 v0.9.1 - 03/20/2018
 ------------
 
 ### Fixed
- - [Issue #115](https://github.com/uber/rides-android-sdk/issues/115) Release Script is creating invalid release notes/download artifacts.
- - Updated to Java SDK 0.8.0 to fix Token Refresh NPE
+- [Issue #115](https://github.com/uber/rides-android-sdk/issues/115) Release Script is creating invalid release notes/download artifacts.
+- Updated to Java SDK 0.8.0 to fix Token Refresh NPE
 
 
 v0.9.0 - 02/13/2018
@@ -29,16 +62,16 @@ v0.9.0 - 02/13/2018
   over deprecated Ride Request Widget
 
 ### Fixed
- - [Issue #105](https://github.com/uber/rides-android-sdk/issues/105) onReceivedError and onReceivedHttpError does not work on API level < 23
+- [Issue #105](https://github.com/uber/rides-android-sdk/issues/105) onReceivedError and onReceivedHttpError does not work on API level < 23
 
 v0.8.0 - 02/09/2018
 ------------
 
 ### Changed
- - [Issue #101](https://github.com/uber/rides-android-sdk/issues/101) LoginManager now uses AccessTokenStorage
+- [Issue #101](https://github.com/uber/rides-android-sdk/issues/101) LoginManager now uses AccessTokenStorage
 
 ### Added
- - [Issue #22](https://github.com/uber/rides-android-sdk/issues/22) Customtab support
+- [Issue #22](https://github.com/uber/rides-android-sdk/issues/22) Customtab support
 
 
 v0.7.0 - 11/17/2017
@@ -53,7 +86,7 @@ v0.7.0 - 11/17/2017
 v0.6.1 - 4/5/2017
 -------------------
 ### Changed
- - AuthUtils now omits unrecognized scopes from parsed AccessToken instead of throwing an exception when creating
+- AuthUtils now omits unrecognized scopes from parsed AccessToken instead of throwing an exception when creating
 
 v0.6.0 - 2/14/2017
 -------------------
@@ -152,7 +185,7 @@ v0.3.1 - 4/18/2016
 ### Fixed
 
 - [Issue #15] (https://github.com/uber/rides-android-sdk/issues/15) RideRequestView correctly handles redirecting to
-call or message the driver
+  call or message the driver
 
 v0.3.0 - 4/11/2016
 ------------------
@@ -208,8 +241,8 @@ Currently available `requestingBehaviors` are:
 
 v0.2.0 - 2/3/2016
 ------------------
-  - Localization of request button text for zh-rCN.
+- Localization of request button text for zh-rCN.
 
 v0.1.0 - 11/24/2015
 ------------------
-  - Initial version.
+- Initial version.

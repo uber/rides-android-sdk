@@ -22,13 +22,11 @@
 
 package com.uber.sdk.android.rides.samples;
 
-import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,13 +34,9 @@ import android.widget.Toast;
 
 import com.uber.sdk.android.core.Deeplink;
 import com.uber.sdk.android.core.auth.AccessTokenManager;
-import com.uber.sdk.android.core.auth.AuthenticationError;
 import com.uber.sdk.android.rides.RideParameters;
-import com.uber.sdk.android.rides.RideRequestActivity;
-import com.uber.sdk.android.rides.RideRequestActivityBehavior;
 import com.uber.sdk.android.rides.RideRequestButton;
 import com.uber.sdk.android.rides.RideRequestButtonCallback;
-import com.uber.sdk.android.rides.RideRequestViewError;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.client.ServerTokenSession;

@@ -22,7 +22,7 @@
 
 package com.uber.sdk.android.core.utils;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.Collection;
 
