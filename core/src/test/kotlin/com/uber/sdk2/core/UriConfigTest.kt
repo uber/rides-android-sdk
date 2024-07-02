@@ -17,8 +17,6 @@ package com.uber.sdk2.core
 
 import com.uber.sdk2.core.config.UriConfig
 import com.uber.sdk2.core.config.UriConfig.CLIENT_ID_PARAM
-import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_METHOD
-import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_METHOD_VAL
 import com.uber.sdk2.core.config.UriConfig.PLATFORM_PARAM
 import com.uber.sdk2.core.config.UriConfig.REDIRECT_PARAM
 import com.uber.sdk2.core.config.UriConfig.RESPONSE_TYPE_PARAM
@@ -47,7 +45,6 @@ class UriConfigTest : RobolectricTestBase() {
     assertEquals(scopes, uri.getQueryParameter(SCOPE_PARAM))
     assertEquals(BuildConfig.VERSION_NAME, uri.getQueryParameter(SDK_VERSION_PARAM))
     assertEquals("android", uri.getQueryParameter(PLATFORM_PARAM))
-    assertEquals(CODE_CHALLENGE_METHOD_VAL, uri.getQueryParameter(CODE_CHALLENGE_METHOD))
   }
 
   @Test
