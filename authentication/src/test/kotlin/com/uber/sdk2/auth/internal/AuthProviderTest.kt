@@ -29,10 +29,12 @@ import com.uber.sdk2.auth.request.AuthDestination
 import com.uber.sdk2.auth.request.AuthType
 import com.uber.sdk2.auth.request.CrossApp
 import com.uber.sdk2.auth.request.PrefillInfo
+import com.uber.sdk2.auth.request.Prompt
 import com.uber.sdk2.auth.response.AuthResult
 import com.uber.sdk2.auth.response.PARResponse
 import com.uber.sdk2.auth.response.UberToken
 import com.uber.sdk2.auth.sso.SsoLink
+import com.uber.sdk2.core.config.UriConfig
 import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_METHOD
 import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_METHOD_VAL
 import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_PARAM
@@ -113,6 +115,7 @@ class AuthProviderTest : RobolectricTestBase() {
     assert(argumentCaptor.firstValue[REQUEST_URI] == "requestUri")
     assert(argumentCaptor.firstValue[CODE_CHALLENGE_PARAM] == "challenge")
     assert(argumentCaptor.firstValue[CODE_CHALLENGE_METHOD] == CODE_CHALLENGE_METHOD_VAL)
+    assert(argumentCaptor.firstValue.containsValue(UriConfig.PROMPT_PARAM).not())
     assert(argumentCaptor.firstValue.size == 3)
     assert(result is AuthResult.Success)
     assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")
@@ -168,5 +171,27 @@ class AuthProviderTest : RobolectricTestBase() {
     val result = authProvider.authenticate()
     verify(ssoLink).execute(any())
     assert(result is AuthResult.Error && result.authException.message == "error")
+  }
+
+  @Test
+  fun `test authenticate when prompt param is present should add to query param`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("authCode")
+    whenever(authService.loginParRequest(any(), any(), any(), any()))
+      .thenReturn(Response.success(PARResponse("requestUri", "codeVerifier")))
+    val authContext =
+      AuthContext(
+        AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        AuthType.AuthCode,
+        null,
+        prompt = Prompt.LOGIN,
+      )
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val argumentCaptor = argumentCaptor<Map<String, String>>()
+    val result = authProvider.authenticate()
+    verify(authService, never()).token(any(), any(), any(), any(), any())
+    verify(ssoLink).execute(argumentCaptor.capture())
+    assert(argumentCaptor.lastValue[UriConfig.PROMPT_PARAM] == Prompt.LOGIN.value)
+    assert(result is AuthResult.Success)
+    assert((result as AuthResult.Success).uberToken.authCode == "authCode")
   }
 }

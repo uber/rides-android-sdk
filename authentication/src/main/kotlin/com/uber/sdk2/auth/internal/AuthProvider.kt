@@ -99,16 +99,12 @@ class AuthProvider(
     } ?: PARResponse("", "")
 
   private fun getQueryParams(parResponse: PARResponse) = buildMap {
-    when (authContext.authType) {
-      AuthType.AuthCode -> {
-        parResponse.requestUri.takeIf { it.isNotEmpty() }?.let { put(REQUEST_URI, it) }
-      }
-      is AuthType.PKCE -> {
-        val codeChallenge = codeVerifierGenerator.generateCodeChallenge(verifier)
-        parResponse.requestUri.takeIf { it.isNotEmpty() }?.let { put(REQUEST_URI, it) }
-        put(CODE_CHALLENGE_PARAM, codeChallenge)
-        put(UriConfig.CODE_CHALLENGE_METHOD, UriConfig.CODE_CHALLENGE_METHOD_VAL)
-      }
+    parResponse.requestUri.takeIf { it.isNotEmpty() }?.let { put(REQUEST_URI, it) }
+    authContext.prompt?.let { put(UriConfig.PROMPT_PARAM, it.value) }
+    if (authContext.authType is AuthType.PKCE) {
+      val codeChallenge = codeVerifierGenerator.generateCodeChallenge(verifier)
+      put(CODE_CHALLENGE_PARAM, codeChallenge)
+      put(UriConfig.CODE_CHALLENGE_METHOD, UriConfig.CODE_CHALLENGE_METHOD_VAL)
     }
   }
 
