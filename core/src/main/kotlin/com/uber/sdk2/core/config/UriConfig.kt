@@ -65,7 +65,6 @@ object UriConfig {
       .appendQueryParameter(SCOPE_PARAM, scopes)
       .appendQueryParameter(SDK_VERSION_PARAM, BuildConfig.VERSION_NAME)
       .appendQueryParameter(PLATFORM_PARAM, "android")
-      .appendQueryParameter(CODE_CHALLENGE_METHOD, CODE_CHALLENGE_METHOD_VAL)
     return builder.build()
   }
 

@@ -33,12 +33,18 @@ import com.uber.sdk2.auth.response.AuthResult
 import com.uber.sdk2.auth.response.PARResponse
 import com.uber.sdk2.auth.response.UberToken
 import com.uber.sdk2.auth.sso.SsoLink
+import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_METHOD
+import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_METHOD_VAL
+import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_PARAM
+import com.uber.sdk2.core.config.UriConfig.REQUEST_URI
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.annotation.Config
@@ -56,6 +62,7 @@ class AuthProviderTest : RobolectricTestBase() {
   @Before
   fun setUp() {
     ssoLink = Shadow.extract<ShadowSsoLinkFactory>(SsoLinkFactory).ssoLink
+    reset(ssoLink)
   }
 
   @Test
@@ -71,6 +78,7 @@ class AuthProviderTest : RobolectricTestBase() {
       AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), null)
     val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
     val result = authProvider.authenticate()
+    verify(ssoLink).execute(any())
     verify(authService, never()).loginParRequest(any(), any(), any(), any())
     verify(authService).token("clientId", "verifier", "authorization_code", "redirectUri", "code")
     assert(result is AuthResult.Success)
@@ -90,6 +98,7 @@ class AuthProviderTest : RobolectricTestBase() {
     val authContext =
       AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), prefillInfo)
     val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val argumentCaptor = argumentCaptor<Map<String, String>>()
     val result = authProvider.authenticate()
     verify(authService)
       .loginParRequest(
@@ -100,6 +109,11 @@ class AuthProviderTest : RobolectricTestBase() {
       )
     verify(authService)
       .token("clientId", "verifier", "authorization_code", "redirectUri", "authCode")
+    verify(ssoLink).execute(argumentCaptor.capture())
+    assert(argumentCaptor.firstValue[REQUEST_URI] == "requestUri")
+    assert(argumentCaptor.firstValue[CODE_CHALLENGE_PARAM] == "challenge")
+    assert(argumentCaptor.firstValue[CODE_CHALLENGE_METHOD] == CODE_CHALLENGE_METHOD_VAL)
+    assert(argumentCaptor.firstValue.size == 3)
     assert(result is AuthResult.Success)
     assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")
   }
@@ -109,14 +123,41 @@ class AuthProviderTest : RobolectricTestBase() {
     whenever(ssoLink.execute(any())).thenReturn("authCode")
     whenever(authService.loginParRequest(any(), any(), any(), any()))
       .thenReturn(Response.success(PARResponse("requestUri", "codeVerifier")))
+    val prefillInfo = PrefillInfo("email", "firstName", "lastName", "phoneNumber")
     val authContext =
-      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
+      AuthContext(
+        AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        AuthType.AuthCode,
+        prefillInfo,
+      )
     val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val argumentCaptor = argumentCaptor<Map<String, String>>()
     val result = authProvider.authenticate()
     verify(authService, never()).token(any(), any(), any(), any(), any())
+    verify(ssoLink).execute(argumentCaptor.capture())
+    assert(argumentCaptor.lastValue[REQUEST_URI] == "requestUri")
+    assert(argumentCaptor.lastValue.size == 1)
     assert(result is AuthResult.Success)
     assert((result as AuthResult.Success).uberToken.authCode == "authCode")
   }
+
+  @Test
+  fun `test authenticate when AuthCode flow and prefillInfo is Null should return only AuthCode`() =
+    runTest {
+      whenever(ssoLink.execute(any())).thenReturn("authCode")
+      whenever(authService.loginParRequest(any(), any(), any(), any()))
+        .thenReturn(Response.success(PARResponse("requestUri", "codeVerifier")))
+      val authContext =
+        AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
+      val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+      val argumentCaptor = argumentCaptor<Map<String, String>>()
+      val result = authProvider.authenticate()
+      verify(authService, never()).token(any(), any(), any(), any(), any())
+      verify(ssoLink).execute(argumentCaptor.capture())
+      assert(argumentCaptor.lastValue.isEmpty())
+      assert(result is AuthResult.Success)
+      assert((result as AuthResult.Success).uberToken.authCode == "authCode")
+    }
 
   @Test
   fun `test authenticate when authException should return error result`() = runTest {
@@ -125,6 +166,7 @@ class AuthProviderTest : RobolectricTestBase() {
       AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
     val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
     val result = authProvider.authenticate()
+    verify(ssoLink).execute(any())
     assert(result is AuthResult.Error && result.authException.message == "error")
   }
 }

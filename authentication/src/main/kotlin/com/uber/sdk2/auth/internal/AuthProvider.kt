@@ -25,10 +25,14 @@ import com.uber.sdk2.auth.internal.sso.UniversalSsoLink.Companion.RESPONSE_TYPE
 import com.uber.sdk2.auth.internal.utils.Base64Util
 import com.uber.sdk2.auth.request.AuthContext
 import com.uber.sdk2.auth.request.AuthType
+import com.uber.sdk2.auth.request.SsoConfig
 import com.uber.sdk2.auth.request.SsoConfigProvider
 import com.uber.sdk2.auth.response.AuthResult
 import com.uber.sdk2.auth.response.PARResponse
 import com.uber.sdk2.auth.response.UberToken
+import com.uber.sdk2.core.config.UriConfig
+import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_PARAM
+import com.uber.sdk2.core.config.UriConfig.REQUEST_URI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -38,60 +42,73 @@ class AuthProvider(
   private val authService: AuthService = AuthService.create(),
   private val codeVerifierGenerator: PKCEGenerator = PKCEGeneratorImpl,
 ) : AuthProviding {
-
   private val verifier: String = codeVerifierGenerator.generateCodeVerifier()
   private val ssoLink = SsoLinkFactory.generateSsoLink(activity, authContext)
 
   override suspend fun authenticate(): AuthResult {
     val ssoConfig = withContext(Dispatchers.IO) { SsoConfigProvider.getSsoConfig(activity) }
     return try {
-      val parResponse =
-        authContext.prefillInfo?.let {
-          val response =
-            authService.loginParRequest(
-              ssoConfig.clientId,
-              RESPONSE_TYPE,
-              Base64Util.encodePrefillInfoToString(it),
-              ssoConfig.scope ?: "profile",
-            )
-          val body = response.body()
-          body?.takeIf { response.isSuccessful }
-            ?: throw AuthException.ServerError("Bad response ${response.code()}")
-        } ?: PARResponse("", "")
-
-      val queryParams =
-        mapOf(
-          "request_uri" to parResponse.requestUri,
-          "code_challenge" to codeVerifierGenerator.generateCodeChallenge(verifier),
-        )
-
+      val parResponse = sendPushedAuthorizationRequest(ssoConfig)
+      val queryParams = getQueryParams(parResponse)
       val authCode = ssoLink.execute(queryParams)
       when (authContext.authType) {
         AuthType.AuthCode -> AuthResult.Success(UberToken(authCode = authCode))
-        is AuthType.PKCE -> {
-          val tokenResponse =
-            authService.token(
-              ssoConfig.clientId,
-              verifier,
-              authContext.authType.grantType,
-              ssoConfig.redirectUri,
-              authCode,
-            )
-
-          if (tokenResponse.isSuccessful) {
-            tokenResponse.body()?.let { AuthResult.Success(it) }
-              ?: AuthResult.Error(
-                AuthException.ClientError("Token request failed with empty response")
-              )
-          } else {
-            AuthResult.Error(
-              AuthException.ClientError("Token request failed with code: ${tokenResponse.code()}")
-            )
-          }
-        }
+        is AuthType.PKCE -> performPkce(ssoConfig, authContext.authType, authCode)
       }
     } catch (e: AuthException) {
       AuthResult.Error(e)
+    }
+  }
+
+  private suspend fun performPkce(
+    ssoConfig: SsoConfig,
+    authType: AuthType.PKCE,
+    authCode: String,
+  ): AuthResult {
+    val tokenResponse =
+      authService.token(
+        ssoConfig.clientId,
+        verifier,
+        authType.grantType,
+        ssoConfig.redirectUri,
+        authCode,
+      )
+
+    return if (tokenResponse.isSuccessful) {
+      tokenResponse.body()?.let { AuthResult.Success(it) }
+        ?: AuthResult.Error(AuthException.ClientError("Token request failed with empty response"))
+    } else {
+      AuthResult.Error(
+        AuthException.ClientError("Token request failed with code: ${tokenResponse.code()}")
+      )
+    }
+  }
+
+  private suspend fun sendPushedAuthorizationRequest(ssoConfig: SsoConfig) =
+    authContext.prefillInfo?.let {
+      val response =
+        authService.loginParRequest(
+          ssoConfig.clientId,
+          RESPONSE_TYPE,
+          Base64Util.encodePrefillInfoToString(it),
+          ssoConfig.scope ?: "profile",
+        )
+      val body = response.body()
+      body?.takeIf { response.isSuccessful }
+        ?: throw AuthException.ServerError("Bad response ${response.code()}")
+    } ?: PARResponse("", "")
+
+  private fun getQueryParams(parResponse: PARResponse) = buildMap {
+    when (authContext.authType) {
+      AuthType.AuthCode -> {
+        parResponse.requestUri.takeIf { it.isNotEmpty() }?.let { put(REQUEST_URI, it) }
+      }
+      is AuthType.PKCE -> {
+        val codeChallenge = codeVerifierGenerator.generateCodeChallenge(verifier)
+        parResponse.requestUri.takeIf { it.isNotEmpty() }?.let { put(REQUEST_URI, it) }
+        put(CODE_CHALLENGE_PARAM, codeChallenge)
+        put(UriConfig.CODE_CHALLENGE_METHOD, UriConfig.CODE_CHALLENGE_METHOD_VAL)
+      }
     }
   }
 
