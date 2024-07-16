@@ -23,8 +23,8 @@ import kotlinx.parcelize.Parcelize
  *
  * @param authDestination The destination app to authenticate the user.
  * @param authType The type of authentication to perform.
- * @param prefillInfo The prefill information to be used for the authentication.
- * @param scopes The scopes to request for the authentication.
+ * @param prefillInfo The prefill information to be used for the authentication. This is optional.
+ * @param prompt The [Prompt] to be used for the authentication. This is optional.
  */
 @Parcelize
 data class AuthContext
@@ -33,4 +33,5 @@ constructor(
   val authDestination: AuthDestination = AuthDestination.CrossAppSso(),
   val authType: AuthType = AuthType.PKCE(),
   val prefillInfo: PrefillInfo? = null,
+  val prompt: Prompt? = null,
 ) : Parcelable
