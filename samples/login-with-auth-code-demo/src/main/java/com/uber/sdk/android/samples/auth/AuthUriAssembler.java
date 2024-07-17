@@ -40,6 +40,10 @@ public class AuthUriAssembler {
     static final String PLATFORM_PARAM = "sdk";
     static final String SDK_VERSION_PARAM = "sdk_version";
     static final String CODE_CHALLENGE_PARAM = "code_challenge";
+
+    static final String CODE_CHALLENGE_METHOD = "code_challenge_method";
+
+    static final String CODE_CHALLENGE_METHOD_VAL = "S256";
     public static Uri assemble(
             @NonNull String clientId,
             @NonNull String scopes,
@@ -57,7 +61,8 @@ public class AuthUriAssembler {
                 .appendQueryParameter(REDIRECT_PARAM, redirectUri)
                 .appendQueryParameter(SDK_VERSION_PARAM, BuildConfig.VERSION_NAME)
                 .appendQueryParameter(SCOPE_PARAM, scopes)
-                .appendQueryParameter(CODE_CHALLENGE_PARAM, codeChallenge);
+                .appendQueryParameter(CODE_CHALLENGE_PARAM, codeChallenge)
+                .appendQueryParameter(CODE_CHALLENGE_METHOD, CODE_CHALLENGE_METHOD_VAL);
         return builder.build();
     }
 }
