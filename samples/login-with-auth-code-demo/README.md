@@ -50,5 +50,7 @@ does not require the third party backend to maintain the oauth secret.
 
 ## Uber App versions that support applink flow
 Rides - 4.482.10000+
+
 Eats - 6.172.10000+
+
 Driver - 4.447.10000+
