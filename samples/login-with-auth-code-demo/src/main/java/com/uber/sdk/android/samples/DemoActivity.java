@@ -113,6 +113,11 @@ public class DemoActivity extends AppCompatActivity {
         ).execute(new TokenRequestFlowCallback() {
             @Override
             public void onSuccess(AccessToken accessToken) {
+                Toast.makeText(
+                        DemoActivity.this,
+                        getString(R.string.auth_success_message),
+                        Toast.LENGTH_LONG
+                ).show();
                 sharedPreferences.edit()
                         .putString(ACCESS_TOKEN, accessToken.getToken())
                         .apply();
