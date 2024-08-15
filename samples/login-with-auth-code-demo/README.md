@@ -37,11 +37,10 @@ be handled in 3 ways -
    Uber auth flow is launched in a custom tab, if available, or system browser. User completes the
    flow and auth code is returned to the 3P app
 
-Then, we make a request to Uber's backend (token endpoint) with `client_id`, `grant_type`
+Then, make a request to Uber's backend (token endpoint) with `client_id`, `grant_type`
 , `redirect_uri`, `code_verifier` (generated as part of pkce pair) along with the
-received `auth_code`. In successful response we would get the OAuth tokens (access token and refresh
-token) which are saved in the app's private shared preferences; or failure exception is propagated
-back to the caller.
+received `auth_code`. If request results in successful response you would get the OAuth tokens (access token and refresh
+token) in the activity result's intent bundle which are saved in the app's private shared preferences; or in case of failure an error is returned back via `ERROR` in the activity result's intent bundle.
 
 ## Should I use this same pattern in my own apps?
 
@@ -52,6 +51,9 @@ With this demo, we are merely presenting
 a new way of authentication supported by Uber for third parties. Previously, we
 supported `auth_code` flow with oauth secret and now, we added support for pkce flow as well which
 does not require the third party backend to maintain the oauth secret.
+
+## How does Uber app return the result?
+The result success or error is set in a bundle and returned as the activity result. The caller needs to make sure that the app link is invoked with `startActivityForResult` api. Check this [android documentation](https://developer.android.com/training/basics/intents/result) for references. If the caller does not use this api then we will not be able to validate the signature of the caller and it would result in an error response.
 
 ## Uber App versions that support applink flow
 Rides - 4.482.10000+
