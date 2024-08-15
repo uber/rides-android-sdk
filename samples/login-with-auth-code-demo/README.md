@@ -4,6 +4,11 @@ This app demonstrates how a third party app can integrate Login via Uber to thei
 the rides-android-sdk using applink flow with proof-key code exchange,
 RFC-7636 (https://datatracker.ietf.org/doc/html/rfc7636).
 
+The app link to invoke the first party Uber app is -
+```
+https://auth.uber.com/oauth/v2/authorize?client_id={client-id}&redirect_uri={redirect-uri}&scope={comma-separated-scopes}&flow_type=DEFAULT&sdk=android&response_type=code&prompt=consent
+```
+
 Here are the main components of the app -
 
 - `AuthUriAssembler` - to assemble the a launch uri which would launch an Uber app (rides, eats or driver)
