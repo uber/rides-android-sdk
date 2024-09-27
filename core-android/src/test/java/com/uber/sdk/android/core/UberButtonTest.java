@@ -29,10 +29,10 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
 
-import org.apache.maven.artifact.ant.shaded.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.Robolectric;
@@ -178,7 +178,7 @@ public class UberButtonTest extends RobolectricTestBase {
 
         assertEquals(resources.getColor(R.color.uber_white), uberButton.getCurrentTextColor());
         assertEquals(Typeface.NORMAL, uberButton.getTypeface().getStyle());
-        assertTrue(StringUtils.isEmpty(uberButton.getText().toString()));
+        assertTrue(TextUtils.isEmpty(uberButton.getText().toString()));
     }
 
     @Test
@@ -205,7 +205,7 @@ public class UberButtonTest extends RobolectricTestBase {
         assertEquals(resources.getColor(R.color.uber_black), uberButton.getCurrentTextColor());
         assertEquals(Typeface.NORMAL, uberButton.getTypeface().getStyle());
         assertTrue(uberButton.getGravity() != 0);
-        assertTrue(StringUtils.isEmpty(uberButton.getText().toString()));
+        assertTrue(TextUtils.isEmpty(uberButton.getText().toString()));
     }
 
     @Test

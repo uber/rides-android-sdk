@@ -27,9 +27,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import android.util.AttributeSet;
 import android.webkit.GeolocationPermissions;
 import android.webkit.WebChromeClient;
@@ -219,7 +219,6 @@ public class RideRequestView extends LinearLayout {
 
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setGeolocationEnabled(true);
-        webView.getSettings().setAppCacheEnabled(true);
         webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         webView.setWebChromeClient(new RideRequestWebChromeClient());
         webView.setWebViewClient(new RideRequestWebViewClient(new RideRequestWebViewClientCallback() {
