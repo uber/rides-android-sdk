@@ -134,7 +134,7 @@ UberAuthClientImpl.authenticate(
 )
 ```
 ## Forcing Login or Consent
-The auth provider accepts an optional `prompt` parameter that can be used to force the login screen or the consent screen to be presented.
+The `AuthContext` accepts an optional `prompt` parameter that can be used to force the login screen or the consent screen to be presented.
 
 **Note:** Login is only available for `inApp` auth destinations
 
