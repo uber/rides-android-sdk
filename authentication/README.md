@@ -136,14 +136,17 @@ UberAuthClientImpl.authenticate(
 ## Forcing Login or Consent
 The auth provider accepts an optional `prompt` parameter that can be used to force the login screen or the consent screen to be presented.
 
-**Note:** Login is only available for .inApp auth destinations.
+**Note:** Login is only available for `inApp` auth destinations
 
 ```
 // Will request login then show the consent screen, even if previously completed by the user
-let prompt: [Prompt] = [.login, .consent]
+val prompt = Prompt.LOGIN
 
-let authProvider: AuthProviding = .authorizationCode(
-    prompt: prompt
+val context = AuthContext(
+    authDestination: authDestination, // CrossApp() or InApp
+    authType: AuthType, // AuthCode or PKCE()
+    prefill: prefill?,
+    prompt
 )
 ```
 
