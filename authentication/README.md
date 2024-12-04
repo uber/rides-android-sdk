@@ -68,7 +68,8 @@ To authenticate with a more controlled/custom experience an `AuthContext` may be
 
 * [Auth Destination](#auth-destination) - Where the login should occur; in the native Uber app or inside your application.
 * [Auth Type](#auth-type) - The type of grant flow that should be used. Authorization Code Grant Flow is the only supported type.
-* [PrefillInfo](#prefill) - Optional user information that should be prefilled when presenting the login screen.
+* [PrefillInfo](#prefilling-user-information) - Optional user information that should be prefilled when presenting the login screen.
+* [Prompt](#forcing-login-or-consent) - Optional parameter to force login or consent
 
 ```kotlin
 val context = AuthContext(
@@ -132,7 +133,19 @@ UberAuthClientImpl.authenticate(
     authContext: AuthContext
 )
 ```
+## Forcing Login or Consent
+The auth provider accepts an optional `prompt` parameter that can be used to force the login screen or the consent screen to be presented.
 
+**Note:** Login is only available for .inApp auth destinations.
+
+```
+// Will request login then show the consent screen, even if previously completed by the user
+let prompt: [Prompt] = [.login, .consent]
+
+let authProvider: AuthProviding = .authorizationCode(
+    prompt: prompt
+)
+```
 
 ### Responding to Redirects
 
