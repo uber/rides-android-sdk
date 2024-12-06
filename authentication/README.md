@@ -28,11 +28,11 @@ Next, add your application's Redirect URI to the list of URLs under `Redirect UR
 To use the Uber authentication, add the implementation dependency with the latest version of the authentication module to your gradle file.
 
 ### Gradle
-[![Maven Central](https://img.shields.io/maven-central/v/com.uber.sdk/authentication.svg)](https://central.sonatype.com/namespace/com.uber.sdk)
+[![Maven Central](https://img.shields.io/maven-central/v/com.uber.sdk2/authentication.svg)](https://central.sonatype.com/namespace/com.uber.sdk2)
 
 ```gradle
 dependencies {
-    implementation 'com.uber.sdk:authentication:x.y.z'
+    implementation 'com.uber.sdk2:authentication:x.y.z'
 }
 ```
 
