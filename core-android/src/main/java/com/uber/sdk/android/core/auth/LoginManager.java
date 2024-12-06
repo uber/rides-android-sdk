@@ -24,10 +24,12 @@ package com.uber.sdk.android.core.auth;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import android.util.Log;
+
 import com.uber.sdk.android.core.SupportedAppType;
 import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.core.utils.AppProtocol;
@@ -38,6 +40,7 @@ import com.uber.sdk.core.client.AccessTokenSession;
 import com.uber.sdk.core.client.ServerTokenSession;
 import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
+
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -169,7 +172,6 @@ public class LoginManager {
         checkState(hasScopes, "Scopes must be set in the Session Configuration.");
         checkNotNull(sessionConfiguration.getRedirectUri(),
                 "Redirect URI must be set in Session Configuration.");
-
         if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
             return;
         }
@@ -206,10 +208,7 @@ public class LoginManager {
         if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
             return;
         }
-
-        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration,
-                ResponseType.TOKEN, legacyUriRedirectHandler.isLegacyMode());
-        activity.startActivityForResult(intent, requestCode);
+        launchOnboardingFlow(activity, ResponseType.TOKEN, false);
     }
 
     /**
@@ -222,9 +221,7 @@ public class LoginManager {
             return;
         }
 
-        Intent intent = LoginActivity.newIntent(activity, sessionConfiguration,
-                ResponseType.CODE, legacyUriRedirectHandler.isLegacyMode());
-        activity.startActivityForResult(intent, requestCode);
+        launchOnboardingFlow(activity, ResponseType.CODE, false);
     }
 
     /**
@@ -233,19 +230,25 @@ public class LoginManager {
      *
      * @param activity to start Activity on.
      */
-    private void loginForImplicitGrantWithFallback(@NonNull Activity activity) {
+    @VisibleForTesting
+    void loginForImplicitGrantWithFallback(@NonNull Activity activity) {
         if (!legacyUriRedirectHandler.checkValidState(activity, this)) {
             return;
         }
 
+        launchOnboardingFlow(activity, ResponseType.TOKEN, true);
+    }
+
+    private void launchOnboardingFlow(Activity activity,
+                                      ResponseType responseType,
+                                      boolean isRedirectToPlayStoreEnabled) {
         Intent intent = LoginActivity.newIntent(
                 activity,
-                new ArrayList<SupportedAppType>(),
+                productFlowPriority,
                 sessionConfiguration,
-                ResponseType.TOKEN,
-                legacyUriRedirectHandler.isLegacyMode(),
+                responseType,
                 false,
-                true);
+                isRedirectToPlayStoreEnabled);
         activity.startActivityForResult(intent, requestCode);
     }
 

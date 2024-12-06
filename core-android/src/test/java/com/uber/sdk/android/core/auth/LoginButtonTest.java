@@ -25,7 +25,7 @@ package com.uber.sdk.android.core.auth;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.AttributeSet;
 
 import com.google.common.collect.Sets;
@@ -37,14 +37,15 @@ import com.uber.sdk.core.client.SessionConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.Mock;
 import org.robolectric.Robolectric;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;

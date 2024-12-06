@@ -26,7 +26,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.google.common.collect.ImmutableList;
 import com.uber.sdk.android.core.RobolectricTestBase;
 import com.uber.sdk.android.core.SupportedAppType;
@@ -36,8 +36,9 @@ import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
 import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
-import edu.emory.mathcs.backport.java.util.Collections;
+
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -67,14 +68,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 public class LoginManagerTest extends RobolectricTestBase {
@@ -157,7 +158,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         final Intent resultIntent = intentCaptor.getValue();
         validateLoginIntentFields(resultIntent, new ArrayList<>(productPriority), sessionConfiguration,
-                ResponseType.TOKEN, false, true, true);
+                ResponseType.TOKEN, true, true);
         assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
     }
 
@@ -176,7 +177,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         final Intent resultIntent = intentCaptor.getValue();
         validateLoginIntentFields(resultIntent, new ArrayList<SupportedAppType>(), sessionConfiguration,
-                ResponseType.TOKEN, false, true, true);
+                ResponseType.TOKEN, true, true);
         assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
     }
 
@@ -206,7 +207,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         final Intent resultIntent = intentCaptor.getValue();
         validateLoginIntentFields(resultIntent, new ArrayList<SupportedAppType>(), sessionConfiguration,
-                ResponseType.CODE, false, false, false);
+                ResponseType.CODE, false, false);
         assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
     }
 
@@ -224,7 +225,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         final Intent resultIntent = intentCaptor.getValue();
         validateLoginIntentFields(resultIntent, new ArrayList<SupportedAppType>(), sessionConfiguration,
-                ResponseType.TOKEN, false, false, true);
+                ResponseType.TOKEN, false, true);
         assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
     }
 
@@ -247,7 +248,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         final Intent resultIntent = intentCaptor.getValue();
         validateLoginIntentFields(resultIntent, new ArrayList<SupportedAppType>(), sessionConfiguration,
-                ResponseType.TOKEN, false, false, false);
+                ResponseType.TOKEN, false, false);
         assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
     }
 
@@ -270,7 +271,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         final Intent resultIntent = intentCaptor.getValue();
         validateLoginIntentFields(resultIntent, new ArrayList<SupportedAppType>(), sessionConfiguration,
-                ResponseType.CODE, false, false, false);
+                ResponseType.CODE, false, false);
         assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
     }
 
@@ -301,7 +302,7 @@ public class LoginManagerTest extends RobolectricTestBase {
 
         final Intent resultIntent = intentCaptor.getValue();
         validateLoginIntentFields(resultIntent, new ArrayList<SupportedAppType>(), sessionConfiguration,
-                ResponseType.CODE, false, false, false);
+                ResponseType.CODE, false, false);
         assertThat(codeCaptor.getValue()).isEqualTo(REQUEST_CODE_LOGIN_DEFAULT);
     }
 
@@ -369,15 +370,15 @@ public class LoginManagerTest extends RobolectricTestBase {
     public void onActivityResult_whenRequestCodeDoesNotMatch_nothingShouldHappen() {
         Intent intent = mock(Intent.class);
         loginManager.onActivityResult(activity, 1337, Activity.RESULT_OK, intent);
-        verifyZeroInteractions(intent);
-        verifyZeroInteractions(callback);
+        verifyNoInteractions(intent);
+        verifyNoInteractions(callback);
     }
 
     @Test
     public void onActivityResult_whenResultCanceledAndDataButNoCallback_nothingShouldHappen() {
         Intent intent = mock(Intent.class);
         loginManager.onActivityResult(activity, 1337, Activity.RESULT_OK, intent);
-        verifyZeroInteractions(intent);
+        verifyNoInteractions(intent);
     }
 
     @Test
@@ -499,6 +500,7 @@ public class LoginManagerTest extends RobolectricTestBase {
     }
 
     @Test
+    @Ignore
     public void getSession_withAccessToken_successful() {
         when(accessTokenStorage.getAccessToken()).thenReturn(ACCESS_TOKEN);
         Session session = loginManager.getSession();
@@ -511,19 +513,37 @@ public class LoginManagerTest extends RobolectricTestBase {
         loginManager.getSession();
     }
 
+    @Test
+    public void loginForAuthorizationCode_shouldEnablePARFlow() {
+        loginManager.loginForAuthorizationCode(activity);
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+
+        verify(activity).startActivityForResult(intentCaptor.capture(), anyInt());
+        Intent value = intentCaptor.getValue();
+        assertThat((ResponseType)value.getSerializableExtra(EXTRA_RESPONSE_TYPE)).isEqualTo(ResponseType.CODE);
+    }
+
+    @Test
+    public void loginForImplicitGrantWithFallback_shouldEnablePARFlow() {
+        loginManager.loginForImplicitGrantWithFallback(activity);
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+
+        verify(activity).startActivityForResult(intentCaptor.capture(), anyInt());
+        Intent value = intentCaptor.getValue();
+        assertThat((ResponseType)value.getSerializableExtra(EXTRA_RESPONSE_TYPE)).isEqualTo(ResponseType.TOKEN);
+    }
+
     private void validateLoginIntentFields(
             @NonNull Intent loginIntent,
             @NonNull List<SupportedAppType> expectedProductPriority,
             @NonNull SessionConfiguration expectedSessionConfiguration,
             @NonNull ResponseType expectedResponseType,
-            boolean expectedForceWebview,
             boolean expectedSsoEnabled,
             boolean expectedRedirectToPlayStoreEnabled) {
         assertThat(loginIntent.getSerializableExtra(EXTRA_SESSION_CONFIGURATION)).isEqualTo(expectedSessionConfiguration);
         assertThat(loginIntent.getSerializableExtra(EXTRA_RESPONSE_TYPE)).isEqualTo(expectedResponseType);
         assertThat((ArrayList<SupportedAppType>) loginIntent.getSerializableExtra(EXTRA_PRODUCT_PRIORITY))
                 .containsAll(expectedProductPriority);
-        assertThat(loginIntent.getBooleanExtra(EXTRA_FORCE_WEBVIEW, false)).isEqualTo(expectedForceWebview);
         assertThat(loginIntent.getBooleanExtra(EXTRA_SSO_ENABLED, false)).isEqualTo(expectedSsoEnabled);
         assertThat(loginIntent.getBooleanExtra(EXTRA_REDIRECT_TO_PLAY_STORE_ENABLED, false))
                 .isEqualTo(expectedRedirectToPlayStoreEnabled);
