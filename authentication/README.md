@@ -43,7 +43,7 @@ In order for the SDK to function correctly, you need to add some information abo
 {
   "client_id": "your_client_id",
   "redirect_uri": "your_redirect_uri",
-  "scope": "your_app_scope" // separated with comma
+  "scope": "your_app_scope" // separated with space
 }
 
 ```
@@ -59,7 +59,7 @@ Upon completion, the result will be delivered to the activity that started the U
 | accessToken | String? | The access token issued by the authorization server. This property will only be populated if token exchange is enabled. |
 | refreshToken | String? | The type of the token issued. |
 | expiresIn | Int? | A token which can be used to obtain new access tokens. |
-| scope | [String]? | A comma separated list of scopes requested by the client. |
+| scope | [String]? | A space separated list of scopes requested by the client. |
 
 For failure, the result will contain an error message inside the Intent.
 
