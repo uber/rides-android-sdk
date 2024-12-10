@@ -22,11 +22,11 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.customtabs.CustomTabsClient;
-import android.support.customtabs.CustomTabsIntent;
-import android.support.customtabs.CustomTabsServiceConnection;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsServiceConnection;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -51,6 +51,8 @@ public class CustomTabsHelper {
 
     private static String packageNameToUse;
 
+    private CustomTabsServiceConnection connection;
+
     public CustomTabsHelper() {}
 
     /**
@@ -69,7 +71,7 @@ public class CustomTabsHelper {
         final String packageName = getPackageNameToUse(context);
 
         if (packageName != null) {
-            final CustomTabsServiceConnection connection = new CustomTabsServiceConnection() {
+            connection = new CustomTabsServiceConnection() {
                 @Override
                 public void onCustomTabsServiceConnected(ComponentName componentName, CustomTabsClient client) {
                     client.warmup(0L); // This prevents backgrounding after redirection
@@ -78,15 +80,26 @@ public class CustomTabsHelper {
                     customTabsIntent.intent.setData(uri);
                     customTabsIntent.launchUrl(context, uri);
                 }
+
                 @Override
-                public void onServiceDisconnected(ComponentName name) {}
+                public void onServiceDisconnected(ComponentName name) {
+                }
             };
             CustomTabsClient.bindCustomTabsService(context, packageName, connection);
         } else if (fallback != null) {
             fallback.openUri(context, uri);
         } else {
-            Log.e(UberSdk.UBER_SDK_LOG_TAG,
-                    "Use of openCustomTab without Customtab support or a fallback set");
+            Log.e(UberSdk.UBER_SDK_LOG_TAG, "Use of openCustomTab without Customtab support or a fallback set");
+        }
+    }
+
+    /**
+     * Called to clean up the CustomTab when the parentActivity is destroyed.
+     */
+    public void onDestroy(Activity parentActivity) {
+        if (connection != null) {
+            parentActivity.unbindService(connection);
+            connection = null;
         }
     }
 

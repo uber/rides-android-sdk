@@ -24,10 +24,10 @@ package com.uber.sdk.android.rides;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
-import android.support.customtabs.CustomTabsIntent;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.browser.customtabs.CustomTabsIntent;
 
 import com.uber.sdk.android.core.Deeplink;
 import com.uber.sdk.android.core.utils.AppProtocol;

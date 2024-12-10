@@ -23,7 +23,7 @@
 package com.uber.sdk.android.rides;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.core.client.SessionConfiguration;
