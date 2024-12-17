@@ -24,7 +24,6 @@ package com.uber.sdk2.auth.internal.sso
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatActivity.RESULT_CANCELED
@@ -60,17 +59,6 @@ internal class UniversalSsoLink(
 ) : SsoLink {
 
   @VisibleForTesting val resultDeferred = CompletableDeferred<String>()
-  private var isAuthInProgress: Boolean = false
-
-  private val launcher =
-    activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-      try {
-        resultDeferred.complete(handleResult(result))
-      } catch (e: AuthException) {
-        resultDeferred.completeExceptionally(e)
-      }
-      isAuthInProgress = true
-    }
 
   override suspend fun execute(optionalQueryParams: Map<String, String>): String {
     val uri =
@@ -96,7 +84,9 @@ internal class UniversalSsoLink(
             val intent = Intent()
             intent.`package` = packageName
             intent.data = uri
-            launcher.launch(intent)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            intent.putExtra(CALLING_PACKAGE, activity.packageName)
+            activity.startActivity(intent)
           } ?: loadCustomtab(getSecureWebviewUri(uri))
         }
         is AuthDestination.InApp -> loadCustomtab(getSecureWebviewUri(uri))
@@ -129,10 +119,6 @@ internal class UniversalSsoLink(
     }
   }
 
-  override fun isAuthInProgress(): Boolean {
-    return isAuthInProgress
-  }
-
   private fun loadCustomtab(uri: Uri) {
     customTabsLauncher.launch(uri)
   }
@@ -143,5 +129,6 @@ internal class UniversalSsoLink(
 
     private const val EXTRA_CODE_RECEIVED = "CODE_RECEIVED"
     private const val EXTRA_ERROR = "ERROR"
+    private const val CALLING_PACKAGE = "CALLING_APPLICATION_ID"
   }
 }

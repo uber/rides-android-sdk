@@ -35,7 +35,4 @@ interface AuthProviding {
 
   /** Handles the authentication code received from the SSO flow via deeplink. */
   fun handleAuthCode(authCode: String)
-
-  /** Checks if the authentication is in progress. */
-  fun isAuthInProgress(): Boolean
 }
