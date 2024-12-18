@@ -49,8 +49,9 @@ class AuthActivity : AppCompatActivity() {
     authProvider = AuthProvider(this, authContext)
   }
 
-  private fun init() {
+  private fun startAuth() {
     authProvider?.let {
+      authStarted = true
       lifecycleScope.launch(Dispatchers.Main) {
         when (val authResult = it.authenticate()) {
           is AuthResult.Success -> {
@@ -76,30 +77,37 @@ class AuthActivity : AppCompatActivity() {
 
   override fun onResume() {
     super.onResume()
-
-    if (!authStarted) {
-      init()
-      authStarted = true
-      return
-    }
-    // Check if the intent has the auth code. This happens when user has authenticated using custom
-    // tabs
-    intent?.data?.let {
-      val authCode = it.getQueryParameter(KEY_AUTHENTICATION_CODE)
-      if (!authCode.isNullOrEmpty()) {
-        authProvider?.handleAuthCode(authCode)
-      } else {
-        // If the intent does not have the auth code, then the user denied the authentication
-        val error = it.getQueryParameter(KEY_ERROR) ?: CANCELED
-        finishAuthWithError(error)
-      }
-    }
+    // Check if the intent has the auth code.
+    intent?.data?.let { handleResponse(it) }
       ?: run {
-        if (authProvider?.isAuthInProgress() == true) {
+        // if intent does not have auth code and auth has not started then start the auth flow
+        if (!authStarted) {
+          startAuth()
           return
         }
+        // otherwise finish the auth flow with error
         finishAuthWithError()
       }
+  }
+
+  private fun handleResponse(uri: Uri) {
+    // This happens when user has authenticated using custom tabs
+    val authCode =
+      if (uri.getQueryParameter(KEY_AUTHENTICATION_CODE).isNullOrEmpty() == false) {
+        uri.getQueryParameter(KEY_AUTHENTICATION_CODE)
+      } else if (uri.fragment?.isNotEmpty() == true) {
+        // This happens when user has authenticated using 1p app
+        Uri.Builder().encodedQuery(uri.fragment).build().getQueryParameter(KEY_AUTHENTICATION_CODE)
+      } else {
+        ""
+      }
+    if (!authCode.isNullOrEmpty()) {
+      authProvider?.handleAuthCode(authCode)
+    } else {
+      // If the intent does not have the auth code, then the user denied the authentication
+      val error = uri.getQueryParameter(KEY_ERROR) ?: CANCELED
+      finishAuthWithError(error)
+    }
   }
 
   private fun finishAuthWithError(error: String = CANCELED) {
