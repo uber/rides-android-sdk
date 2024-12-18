@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2024. Uber Technologies
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~    https://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
+    <string name="ub__mobile_redirect">https://m.uber.com/sign-up?client_id=%1$s&amp;user-agent=%2$s</string>
+
+    <string name="ub__alert_dialog_ok">OK</string>
+    <string name="ub__misconfigured_redirect_uri_title">Misconfigured Redirect URI</string>
+    <string name="ub__misconfigured_redirect_uri_message">
+        An invalid use of the redirect URI for
+        authentication has been detected from an older version of the Uber SDK.
+        \n\n
+        Read https://github.com/uber/rides-android-sdk#authentication-migration-version for migration
+        information. See logcat for more details.
+    </string>
+
+    <string name="ub__misconfigured_auth_code_flow_log">
+        LoginManager.setRedirectForAuthorizationCode() is deprecated in versions > 0.8.0.
+        \n\n
+        See https://github.com/uber/rides-android-sdk#authentication-migration-version for
+        information on using LoginManager.setAuthCodeFlowEnabled() with a properly registered URI
+        for com.uber.sdk.android.core.auth.LoginRedirectReceiverActivity in the AndroidManifest.xml.
+    </string>
+    <string name="ub__missing_redirect_uri_log">Redirect URI must be set in Session Configuration.</string>
+    <string name="ub__mismatching_redirect_uri_log">
+        Redirect URI set in SessionConfiguration does not match URI registered in
+        AndroidManifest.xml for com.uber.sdk.android.core.auth.LoginRedirectReceiverActivity.
+        \n\n
+        See https://github.com/uber/rides-android-sdk#authentication-migration-version for
+        configuration required in versions > 0.8.0.
+    </string>
+</resources>
