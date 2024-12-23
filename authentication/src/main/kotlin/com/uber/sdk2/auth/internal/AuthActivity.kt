@@ -91,18 +91,24 @@ class AuthActivity : AppCompatActivity() {
   }
 
   private fun handleResponse(uri: Uri) {
-    val authCode = uri.getQueryParameter(KEY_AUTHENTICATION_CODE)
-      ?: uri.fragment?.takeIf { it.isNotEmpty() }
-        ?.let { Uri.Builder().encodedQuery(it).build().getQueryParameter(KEY_AUTHENTICATION_CODE) }
-      ?: ""
+    val authCode =
+      uri.getQueryParameter(KEY_AUTHENTICATION_CODE)
+        ?: uri.fragment
+          ?.takeIf { it.isNotEmpty() }
+          ?.let {
+            Uri.Builder().encodedQuery(it).build().getQueryParameter(KEY_AUTHENTICATION_CODE)
+          }
+        ?: ""
 
     if (authCode.isNotEmpty()) {
       authProvider?.handleAuthCode(authCode)
     } else {
-      val error = uri.getQueryParameter(KEY_ERROR)
-        ?: uri.fragment?.takeIf { it.isNotEmpty() }
-          ?.let { Uri.Builder().encodedQuery(it).build().getQueryParameter(KEY_ERROR) }
-        ?: CANCELED
+      val error =
+        uri.getQueryParameter(KEY_ERROR)
+          ?: uri.fragment
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { Uri.Builder().encodedQuery(it).build().getQueryParameter(KEY_ERROR) }
+          ?: CANCELED
       finishAuthWithError(error)
     }
   }
