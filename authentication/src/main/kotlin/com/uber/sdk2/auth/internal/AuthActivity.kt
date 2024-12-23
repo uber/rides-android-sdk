@@ -85,32 +85,29 @@ class AuthActivity : AppCompatActivity() {
           startAuth()
           return
         }
-        // otherwise finish the auth flow with error
-        finishAuthWithError()
+        // otherwise finish the auth flow with "Canceled" error
+        finishAuthWithError(CANCELED)
       }
   }
 
   private fun handleResponse(uri: Uri) {
-    // This happens when user has authenticated using custom tabs
-    val authCode =
-      if (uri.getQueryParameter(KEY_AUTHENTICATION_CODE).isNullOrEmpty() == false) {
-        uri.getQueryParameter(KEY_AUTHENTICATION_CODE)
-      } else if (uri.fragment?.isNotEmpty() == true) {
-        // This happens when user has authenticated using 1p app
-        Uri.Builder().encodedQuery(uri.fragment).build().getQueryParameter(KEY_AUTHENTICATION_CODE)
-      } else {
-        ""
-      }
-    if (!authCode.isNullOrEmpty()) {
+    val authCode = uri.getQueryParameter(KEY_AUTHENTICATION_CODE)
+      ?: uri.fragment?.takeIf { it.isNotEmpty() }
+        ?.let { Uri.Builder().encodedQuery(it).build().getQueryParameter(KEY_AUTHENTICATION_CODE) }
+      ?: ""
+
+    if (authCode.isNotEmpty()) {
       authProvider?.handleAuthCode(authCode)
     } else {
-      // If the intent does not have the auth code, then the user denied the authentication
-      val error = uri.getQueryParameter(KEY_ERROR) ?: CANCELED
+      val error = uri.getQueryParameter(KEY_ERROR)
+        ?: uri.fragment?.takeIf { it.isNotEmpty() }
+          ?.let { Uri.Builder().encodedQuery(it).build().getQueryParameter(KEY_ERROR) }
+        ?: CANCELED
       finishAuthWithError(error)
     }
   }
 
-  private fun finishAuthWithError(error: String = CANCELED) {
+  private fun finishAuthWithError(error: String) {
     // If the intent does not have the auth code, then the user has cancelled the authentication
     intent.putExtra("EXTRA_ERROR", error)
     setResult(RESULT_CANCELED, intent)
