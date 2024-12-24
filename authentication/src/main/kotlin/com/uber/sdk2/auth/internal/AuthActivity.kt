@@ -42,11 +42,14 @@ class AuthActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    val authContext =
-      intent.getParcelableExtra<AuthContext>(AUTH_CONTEXT)
-        ?: throw IllegalStateException("AuthContext is required")
-
-    authProvider = AuthProvider(this, authContext)
+    val authContext = intent.getParcelableExtra<AuthContext>(AUTH_CONTEXT)
+    authContext ?.let {
+      authProvider = AuthProvider(this, authContext)
+    } ?: run {
+      val responseIntent = Intent().apply { putExtra("EXTRA_ERROR", "AUTH_CONTEXT was null") }
+      setResult(RESULT_CANCELED, responseIntent)
+      finish()
+    }
   }
 
   private fun startAuth() {
@@ -81,44 +84,43 @@ class AuthActivity : AppCompatActivity() {
     intent?.data?.let { handleResponse(it) }
       ?: run {
         // if intent does not have auth code and auth has not started then start the auth flow
-        if (!authStarted) {
+        if (authProvider != null && !authStarted) {
           startAuth()
           return
         }
-        // otherwise finish the auth flow with error
-        finishAuthWithError()
+        // otherwise finish the auth flow with "Canceled" error
+        finishAuthWithError(CANCELED)
       }
   }
 
   private fun handleResponse(uri: Uri) {
-    // This happens when user has authenticated using custom tabs
     val authCode =
-      if (uri.getQueryParameter(KEY_AUTHENTICATION_CODE).isNullOrEmpty() == false) {
-        uri.getQueryParameter(KEY_AUTHENTICATION_CODE)
-      } else if (uri.fragment?.isNotEmpty() == true) {
-        // This happens when user has authenticated using 1p app
-        Uri.Builder().encodedQuery(uri.fragment).build().getQueryParameter(KEY_AUTHENTICATION_CODE)
-      } else {
-        ""
-      }
-    if (!authCode.isNullOrEmpty()) {
+      uri.getQueryParameter(KEY_AUTHENTICATION_CODE)
+        ?: uri.fragment
+          ?.takeIf { it.isNotEmpty() }
+          ?.let {
+            Uri.Builder().encodedQuery(it).build().getQueryParameter(KEY_AUTHENTICATION_CODE)
+          }
+        ?: ""
+
+    if (authCode.isNotEmpty()) {
       authProvider?.handleAuthCode(authCode)
     } else {
-      // If the intent does not have the auth code, then the user denied the authentication
-      val error = uri.getQueryParameter(KEY_ERROR) ?: CANCELED
+      val error =
+        uri.getQueryParameter(KEY_ERROR)
+          ?: uri.fragment
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { Uri.Builder().encodedQuery(it).build().getQueryParameter(KEY_ERROR) }
+          ?: CANCELED
       finishAuthWithError(error)
     }
   }
 
-  private fun finishAuthWithError(error: String = CANCELED) {
+  private fun finishAuthWithError(error: String) {
     // If the intent does not have the auth code, then the user has cancelled the authentication
     intent.putExtra("EXTRA_ERROR", error)
     setResult(RESULT_CANCELED, intent)
     finish()
-  }
-
-  private fun isAuthorizationCodePresent(uri: Uri): Boolean {
-    return !uri.getQueryParameter(KEY_AUTHENTICATION_CODE).isNullOrEmpty()
   }
 
   override fun onDestroy() {
