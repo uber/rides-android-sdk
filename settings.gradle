@@ -1,4 +1,0 @@
-include ':rides-android'
-include ':core-android'
-include ':samples:request-button-sample'
-include ':samples:login-sample'

@@ -25,11 +25,9 @@ package com.uber.sdk.android.core.auth;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.ResolveInfo;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.webkit.WebView;
@@ -38,10 +36,8 @@ import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.Scope;
 import com.uber.sdk.core.client.SessionConfiguration;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -49,6 +45,7 @@ import java.util.Set;
  * A utility class for the Uber SDK.
  */
 class AuthUtils {
+    static final String KEY_AUTHENTICATION_CODE = "code";
     static final String KEY_EXPIRATION_TIME = "expires_in";
     static final String KEY_SCOPES = "scope";
     static final String KEY_TOKEN = "access_token";
@@ -222,8 +219,12 @@ class AuthUtils {
         return data;
     }
 
+    static boolean isAuthorizationCodePresent(@NonNull Uri uri) {
+        return !TextUtils.isEmpty(uri.getQueryParameter(KEY_AUTHENTICATION_CODE));
+    }
+
     static String parseAuthorizationCode(@NonNull Uri uri) throws LoginAuthenticationException {
-        final String code = uri.getQueryParameter("code");
+        final String code = uri.getQueryParameter(KEY_AUTHENTICATION_CODE);
         if (TextUtils.isEmpty(code)) {
             throw new LoginAuthenticationException(AuthenticationError.INVALID_RESPONSE);
         }
@@ -257,10 +258,11 @@ class AuthUtils {
     static String buildUrl(
             @NonNull String redirectUri,
             @NonNull ResponseType responseType,
-            @NonNull SessionConfiguration configuration) {
+            @NonNull SessionConfiguration configuration,
+            String requestUri) {
 
         final String CLIENT_ID_PARAM = "client_id";
-        final String ENDPOINT = "login";
+        final String ENDPOINT = "auth";
         final String HTTPS = "https";
         final String PATH = "oauth/v2/authorize";
         final String REDIRECT_PARAM = "redirect_uri";
@@ -268,6 +270,7 @@ class AuthUtils {
         final String SCOPE_PARAM = "scope";
         final String SHOW_FB_PARAM = "show_fb";
         final String SIGNUP_PARAMS = "signup_params";
+        final String REQUEST_URI_PARAM = "request_uri";
         final String REDIRECT_LOGIN = "{\"redirect_to_login\":true}";
 
 
@@ -283,6 +286,9 @@ class AuthUtils {
                 .appendQueryParameter(SCOPE_PARAM, getScopes(configuration))
                 .appendQueryParameter(SHOW_FB_PARAM, "false")
                 .appendQueryParameter(SIGNUP_PARAMS, AuthUtils.createEncodedParam(REDIRECT_LOGIN));
+        if (!TextUtils.isEmpty(requestUri)) {
+            builder.appendQueryParameter(REQUEST_URI_PARAM, requestUri);
+        }
 
         return builder.build().toString();
     }

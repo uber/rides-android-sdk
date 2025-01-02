@@ -3,8 +3,8 @@ package com.uber.sdk.android.core.auth;
 import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.v4.util.Pair;
+import androidx.annotation.NonNull;
+import androidx.core.util.Pair;
 
 import com.uber.sdk.android.core.R;
 import com.uber.sdk.android.core.utils.Utility;
