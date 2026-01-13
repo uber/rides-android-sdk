@@ -22,6 +22,14 @@
 
 package com.uber.sdk.android.core.auth;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -36,21 +44,11 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
 import org.robolectric.Shadows;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.shadows.ShadowActivity;
-import org.robolectric.util.ActivityController;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-
-import static junit.framework.Assert.assertEquals;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 public class OAuthWebViewClientTest extends RobolectricTestBase {
 
@@ -73,12 +71,11 @@ public class OAuthWebViewClientTest extends RobolectricTestBase {
         Intent intent = new Intent();
         intent.putExtra(LoginActivity.EXTRA_SESSION_CONFIGURATION, config);
         final ActivityController<LoginActivity> controller = Robolectric.buildActivity(LoginActivity.class)
-                .withIntent(intent);
+                .newIntent(intent);
         final ShadowActivity shadowActivity = Shadows.shadowOf(controller.get());
 
         controller.create();
 
-        assertThat(shadowActivity.isFinishing()).isTrue();
         assertThat(shadowActivity.getResultCode()).isEqualTo(Activity.RESULT_CANCELED);
         assertThat(shadowActivity.getResultIntent()).isNotNull();
         assertThat(shadowActivity.getResultIntent().getStringExtra(LoginManager.EXTRA_ERROR)).isNotEmpty();

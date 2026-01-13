@@ -7,7 +7,7 @@
 
 SLUG="uber/rides-android-sdk"
 JDK="oraclejdk8"
-BRANCH="master"
+BRANCH="main"
 
 set -e
 
