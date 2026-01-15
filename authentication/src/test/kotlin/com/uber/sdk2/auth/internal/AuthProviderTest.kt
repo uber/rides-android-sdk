@@ -200,4 +200,85 @@ class AuthProviderTest : RobolectricTestBase() {
     assert(result is AuthResult.Success)
     assert((result as AuthResult.Success).uberToken.authCode == "authCode")
   }
+
+  @Test
+  fun `test authenticate when PAR request fails should continue without metadata`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("authCode")
+    // Mock PAR request to return error response (e.g., 500)
+    val errorResponse: Response<PARResponse> = Response.error(500, mock())
+    whenever(authService.loginParRequest(any(), any(), any(), any())).thenReturn(errorResponse)
+    val prefillInfo = PrefillInfo("email", "firstName", "lastName", "phoneNumber")
+    val authContext =
+      AuthContext(
+        AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        AuthType.AuthCode,
+        prefillInfo,
+      )
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val argumentCaptor = argumentCaptor<Map<String, String>>()
+    val result = authProvider.authenticate()
+    // Verify PAR request was attempted
+    verify(authService).loginParRequest(any(), any(), any(), any())
+    // Verify authentication continued without request_uri
+    verify(ssoLink).execute(argumentCaptor.capture())
+    assert(argumentCaptor.lastValue.containsKey(REQUEST_URI).not())
+    // Verify authentication succeeded
+    assert(result is AuthResult.Success)
+    assert((result as AuthResult.Success).uberToken.authCode == "authCode")
+  }
+
+  @Test
+  fun `test authenticate when PAR request throws exception should continue without metadata`() =
+    runTest {
+      whenever(ssoLink.execute(any())).thenReturn("authCode")
+      // Mock PAR request to throw network exception
+      whenever(authService.loginParRequest(any(), any(), any(), any()))
+        .thenThrow(RuntimeException("Network error"))
+      val prefillInfo = PrefillInfo("email", "firstName", "lastName", "phoneNumber")
+      val authContext =
+        AuthContext(
+          AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+          AuthType.AuthCode,
+          prefillInfo,
+        )
+      val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+      val argumentCaptor = argumentCaptor<Map<String, String>>()
+      val result = authProvider.authenticate()
+      // Verify PAR request was attempted
+      verify(authService).loginParRequest(any(), any(), any(), any())
+      // Verify authentication continued without request_uri
+      verify(ssoLink).execute(argumentCaptor.capture())
+      assert(argumentCaptor.lastValue.containsKey(REQUEST_URI).not())
+      // Verify authentication succeeded
+      assert(result is AuthResult.Success)
+      assert((result as AuthResult.Success).uberToken.authCode == "authCode")
+    }
+
+  @Test
+  fun `test authenticate with PKCE when PAR fails should still include code challenge`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("authCode")
+    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
+    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken")))
+    // Mock PAR request to fail
+    val errorResponse: Response<PARResponse> = Response.error(500, mock())
+    whenever(authService.loginParRequest(any(), any(), any(), any())).thenReturn(errorResponse)
+    val prefillInfo = PrefillInfo("email", "firstName", "lastName", "phoneNumber")
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), prefillInfo)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val argumentCaptor = argumentCaptor<Map<String, String>>()
+    val result = authProvider.authenticate()
+    // Verify PAR request was attempted
+    verify(authService).loginParRequest(any(), any(), any(), any())
+    // Verify authentication continued with code challenge but without request_uri
+    verify(ssoLink).execute(argumentCaptor.capture())
+    assert(argumentCaptor.lastValue.containsKey(REQUEST_URI).not())
+    assert(argumentCaptor.lastValue[CODE_CHALLENGE_PARAM] == "challenge")
+    assert(argumentCaptor.lastValue[CODE_CHALLENGE_METHOD] == CODE_CHALLENGE_METHOD_VAL)
+    // Verify authentication succeeded
+    assert(result is AuthResult.Success)
+    assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")
+  }
 }

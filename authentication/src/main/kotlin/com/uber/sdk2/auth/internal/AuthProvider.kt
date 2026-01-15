@@ -92,16 +92,26 @@ class AuthProvider(
 
   private suspend fun sendPushedAuthorizationRequest(ssoConfig: SsoConfig) =
     authContext.prefillInfo?.let {
-      val response =
-        authService.loginParRequest(
-          ssoConfig.clientId,
-          RESPONSE_TYPE,
-          Base64Util.encodePrefillInfoToString(it),
-          ssoConfig.scope ?: "profile",
-        )
-      val body = response.body()
-      body?.takeIf { response.isSuccessful }
-        ?: throw AuthException.ServerError("Bad response ${response.code()}")
+      try {
+        val response =
+          authService.loginParRequest(
+            ssoConfig.clientId,
+            RESPONSE_TYPE,
+            Base64Util.encodePrefillInfoToString(it),
+            ssoConfig.scope ?: "profile",
+          )
+        val body = response.body()
+        body?.takeIf { response.isSuccessful }
+          ?: run {
+            // PAR request failed, but continue authentication without metadata
+            // User can still login, just without pre-filled information
+            PARResponse("", "")
+          }
+      } catch (e: Exception) {
+        // PAR request failed due to network or other error
+        // Continue authentication without metadata for better user experience
+        PARResponse("", "")
+      }
     } ?: PARResponse("", "")
 
   private fun getQueryParams(parResponse: PARResponse) = buildMap {

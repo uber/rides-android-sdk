@@ -43,13 +43,12 @@ class AuthActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     val authContext = intent.getParcelableExtra<AuthContext>(AUTH_CONTEXT)
-    authContext ?.let {
-      authProvider = AuthProvider(this, authContext)
-    } ?: run {
-      val responseIntent = Intent().apply { putExtra("EXTRA_ERROR", "AUTH_CONTEXT was null") }
-      setResult(RESULT_CANCELED, responseIntent)
-      finish()
-    }
+    authContext?.let { authProvider = AuthProvider(this, authContext) }
+      ?: run {
+        val responseIntent = Intent().apply { putExtra("EXTRA_ERROR", "AUTH_CONTEXT was null") }
+        setResult(RESULT_CANCELED, responseIntent)
+        finish()
+      }
   }
 
   private fun startAuth() {
