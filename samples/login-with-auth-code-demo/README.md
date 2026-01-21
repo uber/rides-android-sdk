@@ -6,7 +6,7 @@ RFC-7636 (https://datatracker.ietf.org/doc/html/rfc7636).
 
 The app link to invoke the first party Uber app is -
 ```
-https://auth.uber.com/oauth/v2/authorize?client_id={client-id}&redirect_uri={redirect-uri}&scope={comma-separated-scopes}&flow_type=DEFAULT&sdk=android&response_type=code&prompt=consent
+https://auth.uber.com/oauth/v2/authorize?client_id={client-id}&redirect_uri={redirect-uri}&scope={space-separated-scopes}&flow_type=DEFAULT&sdk=android&response_type=code&prompt=consent
 ```
 
 Here are the main components of the app -
