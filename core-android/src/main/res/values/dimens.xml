@@ -28,4 +28,5 @@
     <dimen name="ub__small_padding">8dp</dimen>
 
     <dimen name="ub__signin_margin">48dp</dimen>
+    <dimen name="ub__progress_bar_height">32dp</dimen>
 </resources>

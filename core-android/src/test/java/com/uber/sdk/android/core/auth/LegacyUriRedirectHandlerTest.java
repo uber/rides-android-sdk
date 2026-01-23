@@ -216,7 +216,7 @@ public class LegacyUriRedirectHandlerTest extends RobolectricTestBase {
 
     private void assertNoLogs() {
         List<ShadowLog.LogItem> logItemList = ShadowLog.getLogsForTag(UberSdk.UBER_SDK_LOG_TAG);
-        assertThat(ShadowLog.getLogsForTag(UberSdk.UBER_SDK_LOG_TAG)).isNull();
+        assertThat(ShadowLog.getLogsForTag(UberSdk.UBER_SDK_LOG_TAG)).isEmpty();
     }
 
     private void assertDialogShown() {

@@ -47,4 +47,8 @@
         <item name="android:background">@drawable/uber_button_background_selector_white</item>
         <item name="android:drawableLeft">@drawable/uber_logotype_black</item>
     </style>
+
+    <style name="UberButton.Background">
+        <item name="android:background">?android:attr/background</item>
+    </style>
 </resources>
