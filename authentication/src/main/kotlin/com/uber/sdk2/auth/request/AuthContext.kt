@@ -22,6 +22,7 @@
 package com.uber.sdk2.auth.request
 
 import android.os.Parcelable
+import com.uber.sdk2.core.config.UriConfig
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -40,4 +41,5 @@ constructor(
   val authType: AuthType = AuthType.PKCE(),
   val prefillInfo: PrefillInfo? = null,
   val prompt: Prompt? = null,
+  val environment: UriConfig.UberEnvironment = UriConfig.UberEnvironment.PRODUCTION,
 ) : Parcelable

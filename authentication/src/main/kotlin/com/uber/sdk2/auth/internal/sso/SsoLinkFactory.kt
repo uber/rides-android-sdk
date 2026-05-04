@@ -34,6 +34,12 @@ object SsoLinkFactory {
   fun generateSsoLink(activity: AppCompatActivity, authContext: AuthContext): SsoLink {
     val ssoConfig = SsoConfigProvider.getSsoConfig(activity)
     val appDiscovering = AppDiscovery(activity)
-    return UniversalSsoLink(activity, ssoConfig, authContext, appDiscovering)
+    return UniversalSsoLink(
+      activity,
+      ssoConfig,
+      authContext,
+      appDiscovering,
+      authContext.environment,
+    )
   }
 }

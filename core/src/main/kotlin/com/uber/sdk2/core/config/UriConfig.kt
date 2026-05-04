@@ -25,7 +25,6 @@ import android.net.Uri
 import com.uber.sdk2.core.BuildConfig
 import com.uber.sdk2.core.config.UriConfig.EndpointRegion.DEFAULT
 import com.uber.sdk2.core.config.UriConfig.Environment.API
-import com.uber.sdk2.core.config.UriConfig.Environment.AUTH
 import com.uber.sdk2.core.config.UriConfig.Scheme.HTTPS
 import java.util.Locale
 
@@ -52,18 +51,24 @@ object UriConfig {
     DEFAULT("uber.com")
   }
 
+  /** Represents the Uber auth environment to target for OAuth flows. */
+  enum class UberEnvironment(val baseUrl: String) {
+    PRODUCTION("https://auth.uber.com"),
+    SANDBOX("https://sandbox-login.uber.com"),
+  }
+
   fun assembleUri(
     clientId: String,
     responseType: String,
     redirectUri: String,
-    environment: Environment = AUTH,
+    uberEnvironment: UberEnvironment = UberEnvironment.PRODUCTION,
     path: String = UNIVERSAL_AUTHORIZE_PATH,
     scopes: String? = null,
   ): Uri {
     val builder = Uri.Builder()
     builder
       .scheme(HTTPS.scheme)
-      .authority(environment.subDomain + "." + DEFAULT.domain)
+      .authority(Uri.parse(uberEnvironment.baseUrl).host)
       .appendEncodedPath(UNIVERSAL_AUTHORIZE_PATH)
       .appendQueryParameter(CLIENT_ID_PARAM, clientId)
       .appendQueryParameter(RESPONSE_TYPE_PARAM, responseType.lowercase(Locale.US))
@@ -78,7 +83,8 @@ object UriConfig {
   fun getEndpointHost(): String = "${HTTPS.scheme}://${API.subDomain}.${DEFAULT.domain}"
 
   /** Gets the login host used to sign in to the Uber API. */
-  fun getAuthHost(): String = "${HTTPS.scheme}://${AUTH.subDomain}.${DEFAULT.domain}"
+  fun getAuthHost(uberEnvironment: UberEnvironment = UberEnvironment.PRODUCTION): String =
+    uberEnvironment.baseUrl
 
   const val CLIENT_ID_PARAM = "client_id"
   const val UNIVERSAL_AUTHORIZE_PATH = "oauth/v2/universal/authorize"

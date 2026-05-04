@@ -46,6 +46,7 @@ import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_METHOD_VAL
 import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_PARAM
 import com.uber.sdk2.core.config.UriConfig.REQUEST_URI
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -278,6 +279,46 @@ class AuthProviderTest : RobolectricTestBase() {
     assert(argumentCaptor.lastValue[CODE_CHALLENGE_PARAM] == "challenge")
     assert(argumentCaptor.lastValue[CODE_CHALLENGE_METHOD] == CODE_CHALLENGE_METHOD_VAL)
     // Verify authentication succeeded
+    assert(result is AuthResult.Success)
+    assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")
+  }
+
+  @Test
+  fun `test AuthContext defaults to PRODUCTION environment`() {
+    val authContext =
+      AuthContext(
+        authDestination = AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        authType = AuthType.PKCE(),
+      )
+    assertEquals(UriConfig.UberEnvironment.PRODUCTION, authContext.environment)
+  }
+
+  @Test
+  fun `test AuthContext with SANDBOX environment is set correctly`() {
+    val authContext =
+      AuthContext(
+        authDestination = AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        authType = AuthType.PKCE(),
+        environment = UriConfig.UberEnvironment.SANDBOX,
+      )
+    assertEquals(UriConfig.UberEnvironment.SANDBOX, authContext.environment)
+  }
+
+  @Test
+  fun `test authenticate with SANDBOX environment succeeds`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("code")
+    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
+    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken")))
+    val authContext =
+      AuthContext(
+        authDestination = AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        authType = AuthType.PKCE(),
+        environment = UriConfig.UberEnvironment.SANDBOX,
+      )
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val result = authProvider.authenticate()
     assert(result is AuthResult.Success)
     assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")
   }

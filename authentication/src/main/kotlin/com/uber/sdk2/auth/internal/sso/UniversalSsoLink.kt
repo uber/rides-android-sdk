@@ -55,6 +55,7 @@ internal class UniversalSsoLink(
   private val ssoConfig: SsoConfig,
   private val authContext: AuthContext,
   private val appDiscovering: AppDiscovering,
+  private val environment: UriConfig.UberEnvironment = UriConfig.UberEnvironment.PRODUCTION,
   private val customTabsLauncher: CustomTabsLauncher = CustomTabsLauncherImpl(activity),
 ) : SsoLink {
 
@@ -66,6 +67,7 @@ internal class UniversalSsoLink(
           ssoConfig.clientId,
           RESPONSE_TYPE,
           ssoConfig.redirectUri,
+          uberEnvironment = environment,
           scopes = ssoConfig.scope,
         )
         .buildUpon()

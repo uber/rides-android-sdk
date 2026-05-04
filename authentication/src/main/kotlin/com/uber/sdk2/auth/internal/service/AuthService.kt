@@ -57,10 +57,10 @@ interface AuthService {
 
   companion object {
     /** Creates an instance of [AuthService]. */
-    fun create(): AuthService {
+    fun create(baseUrl: String = UriConfig.UberEnvironment.PRODUCTION.baseUrl): AuthService {
       val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
       return Retrofit.Builder()
-        .baseUrl(UriConfig.getAuthHost())
+        .baseUrl(baseUrl)
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
         .create(AuthService::class.java)
