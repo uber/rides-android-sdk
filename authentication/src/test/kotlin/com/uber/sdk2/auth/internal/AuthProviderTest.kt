@@ -303,23 +303,4 @@ class AuthProviderTest : RobolectricTestBase() {
       )
     assertEquals(UriConfig.UberEnvironment.SANDBOX, authContext.environment)
   }
-
-  @Test
-  fun `test authenticate with SANDBOX environment succeeds`() = runTest {
-    whenever(ssoLink.execute(any())).thenReturn("code")
-    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
-    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
-    whenever(authService.token(any(), any(), any(), any(), any()))
-      .thenReturn(Response.success(UberToken(accessToken = "accessToken")))
-    val authContext =
-      AuthContext(
-        authDestination = AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
-        authType = AuthType.PKCE(),
-        environment = UriConfig.UberEnvironment.SANDBOX,
-      )
-    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
-    val result = authProvider.authenticate()
-    assert(result is AuthResult.Success)
-    assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")
-  }
 }

@@ -32,6 +32,9 @@ import kotlinx.parcelize.Parcelize
  * @param authType The type of authentication to perform.
  * @param prefillInfo The prefill information to be used for the authentication. This is optional.
  * @param prompt The [Prompt] to be used for the authentication. This is optional.
+ * @param environment The [UriConfig.UberEnvironment] to target for OAuth flows. Defaults to
+ *   [UriConfig.UberEnvironment.PRODUCTION]. Use [UriConfig.UberEnvironment.SANDBOX] to target
+ *   Uber's sandbox environment for development and testing.
  */
 @Parcelize
 data class AuthContext

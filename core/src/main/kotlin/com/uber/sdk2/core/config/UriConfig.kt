@@ -24,7 +24,6 @@ package com.uber.sdk2.core.config
 import android.net.Uri
 import com.uber.sdk2.core.BuildConfig
 import com.uber.sdk2.core.config.UriConfig.EndpointRegion.DEFAULT
-import com.uber.sdk2.core.config.UriConfig.Environment.API
 import com.uber.sdk2.core.config.UriConfig.Scheme.HTTPS
 import java.util.Locale
 
@@ -33,15 +32,6 @@ object UriConfig {
   enum class Scheme(val scheme: String) {
     HTTP("http"),
     HTTPS("https")
-  }
-
-  /**
-   * An Uber API Environment. See [Sandbox](https://developer.uber.com/v1/sandbox) for more
-   * information.
-   */
-  enum class Environment(val subDomain: String) {
-    API("api"),
-    AUTH("auth"),
   }
 
   enum class EndpointRegion(
@@ -80,7 +70,7 @@ object UriConfig {
   }
 
   /** Gets the endpoint host used to hit the Uber API. */
-  fun getEndpointHost(): String = "${HTTPS.scheme}://${API.subDomain}.${DEFAULT.domain}"
+  fun getEndpointHost(): String = "${HTTPS.scheme}://api.${DEFAULT.domain}"
 
   /** Gets the login host used to sign in to the Uber API. */
   fun getAuthHost(uberEnvironment: UberEnvironment = UberEnvironment.PRODUCTION): String =
