@@ -46,6 +46,7 @@ import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_METHOD_VAL
 import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_PARAM
 import com.uber.sdk2.core.config.UriConfig.REQUEST_URI
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -280,5 +281,26 @@ class AuthProviderTest : RobolectricTestBase() {
     // Verify authentication succeeded
     assert(result is AuthResult.Success)
     assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")
+  }
+
+  @Test
+  fun `test AuthContext defaults to PRODUCTION environment`() {
+    val authContext =
+      AuthContext(
+        authDestination = AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        authType = AuthType.PKCE(),
+      )
+    assertEquals(UriConfig.UberEnvironment.PRODUCTION, authContext.environment)
+  }
+
+  @Test
+  fun `test AuthContext with SANDBOX environment is set correctly`() {
+    val authContext =
+      AuthContext(
+        authDestination = AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        authType = AuthType.PKCE(),
+        environment = UriConfig.UberEnvironment.SANDBOX,
+      )
+    assertEquals(UriConfig.UberEnvironment.SANDBOX, authContext.environment)
   }
 }

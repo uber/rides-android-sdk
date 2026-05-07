@@ -22,6 +22,7 @@
 package com.uber.sdk2.auth.request
 
 import android.os.Parcelable
+import com.uber.sdk2.core.config.UriConfig
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -31,6 +32,9 @@ import kotlinx.parcelize.Parcelize
  * @param authType The type of authentication to perform.
  * @param prefillInfo The prefill information to be used for the authentication. This is optional.
  * @param prompt The [Prompt] to be used for the authentication. This is optional.
+ * @param environment The [UriConfig.UberEnvironment] to target for OAuth flows. Defaults to
+ *   [UriConfig.UberEnvironment.PRODUCTION]. Use [UriConfig.UberEnvironment.SANDBOX] to target
+ *   Uber's sandbox environment for development and testing.
  */
 @Parcelize
 data class AuthContext
@@ -40,4 +44,5 @@ constructor(
   val authType: AuthType = AuthType.PKCE(),
   val prefillInfo: PrefillInfo? = null,
   val prompt: Prompt? = null,
+  val environment: UriConfig.UberEnvironment = UriConfig.UberEnvironment.PRODUCTION,
 ) : Parcelable

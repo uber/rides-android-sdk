@@ -45,7 +45,7 @@ import kotlinx.coroutines.withContext
 class AuthProvider(
   private val activity: AppCompatActivity,
   private val authContext: AuthContext,
-  private val authService: AuthService = AuthService.create(),
+  private val authService: AuthService = AuthService.create(authContext.environment.baseUrl),
   private val codeVerifierGenerator: PKCEGenerator = PKCEGeneratorImpl,
 ) : AuthProviding {
   private val verifier: String = codeVerifierGenerator.generateCodeVerifier()

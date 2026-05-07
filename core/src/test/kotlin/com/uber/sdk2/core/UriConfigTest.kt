@@ -54,12 +54,54 @@ class UriConfigTest : RobolectricTestBase() {
   }
 
   @Test
+  fun `assembleUri with PRODUCTION environment should use auth uber com`() {
+    val uri =
+      UriConfig.assembleUri(
+        "clientId",
+        "code",
+        "redirectUri",
+        uberEnvironment = UriConfig.UberEnvironment.PRODUCTION,
+      )
+    assertEquals("auth.uber.com", uri.authority)
+    assertEquals("https", uri.scheme)
+  }
+
+  @Test
+  fun `assembleUri with SANDBOX environment should use sandbox-login uber com`() {
+    val uri =
+      UriConfig.assembleUri(
+        "clientId",
+        "code",
+        "redirectUri",
+        uberEnvironment = UriConfig.UberEnvironment.SANDBOX,
+      )
+    assertEquals("sandbox-login.uber.com", uri.authority)
+    assertEquals("https", uri.scheme)
+  }
+
+  @Test
   fun `getEndpointHost should return correct host`() {
     assertEquals("https://api.uber.com", UriConfig.getEndpointHost())
   }
 
   @Test
-  fun `getAuthHost should return correct host`() {
+  fun `getAuthHost with default should return production host`() {
     assertEquals("https://auth.uber.com", UriConfig.getAuthHost())
+  }
+
+  @Test
+  fun `getAuthHost with PRODUCTION should return auth uber com`() {
+    assertEquals(
+      "https://auth.uber.com",
+      UriConfig.getAuthHost(UriConfig.UberEnvironment.PRODUCTION),
+    )
+  }
+
+  @Test
+  fun `getAuthHost with SANDBOX should return sandbox-login uber com`() {
+    assertEquals(
+      "https://sandbox-login.uber.com",
+      UriConfig.getAuthHost(UriConfig.UberEnvironment.SANDBOX),
+    )
   }
 }

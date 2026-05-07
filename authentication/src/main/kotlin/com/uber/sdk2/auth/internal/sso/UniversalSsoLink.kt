@@ -66,6 +66,7 @@ internal class UniversalSsoLink(
           ssoConfig.clientId,
           RESPONSE_TYPE,
           ssoConfig.redirectUri,
+          uberEnvironment = authContext.environment,
           scopes = ssoConfig.scope,
         )
         .buildUpon()
