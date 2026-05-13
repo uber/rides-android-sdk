@@ -11,6 +11,12 @@ name: Snapshot publish test
 
 on:
   workflow_dispatch:
+  # TEMPORARY: auto-fire on every push to this branch while iterating.
+  # Strip this `push:` block before merging to main — release-style workflows
+  # should be manually-triggered only.
+  push:
+    branches:
+      - sirker-snapshot-test
 
 jobs:
   snapshot-publish:
