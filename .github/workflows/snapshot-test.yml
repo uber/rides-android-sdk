@@ -1,0 +1,50 @@
+name: Snapshot publish test
+
+# Manually-triggered workflow that publishes the current -SNAPSHOT versions
+# of all 4 modules (authentication, core, core-android, rides-android) to the
+# Sonatype OSSRH snapshots repository. Uses GitHub org-level secrets — no
+# per-repo secret setup required.
+#
+# This workflow does NOT bump versions, create tags, or create a GitHub
+# release. It exists purely to validate that the publish pipeline works
+# end-to-end before we wire up a real release workflow.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  snapshot-publish:
+    name: Build and publish snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: "adopt"
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build, lint, unit tests
+        run: ./gradlew check --stacktrace
+
+      - name: Publish snapshot to Sonatype OSSRH
+        env:
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.OSSRH_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.OSSRH_PASSWORD }}
+        run: ./gradlew publish --stacktrace
+
+      - name: Print snapshot URLs
+        run: |
+          echo "Snapshots should now be available at:"
+          echo "  https://s01.oss.sonatype.org/content/repositories/snapshots/com/uber/sdk2/authentication/2.0.3-SNAPSHOT/"
+          echo "  https://s01.oss.sonatype.org/content/repositories/snapshots/com/uber/sdk2/core/2.0.3-SNAPSHOT/"
+          echo "  https://s01.oss.sonatype.org/content/repositories/snapshots/com/uber/sdk/core-android/0.10.11-SNAPSHOT/"
+          echo "  https://s01.oss.sonatype.org/content/repositories/snapshots/com/uber/sdk/rides-android/0.10.11-SNAPSHOT/"
+          echo ""
+          echo "(If those 404, try the legacy host: https://oss.sonatype.org/content/repositories/snapshots/...)"
