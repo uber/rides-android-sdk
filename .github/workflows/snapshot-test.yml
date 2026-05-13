@@ -36,11 +36,27 @@ jobs:
       - name: Build, lint, unit tests
         run: ./gradlew check --stacktrace
 
+      - name: Diagnose which secrets are populated (no values leaked)
+        env:
+          KEY: ${{ secrets.SIGNING_KEY }}
+          KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+          KEY_PASS: ${{ secrets.SIGNING_PASSWORD }}
+          USER: ${{ secrets.OSSRH_USERNAME }}
+          PASS: ${{ secrets.OSSRH_PASSWORD }}
+        run: |
+          check() { test -n "$2" && echo "$1: SET (len=${#2})" || echo "$1: EMPTY/MISSING"; }
+          check SIGNING_KEY        "$KEY"
+          check SIGNING_KEY_ID     "$KEY_ID"
+          check SIGNING_PASSWORD   "$KEY_PASS"
+          check OSSRH_USERNAME     "$USER"
+          check OSSRH_PASSWORD     "$PASS"
+
       - name: Publish snapshot to Sonatype OSSRH
         env:
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
+          # signingInMemoryKeyId omitted on purpose — vanniktech derives it
+          # from the SIGNING_KEY block when not provided (only needed for subkeys).
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.OSSRH_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.OSSRH_PASSWORD }}
         run: ./gradlew publish --stacktrace
