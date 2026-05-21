@@ -1,3 +1,12 @@
+v2.0.3 - 05/20/2026
+-------------
+
+### Added
+- [PR #268](https://github.com/uber/rides-android-sdk/pull/268) Added `UberEnvironment` enum and `environment` parameter on `AuthContext` to let 3P developers target sandbox vs production environments
+
+### Fixed
+- [PR #265](https://github.com/uber/rides-android-sdk/pull/265) Handle PAR (pushed authorization request) failures gracefully to continue authentication without metadata
+
 v0.10.8 - 09/22/2023
 -------------
 
