@@ -9,7 +9,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/actions/wrapper-validation@v4
       - name: Install JDK
         uses: actions/setup-java@v2
         with:
@@ -34,7 +34,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/actions/wrapper-validation@v4
       - name: Install JDK
         uses: actions/setup-java@v2
         with:
@@ -50,7 +50,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/actions/wrapper-validation@v4
       - name: Install JDK
         uses: actions/setup-java@v2
         with:

@@ -4,7 +4,7 @@
 agp = "8.2.2"
 androidxVersion = "1.7.0"
 uberJava = "0.8.5"
-mavenPublish = "0.27.0"
+mavenPublish = "0.33.0"
 kotlin = "1.9.23"
 junit = "4.13.2"
 runner = "1.0.2"
