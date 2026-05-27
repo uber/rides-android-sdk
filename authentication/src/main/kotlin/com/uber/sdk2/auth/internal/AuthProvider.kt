@@ -117,6 +117,7 @@ class AuthProvider(
   private fun getQueryParams(parResponse: PARResponse) = buildMap {
     parResponse.requestUri.takeIf { it.isNotEmpty() }?.let { put(REQUEST_URI, it) }
     authContext.prompt?.let { put(UriConfig.PROMPT_PARAM, it.value) }
+    authContext.nonce?.let { put(UriConfig.NONCE_PARAM, it) }
     if (authContext.authType is AuthType.PKCE) {
       val codeChallenge = codeVerifierGenerator.generateCodeChallenge(verifier)
       put(CODE_CHALLENGE_PARAM, codeChallenge)

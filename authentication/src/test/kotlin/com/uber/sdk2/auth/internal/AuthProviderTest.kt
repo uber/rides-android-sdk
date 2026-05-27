@@ -203,6 +203,40 @@ class AuthProviderTest : RobolectricTestBase() {
   }
 
   @Test
+  fun `test authenticate when nonce is present should forward it as query param`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("authCode")
+    whenever(authService.loginParRequest(any(), any(), any(), any()))
+      .thenReturn(Response.success(PARResponse("requestUri", "codeVerifier")))
+    val authContext =
+      AuthContext(
+        AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        AuthType.AuthCode,
+        null,
+        nonce = "n-0S6_WzA2Mj",
+      )
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val argumentCaptor = argumentCaptor<Map<String, String>>()
+    val result = authProvider.authenticate()
+    verify(ssoLink).execute(argumentCaptor.capture())
+    assert(argumentCaptor.lastValue[UriConfig.NONCE_PARAM] == "n-0S6_WzA2Mj")
+    assert(result is AuthResult.Success)
+  }
+
+  @Test
+  fun `test authenticate when nonce is absent should not include nonce query param`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("authCode")
+    whenever(authService.loginParRequest(any(), any(), any(), any()))
+      .thenReturn(Response.success(PARResponse("requestUri", "codeVerifier")))
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val argumentCaptor = argumentCaptor<Map<String, String>>()
+    authProvider.authenticate()
+    verify(ssoLink).execute(argumentCaptor.capture())
+    assert(argumentCaptor.lastValue.containsKey(UriConfig.NONCE_PARAM).not())
+  }
+
+  @Test
   fun `test authenticate when PAR request fails should continue without metadata`() = runTest {
     whenever(ssoLink.execute(any())).thenReturn("authCode")
     // Mock PAR request to return error response (e.g., 500)
