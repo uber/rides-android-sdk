@@ -35,6 +35,10 @@ import kotlinx.parcelize.Parcelize
  * @param environment The [UriConfig.UberEnvironment] to target for OAuth flows. Defaults to
  *   [UriConfig.UberEnvironment.PRODUCTION]. Use [UriConfig.UberEnvironment.SANDBOX] to target
  *   Uber's sandbox environment for development and testing.
+ * @param nonce An optional, opaque, single-use string sent on the `/authorize` request. Required by
+ *   the server when `openid` is one of the requested scopes; the same value is returned as the
+ *   `nonce` claim of the issued ID token and must be validated by the caller's backend to mitigate
+ *   token replay. The SDK does not generate, store, or validate the value — it only forwards it.
  */
 @Parcelize
 data class AuthContext
@@ -45,4 +49,5 @@ constructor(
   val prefillInfo: PrefillInfo? = null,
   val prompt: Prompt? = null,
   val environment: UriConfig.UberEnvironment = UriConfig.UberEnvironment.PRODUCTION,
+  val nonce: String? = null,
 ) : Parcelable

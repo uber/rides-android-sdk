@@ -89,4 +89,5 @@ object UriConfig {
   const val CODE_CHALLENGE_METHOD = "code_challenge_method"
   const val CODE_CHALLENGE_METHOD_VAL = "S256"
   const val PROMPT_PARAM = "prompt"
+  const val NONCE_PARAM = "nonce"
 }
