@@ -1,3 +1,12 @@
+v2.0.4 - 06/16/2026
+-------------
+
+### Added
+- [PR #271](https://github.com/uber/rides-android-sdk/pull/271) Forward optional nonce parameter on `/authorize` request
+
+### Fixed
+- [PR #270](https://github.com/uber/rides-android-sdk/pull/270) Fix resource linking issue by adding `ubb__signin_margin`
+
 v2.0.3 - 05/20/2026
 -------------
 
