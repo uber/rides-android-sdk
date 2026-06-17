@@ -432,4 +432,30 @@ class AuthProviderTest : RobolectricTestBase() {
     assert(authProvider.effectiveNonce == authProvider.effectiveNonce)
     assert(authProvider.effectiveNonce.isNotEmpty())
   }
+
+  @Test
+  fun `PKCE flow includes auto-generated nonce in SSO params`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("code")
+    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
+    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken")))
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val captor = argumentCaptor<Map<String, String>>()
+    authProvider.authenticate()
+    verify(ssoLink).execute(captor.capture())
+    assert(captor.lastValue.containsKey(UriConfig.NONCE_PARAM))
+    assert(captor.lastValue[UriConfig.NONCE_PARAM] == authProvider.effectiveNonce)
+  }
+
+  @Test
+  fun `two different AuthProvider instances generate distinct nonces`() {
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
+    val provider1 = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val provider2 = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    assert(provider1.effectiveNonce != provider2.effectiveNonce)
+  }
 }
