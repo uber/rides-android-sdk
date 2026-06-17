@@ -33,4 +33,5 @@ data class UberToken(
   @Json(name = "refresh_token") val refreshToken: String? = null,
   @Json(name = "expires_in") val expiresIn: Long? = null,
   @Json(name = "scope") val scope: String? = null,
+  @Json(name = "id_token") val idToken: String? = null,
 ) : Parcelable

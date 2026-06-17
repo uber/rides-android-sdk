@@ -44,6 +44,7 @@ import com.uber.sdk2.core.config.UriConfig.REQUEST_URI
 import java.security.SecureRandom
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
 class AuthProvider(
   private val activity: AppCompatActivity,
@@ -87,13 +88,32 @@ class AuthProvider(
         authCode,
       )
 
-    return if (tokenResponse.isSuccessful) {
-      tokenResponse.body()?.let { AuthResult.Success(it) }
-        ?: AuthResult.Error(AuthException.ClientError("Token request failed with empty response"))
-    } else {
-      AuthResult.Error(
+    if (!tokenResponse.isSuccessful) {
+      return AuthResult.Error(
         AuthException.ClientError("Token request failed with code: ${tokenResponse.code()}")
       )
+    }
+    val token =
+      tokenResponse.body()
+        ?: return AuthResult.Error(
+          AuthException.ClientError("Token request failed with empty response")
+        )
+    token.idToken?.let { idToken ->
+      val claimNonce = extractNonceFromIdToken(idToken)
+      if (claimNonce != effectiveNonce) {
+        return AuthResult.Error(AuthException.ClientError(AuthException.NONCE_MISMATCH))
+      }
+    }
+    return AuthResult.Success(token)
+  }
+
+  private fun extractNonceFromIdToken(idToken: String): String? {
+    return try {
+      val payload = idToken.split(".").getOrNull(1) ?: return null
+      val decoded = android.util.Base64.decode(payload, android.util.Base64.URL_SAFE)
+      JSONObject(String(decoded)).optString("nonce").takeIf { it.isNotEmpty() }
+    } catch (_: Exception) {
+      null
     }
   }
 
