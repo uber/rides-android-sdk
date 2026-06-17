@@ -21,6 +21,8 @@
  */
 package com.uber.sdk2.auth.internal
 
+import android.util.Base64
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import com.uber.sdk2.auth.AuthProviding
 import com.uber.sdk2.auth.PKCEGenerator
@@ -39,6 +41,7 @@ import com.uber.sdk2.auth.response.UberToken
 import com.uber.sdk2.core.config.UriConfig
 import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_PARAM
 import com.uber.sdk2.core.config.UriConfig.REQUEST_URI
+import java.security.SecureRandom
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -50,6 +53,8 @@ class AuthProvider(
 ) : AuthProviding {
   private val verifier: String = codeVerifierGenerator.generateCodeVerifier()
   private val ssoLink = SsoLinkFactory.generateSsoLink(activity, authContext)
+
+  @VisibleForTesting internal val generatedState: String = generateSecureToken()
 
   override suspend fun authenticate(): AuthResult {
     val ssoConfig = withContext(Dispatchers.IO) { SsoConfigProvider.getSsoConfig(activity) }
@@ -118,6 +123,7 @@ class AuthProvider(
     parResponse.requestUri.takeIf { it.isNotEmpty() }?.let { put(REQUEST_URI, it) }
     authContext.prompt?.let { put(UriConfig.PROMPT_PARAM, it.value) }
     authContext.nonce?.let { put(UriConfig.NONCE_PARAM, it) }
+    put(UriConfig.STATE_PARAM, generatedState)
     if (authContext.authType is AuthType.PKCE) {
       val codeChallenge = codeVerifierGenerator.generateCodeChallenge(verifier)
       put(CODE_CHALLENGE_PARAM, codeChallenge)
@@ -125,7 +131,17 @@ class AuthProvider(
     }
   }
 
-  override fun handleAuthCode(authCode: String) {
+  override fun handleAuthCode(authCode: String, state: String?) {
+    if (state != null && state != generatedState) {
+      ssoLink.handleAuthError(AuthException.ClientError(AuthException.INVALID_STATE))
+      return
+    }
     ssoLink.handleAuthCode(authCode)
+  }
+
+  private fun generateSecureToken(): String {
+    val bytes = ByteArray(32)
+    SecureRandom().nextBytes(bytes)
+    return Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
   }
 }

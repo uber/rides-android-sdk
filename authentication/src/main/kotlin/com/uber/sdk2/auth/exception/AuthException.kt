@@ -47,5 +47,7 @@ sealed class AuthException(override val message: String) : RuntimeException(mess
     internal const val NULL_RESPONSE = "Response not received"
 
     internal const val UNKNOWN = "Unknown error occurred"
+
+    internal const val INVALID_STATE = "State parameter mismatch — possible CSRF attack"
   }
 }
