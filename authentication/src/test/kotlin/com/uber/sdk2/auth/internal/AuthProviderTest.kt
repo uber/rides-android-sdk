@@ -462,14 +462,20 @@ class AuthProviderTest : RobolectricTestBase() {
   // ---- id_token nonce validation tests ----
 
   private fun buildFakeIdToken(nonce: String): String {
-    val header = android.util.Base64.encodeToString(
-      """{"alg":"RS256"}""".toByteArray(),
-      android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING,
-    )
-    val payload = android.util.Base64.encodeToString(
-      """{"sub":"uid123","nonce":"$nonce"}""".toByteArray(),
-      android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING,
-    )
+    val header =
+      android.util.Base64.encodeToString(
+        """{"alg":"RS256"}""".toByteArray(),
+        android.util.Base64.URL_SAFE or
+          android.util.Base64.NO_WRAP or
+          android.util.Base64.NO_PADDING,
+      )
+    val payload =
+      android.util.Base64.encodeToString(
+        """{"sub":"uid123","nonce":"$nonce"}""".toByteArray(),
+        android.util.Base64.URL_SAFE or
+          android.util.Base64.NO_WRAP or
+          android.util.Base64.NO_PADDING,
+      )
     return "$header.$payload.fakesig"
   }
 
