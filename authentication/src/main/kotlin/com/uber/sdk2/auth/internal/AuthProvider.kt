@@ -55,7 +55,8 @@ class AuthProvider(
   private val ssoLink = SsoLinkFactory.generateSsoLink(activity, authContext)
 
   @VisibleForTesting internal val generatedState: String = generateSecureToken()
-  @VisibleForTesting internal val effectiveNonce: String = authContext.nonce ?: generateSecureToken()
+  @VisibleForTesting
+  internal val effectiveNonce: String = authContext.nonce ?: generateSecureToken()
 
   override suspend fun authenticate(): AuthResult {
     val ssoConfig = withContext(Dispatchers.IO) { SsoConfigProvider.getSsoConfig(activity) }
