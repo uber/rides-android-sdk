@@ -50,4 +50,38 @@ constructor(
   val prompt: Prompt? = null,
   val environment: UriConfig.UberEnvironment = UriConfig.UberEnvironment.PRODUCTION,
   val nonce: String? = null,
-) : Parcelable
+) : Parcelable {
+
+  class Builder {
+    private var authDestination: AuthDestination = AuthDestination.CrossAppSso()
+    private var authType: AuthType = AuthType.PKCE()
+    private var prefillInfo: PrefillInfo? = null
+    private var prompt: Prompt? = null
+    private var environment: UriConfig.UberEnvironment = UriConfig.UberEnvironment.PRODUCTION
+    private var nonce: String? = null
+
+    fun authDestination(authDestination: AuthDestination) =
+      apply { this.authDestination = authDestination }
+
+    fun authType(authType: AuthType) = apply { this.authType = authType }
+
+    fun prefillInfo(prefillInfo: PrefillInfo?) = apply { this.prefillInfo = prefillInfo }
+
+    fun prompt(prompt: Prompt?) = apply { this.prompt = prompt }
+
+    fun environment(environment: UriConfig.UberEnvironment) =
+      apply { this.environment = environment }
+
+    fun nonce(nonce: String?) = apply { this.nonce = nonce }
+
+    fun build(): AuthContext =
+      AuthContext(
+        authDestination = authDestination,
+        authType = authType,
+        prefillInfo = prefillInfo,
+        prompt = prompt,
+        environment = environment,
+        nonce = nonce,
+      )
+  }
+}

@@ -388,4 +388,35 @@ class AuthProviderTest : RobolectricTestBase() {
     verify(ssoLink, never()).handleAuthCode(any())
     verify(ssoLink).handleAuthError(argThat { message == AuthException.INVALID_STATE })
   }
+
+  @Test
+  fun `test AuthContext Builder produces equivalent result to constructor`() {
+    val prefillInfo = PrefillInfo("email", "firstName", "lastName", "phoneNumber")
+    val fromConstructor =
+      AuthContext(
+        authDestination = AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        authType = AuthType.AuthCode,
+        prefillInfo = prefillInfo,
+        prompt = Prompt.LOGIN,
+        environment = UriConfig.UberEnvironment.SANDBOX,
+        nonce = "test-nonce",
+      )
+    val fromBuilder =
+      AuthContext.Builder()
+        .authDestination(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)))
+        .authType(AuthType.AuthCode)
+        .prefillInfo(prefillInfo)
+        .prompt(Prompt.LOGIN)
+        .environment(UriConfig.UberEnvironment.SANDBOX)
+        .nonce("test-nonce")
+        .build()
+    assertEquals(fromConstructor, fromBuilder)
+  }
+
+  @Test
+  fun `test AuthContext Builder defaults match constructor defaults`() {
+    val fromConstructor = AuthContext()
+    val fromBuilder = AuthContext.Builder().build()
+    assertEquals(fromConstructor, fromBuilder)
+  }
 }
