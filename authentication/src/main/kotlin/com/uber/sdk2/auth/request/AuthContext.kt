@@ -60,8 +60,9 @@ constructor(
     private var environment: UriConfig.UberEnvironment = UriConfig.UberEnvironment.PRODUCTION
     private var nonce: String? = null
 
-    fun authDestination(authDestination: AuthDestination) =
-      apply { this.authDestination = authDestination }
+    fun authDestination(authDestination: AuthDestination) = apply {
+      this.authDestination = authDestination
+    }
 
     fun authType(authType: AuthType) = apply { this.authType = authType }
 
@@ -69,8 +70,9 @@ constructor(
 
     fun prompt(prompt: Prompt?) = apply { this.prompt = prompt }
 
-    fun environment(environment: UriConfig.UberEnvironment) =
-      apply { this.environment = environment }
+    fun environment(environment: UriConfig.UberEnvironment) = apply {
+      this.environment = environment
+    }
 
     fun nonce(nonce: String?) = apply { this.nonce = nonce }
 
