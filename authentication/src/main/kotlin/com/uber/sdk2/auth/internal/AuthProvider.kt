@@ -132,7 +132,7 @@ class AuthProvider(
   }
 
   override fun handleAuthCode(authCode: String, state: String?) {
-    if (state != null && state != generatedState) {
+    if (state != generatedState) {
       ssoLink.handleAuthError(AuthException.ClientError(AuthException.INVALID_STATE))
       return
     }

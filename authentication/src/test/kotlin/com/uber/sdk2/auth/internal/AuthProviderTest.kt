@@ -380,12 +380,12 @@ class AuthProviderTest : RobolectricTestBase() {
   }
 
   @Test
-  fun `handleAuthCode with null state skips state validation`() {
+  fun `handleAuthCode with null state triggers state mismatch error`() {
     val authContext =
       AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
     val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
     authProvider.handleAuthCode("authCode", null)
-    verify(ssoLink).handleAuthCode("authCode")
-    verify(ssoLink, never()).handleAuthError(any())
+    verify(ssoLink, never()).handleAuthCode(any())
+    verify(ssoLink).handleAuthError(argThat { message == AuthException.INVALID_STATE })
   }
 }
