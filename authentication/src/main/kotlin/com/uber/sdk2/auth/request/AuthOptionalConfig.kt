@@ -38,7 +38,7 @@ import kotlinx.parcelize.Parcelize
  *   token replay.
  */
 @Parcelize
-data class AuthOptions(
+data class AuthOptionalConfig(
   val prefillInfo: PrefillInfo? = null,
   val prompt: Prompt? = null,
   val environment: UriConfig.UberEnvironment = UriConfig.UberEnvironment.PRODUCTION,

@@ -32,7 +32,7 @@ import com.uber.sdk2.auth.internal.sso.SsoLinkFactory
 import com.uber.sdk2.auth.internal.utils.Base64Util
 import com.uber.sdk2.auth.request.AuthContext
 import com.uber.sdk2.auth.request.AuthDestination
-import com.uber.sdk2.auth.request.AuthOptions
+import com.uber.sdk2.auth.request.AuthOptionalConfig
 import com.uber.sdk2.auth.request.AuthType
 import com.uber.sdk2.auth.request.CrossApp
 import com.uber.sdk2.auth.request.PrefillInfo
@@ -391,14 +391,14 @@ class AuthProviderTest : RobolectricTestBase() {
   }
 
   @Test
-  fun `test AuthContext with AuthOptions produces correct properties`() {
+  fun `test AuthContext with AuthOptionalConfig produces correct properties`() {
     val prefillInfo = PrefillInfo("email", "firstName", "lastName", "phoneNumber")
     val authContext =
       AuthContext(
         authDestination = AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
         authType = AuthType.AuthCode,
         options =
-          AuthOptions(
+          AuthOptionalConfig(
             prefillInfo = prefillInfo,
             prompt = Prompt.LOGIN,
             environment = UriConfig.UberEnvironment.SANDBOX,
@@ -413,7 +413,7 @@ class AuthProviderTest : RobolectricTestBase() {
 
   @Suppress("DEPRECATION")
   @Test
-  fun `test deprecated constructor produces same result as AuthOptions constructor`() {
+  fun `test deprecated constructor produces same result as AuthOptionalConfig constructor`() {
     val prefillInfo = PrefillInfo("email", "firstName", "lastName", "phoneNumber")
     val fromDeprecated =
       AuthContext(
@@ -429,7 +429,7 @@ class AuthProviderTest : RobolectricTestBase() {
         authDestination = AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
         authType = AuthType.AuthCode,
         options =
-          AuthOptions(
+          AuthOptionalConfig(
             prefillInfo = prefillInfo,
             prompt = Prompt.LOGIN,
             environment = UriConfig.UberEnvironment.SANDBOX,
@@ -440,9 +440,9 @@ class AuthProviderTest : RobolectricTestBase() {
   }
 
   @Test
-  fun `test AuthContext defaults match AuthOptions defaults`() {
+  fun `test AuthContext defaults match AuthOptionalConfig defaults`() {
     val authContext = AuthContext()
-    assertEquals(AuthOptions(), authContext.options)
+    assertEquals(AuthOptionalConfig(), authContext.options)
     assertEquals(UriConfig.UberEnvironment.PRODUCTION, authContext.environment)
   }
 }

@@ -36,7 +36,7 @@ import kotlinx.parcelize.Parcelize
 data class AuthContext(
   val authDestination: AuthDestination = AuthDestination.CrossAppSso(),
   val authType: AuthType = AuthType.PKCE(),
-  val options: AuthOptions = AuthOptions(),
+  val options: AuthOptionalConfig = AuthOptionalConfig(),
 ) : Parcelable {
 
   val prefillInfo: PrefillInfo?
@@ -52,10 +52,10 @@ data class AuthContext(
     get() = options.nonce
 
   @Deprecated(
-    message = "Use the constructor with AuthOptions instead.",
+    message = "Use the constructor with AuthOptionalConfig instead.",
     replaceWith =
       ReplaceWith(
-        "AuthContext(authDestination, authType, AuthOptions(prefillInfo, prompt, environment, nonce))"
+        "AuthContext(authDestination, authType, AuthOptionalConfig(prefillInfo, prompt, environment, nonce))"
       ),
   )
   @JvmOverloads
@@ -69,6 +69,6 @@ data class AuthContext(
   ) : this(
     authDestination = authDestination,
     authType = authType,
-    options = AuthOptions(prefillInfo, prompt, environment, nonce),
+    options = AuthOptionalConfig(prefillInfo, prompt, environment, nonce),
   )
 }
