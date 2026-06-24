@@ -525,4 +525,23 @@ class AuthProviderTest : RobolectricTestBase() {
     assert(result is AuthResult.Success)
     assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")
   }
+
+  @Test
+  fun `PKCE with malformed id_token returns ID_TOKEN_PARSE_FAILED error`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("code")
+    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
+    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(
+        Response.success(UberToken(accessToken = "accessToken", idToken = "not-a-valid-jwt"))
+      )
+    val result = authProvider.authenticate()
+    assert(result is AuthResult.Error)
+    assert(
+      (result as AuthResult.Error).authException.message == AuthException.ID_TOKEN_PARSE_FAILED
+    )
+  }
 }

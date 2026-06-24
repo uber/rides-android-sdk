@@ -100,6 +100,9 @@ class AuthProvider(
         )
     token.idToken?.let { idToken ->
       val claimNonce = extractNonceFromIdToken(idToken)
+      if (claimNonce == null) {
+        return AuthResult.Error(AuthException.ClientError(AuthException.ID_TOKEN_PARSE_FAILED))
+      }
       if (claimNonce != effectiveNonce) {
         return AuthResult.Error(AuthException.ClientError(AuthException.NONCE_MISMATCH))
       }
@@ -110,7 +113,7 @@ class AuthProvider(
   private fun extractNonceFromIdToken(idToken: String): String? {
     return try {
       val payload = idToken.split(".").getOrNull(1) ?: return null
-      val decoded = android.util.Base64.decode(payload, android.util.Base64.URL_SAFE)
+      val decoded = Base64.decode(payload, Base64.URL_SAFE)
       JSONObject(String(decoded)).optString("nonce").takeIf { it.isNotEmpty() }
     } catch (_: Exception) {
       null
