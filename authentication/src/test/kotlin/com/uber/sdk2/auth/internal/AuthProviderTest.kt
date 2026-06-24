@@ -32,6 +32,7 @@ import com.uber.sdk2.auth.internal.sso.SsoLinkFactory
 import com.uber.sdk2.auth.internal.utils.Base64Util
 import com.uber.sdk2.auth.request.AuthContext
 import com.uber.sdk2.auth.request.AuthDestination
+import com.uber.sdk2.auth.request.AuthOptions
 import com.uber.sdk2.auth.request.AuthType
 import com.uber.sdk2.auth.request.CrossApp
 import com.uber.sdk2.auth.request.PrefillInfo
@@ -390,9 +391,31 @@ class AuthProviderTest : RobolectricTestBase() {
   }
 
   @Test
-  fun `test AuthContext Builder produces equivalent result to constructor`() {
+  fun `test AuthContext with AuthOptions produces correct properties`() {
     val prefillInfo = PrefillInfo("email", "firstName", "lastName", "phoneNumber")
-    val fromConstructor =
+    val authContext =
+      AuthContext(
+        authDestination = AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        authType = AuthType.AuthCode,
+        options =
+          AuthOptions(
+            prefillInfo = prefillInfo,
+            prompt = Prompt.LOGIN,
+            environment = UriConfig.UberEnvironment.SANDBOX,
+            nonce = "test-nonce",
+          ),
+      )
+    assertEquals(prefillInfo, authContext.prefillInfo)
+    assertEquals(Prompt.LOGIN, authContext.prompt)
+    assertEquals(UriConfig.UberEnvironment.SANDBOX, authContext.environment)
+    assertEquals("test-nonce", authContext.nonce)
+  }
+
+  @Suppress("DEPRECATION")
+  @Test
+  fun `test deprecated constructor produces same result as AuthOptions constructor`() {
+    val prefillInfo = PrefillInfo("email", "firstName", "lastName", "phoneNumber")
+    val fromDeprecated =
       AuthContext(
         authDestination = AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
         authType = AuthType.AuthCode,
@@ -401,22 +424,25 @@ class AuthProviderTest : RobolectricTestBase() {
         environment = UriConfig.UberEnvironment.SANDBOX,
         nonce = "test-nonce",
       )
-    val fromBuilder =
-      AuthContext.Builder()
-        .authDestination(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)))
-        .authType(AuthType.AuthCode)
-        .prefillInfo(prefillInfo)
-        .prompt(Prompt.LOGIN)
-        .environment(UriConfig.UberEnvironment.SANDBOX)
-        .nonce("test-nonce")
-        .build()
-    assertEquals(fromConstructor, fromBuilder)
+    val fromOptions =
+      AuthContext(
+        authDestination = AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        authType = AuthType.AuthCode,
+        options =
+          AuthOptions(
+            prefillInfo = prefillInfo,
+            prompt = Prompt.LOGIN,
+            environment = UriConfig.UberEnvironment.SANDBOX,
+            nonce = "test-nonce",
+          ),
+      )
+    assertEquals(fromDeprecated, fromOptions)
   }
 
   @Test
-  fun `test AuthContext Builder defaults match constructor defaults`() {
-    val fromConstructor = AuthContext()
-    val fromBuilder = AuthContext.Builder().build()
-    assertEquals(fromConstructor, fromBuilder)
+  fun `test AuthContext defaults match AuthOptions defaults`() {
+    val authContext = AuthContext()
+    assertEquals(AuthOptions(), authContext.options)
+    assertEquals(UriConfig.UberEnvironment.PRODUCTION, authContext.environment)
   }
 }

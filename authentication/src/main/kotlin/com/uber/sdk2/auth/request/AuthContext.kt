@@ -30,60 +30,45 @@ import kotlinx.parcelize.Parcelize
  *
  * @param authDestination The destination app to authenticate the user.
  * @param authType The type of authentication to perform.
- * @param prefillInfo The prefill information to be used for the authentication. This is optional.
- * @param prompt The [Prompt] to be used for the authentication. This is optional.
- * @param environment The [UriConfig.UberEnvironment] to target for OAuth flows. Defaults to
- *   [UriConfig.UberEnvironment.PRODUCTION]. Use [UriConfig.UberEnvironment.SANDBOX] to target
- *   Uber's sandbox environment for development and testing.
- * @param nonce An optional, opaque, single-use string sent on the `/authorize` request. Required by
- *   the server when `openid` is one of the requested scopes; the same value is returned as the
- *   `nonce` claim of the issued ID token and must be validated by the caller's backend to mitigate
- *   token replay. The SDK does not generate, store, or validate the value — it only forwards it.
+ * @param options Optional configuration for the authentication request.
  */
 @Parcelize
-data class AuthContext
-@JvmOverloads
-constructor(
+data class AuthContext(
   val authDestination: AuthDestination = AuthDestination.CrossAppSso(),
   val authType: AuthType = AuthType.PKCE(),
-  val prefillInfo: PrefillInfo? = null,
-  val prompt: Prompt? = null,
-  val environment: UriConfig.UberEnvironment = UriConfig.UberEnvironment.PRODUCTION,
-  val nonce: String? = null,
+  val options: AuthOptions = AuthOptions(),
 ) : Parcelable {
 
-  class Builder {
-    private var authDestination: AuthDestination = AuthDestination.CrossAppSso()
-    private var authType: AuthType = AuthType.PKCE()
-    private var prefillInfo: PrefillInfo? = null
-    private var prompt: Prompt? = null
-    private var environment: UriConfig.UberEnvironment = UriConfig.UberEnvironment.PRODUCTION
-    private var nonce: String? = null
+  val prefillInfo: PrefillInfo?
+    get() = options.prefillInfo
 
-    fun authDestination(authDestination: AuthDestination) = apply {
-      this.authDestination = authDestination
-    }
+  val prompt: Prompt?
+    get() = options.prompt
 
-    fun authType(authType: AuthType) = apply { this.authType = authType }
+  val environment: UriConfig.UberEnvironment
+    get() = options.environment
 
-    fun prefillInfo(prefillInfo: PrefillInfo?) = apply { this.prefillInfo = prefillInfo }
+  val nonce: String?
+    get() = options.nonce
 
-    fun prompt(prompt: Prompt?) = apply { this.prompt = prompt }
-
-    fun environment(environment: UriConfig.UberEnvironment) = apply {
-      this.environment = environment
-    }
-
-    fun nonce(nonce: String?) = apply { this.nonce = nonce }
-
-    fun build(): AuthContext =
-      AuthContext(
-        authDestination = authDestination,
-        authType = authType,
-        prefillInfo = prefillInfo,
-        prompt = prompt,
-        environment = environment,
-        nonce = nonce,
-      )
-  }
+  @Deprecated(
+    message = "Use the constructor with AuthOptions instead.",
+    replaceWith =
+      ReplaceWith(
+        "AuthContext(authDestination, authType, AuthOptions(prefillInfo, prompt, environment, nonce))"
+      ),
+  )
+  @JvmOverloads
+  constructor(
+    authDestination: AuthDestination = AuthDestination.CrossAppSso(),
+    authType: AuthType = AuthType.PKCE(),
+    prefillInfo: PrefillInfo? = null,
+    prompt: Prompt? = null,
+    environment: UriConfig.UberEnvironment = UriConfig.UberEnvironment.PRODUCTION,
+    nonce: String? = null,
+  ) : this(
+    authDestination = authDestination,
+    authType = authType,
+    options = AuthOptions(prefillInfo, prompt, environment, nonce),
+  )
 }
