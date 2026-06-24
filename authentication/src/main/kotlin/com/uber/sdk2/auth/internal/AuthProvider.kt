@@ -31,6 +31,7 @@ import com.uber.sdk2.auth.internal.service.AuthService
 import com.uber.sdk2.auth.internal.sso.SsoLinkFactory
 import com.uber.sdk2.auth.internal.sso.UniversalSsoLink.Companion.RESPONSE_TYPE
 import com.uber.sdk2.auth.internal.utils.Base64Util
+import com.uber.sdk2.auth.internal.utils.NonceUtil
 import com.uber.sdk2.auth.request.AuthContext
 import com.uber.sdk2.auth.request.AuthType
 import com.uber.sdk2.auth.request.SsoConfig
@@ -86,8 +87,16 @@ class AuthProvider(
       )
 
     return if (tokenResponse.isSuccessful) {
-      tokenResponse.body()?.let { AuthResult.Success(it) }
-        ?: AuthResult.Error(AuthException.ClientError("Token request failed with empty response"))
+      tokenResponse.body()?.let { token ->
+        val sentNonce = authContext.nonce
+        if (sentNonce != null) {
+          val claimNonce = token.idToken?.let { NonceUtil.extractNonceFromIdToken(it) }
+          if (claimNonce != sentNonce) {
+            return AuthResult.Error(AuthException.ClientError(AuthException.INVALID_NONCE))
+          }
+        }
+        AuthResult.Success(token)
+      } ?: AuthResult.Error(AuthException.ClientError("Token request failed with empty response"))
     } else {
       AuthResult.Error(
         AuthException.ClientError("Token request failed with code: ${tokenResponse.code()}")

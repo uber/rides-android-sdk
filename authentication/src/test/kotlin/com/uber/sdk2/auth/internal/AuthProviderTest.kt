@@ -445,4 +445,98 @@ class AuthProviderTest : RobolectricTestBase() {
     assertEquals(AuthOptionalConfig(), authContext.options)
     assertEquals(UriConfig.UberEnvironment.PRODUCTION, authContext.environment)
   }
+
+  // ---- Nonce validation tests ----
+
+  @Test
+  fun `test PKCE with nonce validates id_token nonce claim`() = runTest {
+    val idToken = buildJwt("""{"sub":"user","nonce":"my-nonce"}""")
+    whenever(ssoLink.execute(any())).thenReturn("code")
+    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
+    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken", idToken = idToken)))
+    val authContext =
+      AuthContext(
+        AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        AuthType.PKCE(),
+        nonce = "my-nonce",
+      )
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val result = authProvider.authenticate()
+    assert(result is AuthResult.Success)
+    assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")
+  }
+
+  @Test
+  fun `test PKCE with nonce mismatch returns error`() = runTest {
+    val idToken = buildJwt("""{"sub":"user","nonce":"wrong-nonce"}""")
+    whenever(ssoLink.execute(any())).thenReturn("code")
+    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
+    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken", idToken = idToken)))
+    val authContext =
+      AuthContext(
+        AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        AuthType.PKCE(),
+        nonce = "expected-nonce",
+      )
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val result = authProvider.authenticate()
+    assert(result is AuthResult.Error)
+    assertEquals(AuthException.INVALID_NONCE, (result as AuthResult.Error).authException.message)
+  }
+
+  @Test
+  fun `test PKCE with nonce but missing id_token returns error`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("code")
+    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
+    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken")))
+    val authContext =
+      AuthContext(
+        AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        AuthType.PKCE(),
+        nonce = "my-nonce",
+      )
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val result = authProvider.authenticate()
+    assert(result is AuthResult.Error)
+    assertEquals(AuthException.INVALID_NONCE, (result as AuthResult.Error).authException.message)
+  }
+
+  @Test
+  fun `test PKCE without nonce skips id_token validation`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("code")
+    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
+    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken")))
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val result = authProvider.authenticate()
+    assert(result is AuthResult.Success)
+    assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")
+  }
+
+  private fun buildJwt(payloadJson: String): String {
+    val header =
+      android.util.Base64.encodeToString(
+        """{"alg":"RS256","typ":"JWT"}""".toByteArray(),
+        android.util.Base64.URL_SAFE or
+          android.util.Base64.NO_WRAP or
+          android.util.Base64.NO_PADDING,
+      )
+    val payload =
+      android.util.Base64.encodeToString(
+        payloadJson.toByteArray(),
+        android.util.Base64.URL_SAFE or
+          android.util.Base64.NO_WRAP or
+          android.util.Base64.NO_PADDING,
+      )
+    return "$header.$payload.fake-signature"
+  }
 }
