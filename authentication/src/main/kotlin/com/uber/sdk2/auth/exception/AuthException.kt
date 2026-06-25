@@ -48,6 +48,12 @@ sealed class AuthException(override val message: String) : RuntimeException(mess
 
     internal const val UNKNOWN = "Unknown error occurred"
 
-    internal const val INVALID_STATE = "State parameter mismatch — possible CSRF attack"
+    internal const val INVALID_STATE = "State parameter mismatch possible CSRF attack"
+
+    internal const val NONCE_MISMATCH =
+      "Nonce claim in id_token does not match possible replay attack"
+
+    internal const val ID_TOKEN_PARSE_FAILED =
+      "Failed to parse id_token payload for nonce validation"
   }
 }

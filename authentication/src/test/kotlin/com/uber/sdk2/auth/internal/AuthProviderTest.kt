@@ -381,13 +381,168 @@ class AuthProviderTest : RobolectricTestBase() {
   }
 
   @Test
-  fun `handleAuthCode with null state skips state validation`() {
+  fun `handleAuthCode with null state triggers state mismatch error`() {
     val authContext =
       AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
     val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
     authProvider.handleAuthCode("authCode", null)
-    verify(ssoLink).handleAuthCode("authCode")
-    verify(ssoLink, never()).handleAuthError(any())
+    verify(ssoLink, never()).handleAuthCode(any())
+    verify(ssoLink).handleAuthError(argThat { message == AuthException.INVALID_STATE })
+  }
+
+  // ---- Nonce auto-generation tests ----
+
+  @Test
+  fun `auto-generated nonce is non-empty and forwarded to SSO params`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("authCode")
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val captor = argumentCaptor<Map<String, String>>()
+    authProvider.authenticate()
+    verify(ssoLink).execute(captor.capture())
+    val nonce = captor.lastValue[UriConfig.NONCE_PARAM]
+    assert(!nonce.isNullOrEmpty())
+    assert(nonce == authProvider.effectiveNonce)
+  }
+
+  @Test
+  fun `caller-provided nonce is used verbatim and not replaced`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("authCode")
+    val authContext =
+      AuthContext(
+        AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        AuthType.AuthCode,
+        null,
+        nonce = "caller-nonce-xyz",
+      )
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val captor = argumentCaptor<Map<String, String>>()
+    authProvider.authenticate()
+    verify(ssoLink).execute(captor.capture())
+    assert(captor.lastValue[UriConfig.NONCE_PARAM] == "caller-nonce-xyz")
+    assert(authProvider.effectiveNonce == "caller-nonce-xyz")
+  }
+
+  @Test
+  fun `effectiveNonce is stable — same value on every access`() {
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    assert(authProvider.effectiveNonce == authProvider.effectiveNonce)
+    assert(authProvider.effectiveNonce.isNotEmpty())
+  }
+
+  @Test
+  fun `PKCE flow includes auto-generated nonce in SSO params`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("code")
+    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
+    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken")))
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val captor = argumentCaptor<Map<String, String>>()
+    authProvider.authenticate()
+    verify(ssoLink).execute(captor.capture())
+    assert(captor.lastValue.containsKey(UriConfig.NONCE_PARAM))
+    assert(captor.lastValue[UriConfig.NONCE_PARAM] == authProvider.effectiveNonce)
+  }
+
+  @Test
+  fun `two different AuthProvider instances generate distinct nonces`() {
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
+    val provider1 = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val provider2 = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    assert(provider1.effectiveNonce != provider2.effectiveNonce)
+  }
+
+  // ---- id_token nonce validation tests ----
+
+  private fun buildFakeIdToken(nonce: String): String {
+    val header =
+      android.util.Base64.encodeToString(
+        """{"alg":"RS256"}""".toByteArray(),
+        android.util.Base64.URL_SAFE or
+          android.util.Base64.NO_WRAP or
+          android.util.Base64.NO_PADDING,
+      )
+    val payload =
+      android.util.Base64.encodeToString(
+        """{"sub":"uid123","nonce":"$nonce"}""".toByteArray(),
+        android.util.Base64.URL_SAFE or
+          android.util.Base64.NO_WRAP or
+          android.util.Base64.NO_PADDING,
+      )
+    return "$header.$payload.fakesig"
+  }
+
+  @Test
+  fun `PKCE with matching id_token nonce succeeds`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("code")
+    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
+    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val idToken = buildFakeIdToken(authProvider.effectiveNonce)
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken", idToken = idToken)))
+    val result = authProvider.authenticate()
+    assert(result is AuthResult.Success)
+    assert((result as AuthResult.Success).uberToken.idToken == idToken)
+  }
+
+  @Test
+  fun `PKCE with mismatched id_token nonce returns NONCE_MISMATCH error`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("code")
+    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
+    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val idToken = buildFakeIdToken("wrong-nonce")
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken", idToken = idToken)))
+    val result = authProvider.authenticate()
+    assert(result is AuthResult.Error)
+    assert((result as AuthResult.Error).authException.message == AuthException.NONCE_MISMATCH)
+  }
+
+  @Test
+  fun `PKCE without id_token skips nonce validation and succeeds`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("code")
+    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
+    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken", idToken = null)))
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val result = authProvider.authenticate()
+    assert(result is AuthResult.Success)
+    assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")
+  }
+
+  @Test
+  fun `PKCE with malformed id_token returns ID_TOKEN_PARSE_FAILED error`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("code")
+    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
+    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(
+        Response.success(UberToken(accessToken = "accessToken", idToken = "not-a-valid-jwt"))
+      )
+    val result = authProvider.authenticate()
+    assert(result is AuthResult.Error)
+    assert(
+      (result as AuthResult.Error).authException.message == AuthException.ID_TOKEN_PARSE_FAILED
+    )
   }
 
   // ---- Nonce auto-generation tests ----
