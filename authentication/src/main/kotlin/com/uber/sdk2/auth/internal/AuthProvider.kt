@@ -55,6 +55,8 @@ class AuthProvider(
   private val ssoLink = SsoLinkFactory.generateSsoLink(activity, authContext)
 
   @VisibleForTesting internal val generatedState: String = generateSecureToken()
+  @VisibleForTesting
+  internal val effectiveNonce: String = authContext.nonce ?: generateSecureToken()
 
   override suspend fun authenticate(): AuthResult {
     val ssoConfig = withContext(Dispatchers.IO) { SsoConfigProvider.getSsoConfig(activity) }
@@ -122,7 +124,7 @@ class AuthProvider(
   private fun getQueryParams(parResponse: PARResponse) = buildMap {
     parResponse.requestUri.takeIf { it.isNotEmpty() }?.let { put(REQUEST_URI, it) }
     authContext.prompt?.let { put(UriConfig.PROMPT_PARAM, it.value) }
-    authContext.nonce?.let { put(UriConfig.NONCE_PARAM, it) }
+    put(UriConfig.NONCE_PARAM, effectiveNonce)
     put(UriConfig.STATE_PARAM, generatedState)
     if (authContext.authType is AuthType.PKCE) {
       val codeChallenge = codeVerifierGenerator.generateCodeChallenge(verifier)
