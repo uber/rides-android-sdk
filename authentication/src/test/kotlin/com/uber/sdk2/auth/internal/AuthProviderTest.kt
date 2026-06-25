@@ -45,11 +45,13 @@ import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_METHOD
 import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_METHOD_VAL
 import com.uber.sdk2.core.config.UriConfig.CODE_CHALLENGE_PARAM
 import com.uber.sdk2.core.config.UriConfig.REQUEST_URI
+import com.uber.sdk2.core.config.UriConfig.STATE_PARAM
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -123,7 +125,8 @@ class AuthProviderTest : RobolectricTestBase() {
     assert(argumentCaptor.firstValue[CODE_CHALLENGE_PARAM] == "challenge")
     assert(argumentCaptor.firstValue[CODE_CHALLENGE_METHOD] == CODE_CHALLENGE_METHOD_VAL)
     assert(argumentCaptor.firstValue.containsValue(UriConfig.PROMPT_PARAM).not())
-    assert(argumentCaptor.firstValue.size == 3)
+    // request_uri + code_challenge + code_challenge_method + state = 4
+    assert(argumentCaptor.firstValue.size == 4)
     assert(result is AuthResult.Success)
     assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")
   }
@@ -146,7 +149,8 @@ class AuthProviderTest : RobolectricTestBase() {
     verify(authService, never()).token(any(), any(), any(), any(), any())
     verify(ssoLink).execute(argumentCaptor.capture())
     assert(argumentCaptor.lastValue[REQUEST_URI] == "requestUri")
-    assert(argumentCaptor.lastValue.size == 1)
+    // request_uri + state = 2
+    assert(argumentCaptor.lastValue.size == 2)
     assert(result is AuthResult.Success)
     assert((result as AuthResult.Success).uberToken.authCode == "authCode")
   }
@@ -164,7 +168,9 @@ class AuthProviderTest : RobolectricTestBase() {
       val result = authProvider.authenticate()
       verify(authService, never()).token(any(), any(), any(), any(), any())
       verify(ssoLink).execute(argumentCaptor.capture())
-      assert(argumentCaptor.lastValue.isEmpty())
+      // state is always included; no request_uri when prefillInfo is null
+      assert(argumentCaptor.lastValue.size == 1)
+      assert(argumentCaptor.lastValue.containsKey(STATE_PARAM))
       assert(result is AuthResult.Success)
       assert((result as AuthResult.Success).uberToken.authCode == "authCode")
     }
@@ -336,5 +342,50 @@ class AuthProviderTest : RobolectricTestBase() {
         environment = UriConfig.UberEnvironment.SANDBOX,
       )
     assertEquals(UriConfig.UberEnvironment.SANDBOX, authContext.environment)
+  }
+
+  // ---- State (CSRF) tests ----
+
+  @Test
+  fun `state is always included in query params`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("authCode")
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val captor = argumentCaptor<Map<String, String>>()
+    authProvider.authenticate()
+    verify(ssoLink).execute(captor.capture())
+    assert(captor.lastValue.containsKey(STATE_PARAM))
+    assert(captor.lastValue[STATE_PARAM]!!.isNotEmpty())
+  }
+
+  @Test
+  fun `handleAuthCode with matching state completes normally`() {
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    authProvider.handleAuthCode("authCode", authProvider.generatedState)
+    verify(ssoLink).handleAuthCode("authCode")
+    verify(ssoLink, never()).handleAuthError(any())
+  }
+
+  @Test
+  fun `handleAuthCode with state mismatch signals error on ssoLink`() {
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    authProvider.handleAuthCode("authCode", "tampered-state-value")
+    verify(ssoLink, never()).handleAuthCode(any())
+    verify(ssoLink).handleAuthError(argThat { message == AuthException.INVALID_STATE })
+  }
+
+  @Test
+  fun `handleAuthCode with null state triggers state mismatch error`() {
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    authProvider.handleAuthCode("authCode", null)
+    verify(ssoLink, never()).handleAuthCode(any())
+    verify(ssoLink).handleAuthError(argThat { message == AuthException.INVALID_STATE })
   }
 }

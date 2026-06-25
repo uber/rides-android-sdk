@@ -21,6 +21,8 @@
  */
 package com.uber.sdk2.auth.sso
 
+import com.uber.sdk2.auth.exception.AuthException
+
 /**
  * Represents the Single Sign-On (SSO) link for authentication. This class is used to start the SSO
  * flow
@@ -31,4 +33,7 @@ interface SsoLink {
 
   /** Handles the authentication code received from the SSO flow via deeplink. */
   fun handleAuthCode(authCode: String)
+
+  /** Signals an auth error so the suspended [execute] call completes exceptionally. */
+  fun handleAuthError(exception: AuthException)
 }

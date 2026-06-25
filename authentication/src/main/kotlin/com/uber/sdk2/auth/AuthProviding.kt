@@ -34,5 +34,5 @@ interface AuthProviding {
   suspend fun authenticate(): AuthResult
 
   /** Handles the authentication code received from the SSO flow via deeplink. */
-  fun handleAuthCode(authCode: String)
+  fun handleAuthCode(authCode: String, state: String? = null)
 }

@@ -102,6 +102,10 @@ internal class UniversalSsoLink(
     resultDeferred.complete(authCode)
   }
 
+  override fun handleAuthError(exception: AuthException) {
+    resultDeferred.completeExceptionally(exception)
+  }
+
   private fun handleResult(result: ActivityResult): String {
     return when (result.resultCode) {
       RESULT_OK -> {

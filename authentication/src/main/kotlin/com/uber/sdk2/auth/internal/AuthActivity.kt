@@ -102,8 +102,10 @@ class AuthActivity : AppCompatActivity() {
           }
         ?: ""
 
+    val state = uri.getQueryParameter(KEY_STATE)
+
     if (authCode.isNotEmpty()) {
-      authProvider?.handleAuthCode(authCode)
+      authProvider?.handleAuthCode(authCode, state)
     } else {
       val error =
         uri.getQueryParameter(KEY_ERROR)
@@ -131,6 +133,7 @@ class AuthActivity : AppCompatActivity() {
     private const val AUTH_CONTEXT = "auth_context"
     private const val KEY_AUTHENTICATION_CODE = "code"
     private const val KEY_ERROR = "error"
+    private const val KEY_STATE = "state"
 
     fun newIntent(context: Context, authContext: AuthContext): Intent {
       val intent = Intent(context, AuthActivity::class.java)
