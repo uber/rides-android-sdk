@@ -19,19 +19,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.uber.sdk2.auth.response
+package com.uber.sdk2.auth.internal.utils
 
-import android.os.Parcelable
-import com.squareup.moshi.Json
-import kotlinx.parcelize.Parcelize
+import android.util.Base64
+import org.json.JSONObject
 
-/** Holds the OAuth token that is returned after a successful authentication request. */
-@Parcelize
-data class UberToken(
-  val authCode: String? = null,
-  @Json(name = "access_token") val accessToken: String? = null,
-  @Json(name = "refresh_token") val refreshToken: String? = null,
-  @Json(name = "expires_in") val expiresIn: Long? = null,
-  @Json(name = "scope") val scope: String? = null,
-  @Json(name = "id_token") val idToken: String? = null,
-) : Parcelable
+object NonceUtil {
+
+  /**
+   * Extracts the `nonce` claim from a JWT id_token by decoding the payload segment (without
+   * verifying the signature). Returns null if the token is malformed or contains no nonce claim.
+   */
+  @JvmStatic
+  fun extractNonceFromIdToken(idToken: String): String? {
+    val parts = idToken.split(".")
+    if (parts.size != 3) return null
+    return try {
+      val payload = Base64.decode(parts[1], Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+      val json = JSONObject(String(payload, Charsets.UTF_8))
+      json.optString("nonce", null)
+    } catch (_: Exception) {
+      null
+    }
+  }
+}
