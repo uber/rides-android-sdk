@@ -30,6 +30,7 @@ object NonceUtil {
    * Extracts the `nonce` claim from a JWT id_token by decoding the payload segment (without
    * verifying the signature). Returns null if the token is malformed or contains no nonce claim.
    */
+  @JvmStatic
   fun extractNonceFromIdToken(idToken: String): String? {
     val parts = idToken.split(".")
     if (parts.size != 3) return null
