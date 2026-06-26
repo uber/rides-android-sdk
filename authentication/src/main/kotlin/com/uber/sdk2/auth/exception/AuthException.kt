@@ -49,5 +49,7 @@ sealed class AuthException(override val message: String) : RuntimeException(mess
     internal const val UNKNOWN = "Unknown error occurred"
 
     internal const val INVALID_STATE = "State parameter mismatch possible CSRF attack"
+
+    internal const val INVALID_NONCE = "Nonce claim in id_token does not match the sent nonce"
   }
 }
