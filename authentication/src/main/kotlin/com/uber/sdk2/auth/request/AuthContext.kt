@@ -30,24 +30,45 @@ import kotlinx.parcelize.Parcelize
  *
  * @param authDestination The destination app to authenticate the user.
  * @param authType The type of authentication to perform.
- * @param prefillInfo The prefill information to be used for the authentication. This is optional.
- * @param prompt The [Prompt] to be used for the authentication. This is optional.
- * @param environment The [UriConfig.UberEnvironment] to target for OAuth flows. Defaults to
- *   [UriConfig.UberEnvironment.PRODUCTION]. Use [UriConfig.UberEnvironment.SANDBOX] to target
- *   Uber's sandbox environment for development and testing.
- * @param nonce An optional, opaque, single-use string sent on the `/authorize` request. Required by
- *   the server when `openid` is one of the requested scopes; the same value is returned as the
- *   `nonce` claim of the issued ID token and must be validated by the caller's backend to mitigate
- *   token replay. The SDK does not generate, store, or validate the value — it only forwards it.
+ * @param options Optional configuration for the authentication request.
  */
 @Parcelize
-data class AuthContext
-@JvmOverloads
-constructor(
+data class AuthContext(
   val authDestination: AuthDestination = AuthDestination.CrossAppSso(),
   val authType: AuthType = AuthType.PKCE(),
-  val prefillInfo: PrefillInfo? = null,
-  val prompt: Prompt? = null,
-  val environment: UriConfig.UberEnvironment = UriConfig.UberEnvironment.PRODUCTION,
-  val nonce: String? = null,
-) : Parcelable
+  val options: AuthOptionalConfig = AuthOptionalConfig(),
+) : Parcelable {
+
+  val prefillInfo: PrefillInfo?
+    get() = options.prefillInfo
+
+  val prompt: Prompt?
+    get() = options.prompt
+
+  val environment: UriConfig.UberEnvironment
+    get() = options.environment
+
+  val nonce: String?
+    get() = options.nonce
+
+  @Deprecated(
+    message = "Use the constructor with AuthOptionalConfig instead.",
+    replaceWith =
+      ReplaceWith(
+        "AuthContext(authDestination, authType, AuthOptionalConfig(prefillInfo, prompt, environment, nonce))"
+      ),
+  )
+  @JvmOverloads
+  constructor(
+    authDestination: AuthDestination = AuthDestination.CrossAppSso(),
+    authType: AuthType = AuthType.PKCE(),
+    prefillInfo: PrefillInfo? = null,
+    prompt: Prompt? = null,
+    environment: UriConfig.UberEnvironment = UriConfig.UberEnvironment.PRODUCTION,
+    nonce: String? = null,
+  ) : this(
+    authDestination = authDestination,
+    authType = authType,
+    options = AuthOptionalConfig(prefillInfo, prompt, environment, nonce),
+  )
+}
