@@ -126,8 +126,8 @@ class AuthProviderTest : RobolectricTestBase() {
     assert(argumentCaptor.firstValue[CODE_CHALLENGE_PARAM] == "challenge")
     assert(argumentCaptor.firstValue[CODE_CHALLENGE_METHOD] == CODE_CHALLENGE_METHOD_VAL)
     assert(argumentCaptor.firstValue.containsValue(UriConfig.PROMPT_PARAM).not())
-    // request_uri + code_challenge + code_challenge_method + state = 4
-    assert(argumentCaptor.firstValue.size == 4)
+    // request_uri + code_challenge + code_challenge_method + state + nonce = 5
+    assert(argumentCaptor.firstValue.size == 5)
     assert(result is AuthResult.Success)
     assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")
   }
@@ -150,8 +150,8 @@ class AuthProviderTest : RobolectricTestBase() {
     verify(authService, never()).token(any(), any(), any(), any(), any())
     verify(ssoLink).execute(argumentCaptor.capture())
     assert(argumentCaptor.lastValue[REQUEST_URI] == "requestUri")
-    // request_uri + state = 2
-    assert(argumentCaptor.lastValue.size == 2)
+    // request_uri + state + nonce = 3
+    assert(argumentCaptor.lastValue.size == 3)
     assert(result is AuthResult.Success)
     assert((result as AuthResult.Success).uberToken.authCode == "authCode")
   }
@@ -169,9 +169,10 @@ class AuthProviderTest : RobolectricTestBase() {
       val result = authProvider.authenticate()
       verify(authService, never()).token(any(), any(), any(), any(), any())
       verify(ssoLink).execute(argumentCaptor.capture())
-      // state is always included; no request_uri when prefillInfo is null
-      assert(argumentCaptor.lastValue.size == 1)
+      // state + nonce always included; no request_uri when prefillInfo is null
+      assert(argumentCaptor.lastValue.size == 2)
       assert(argumentCaptor.lastValue.containsKey(STATE_PARAM))
+      assert(argumentCaptor.lastValue.containsKey(UriConfig.NONCE_PARAM))
       assert(result is AuthResult.Success)
       assert((result as AuthResult.Success).uberToken.authCode == "authCode")
     }
@@ -230,7 +231,7 @@ class AuthProviderTest : RobolectricTestBase() {
   }
 
   @Test
-  fun `test authenticate when nonce is absent should not include nonce query param`() = runTest {
+  fun `test authenticate when nonce is absent should auto-generate nonce query param`() = runTest {
     whenever(ssoLink.execute(any())).thenReturn("authCode")
     whenever(authService.loginParRequest(any(), any(), any(), any()))
       .thenReturn(Response.success(PARResponse("requestUri", "codeVerifier")))
@@ -240,7 +241,76 @@ class AuthProviderTest : RobolectricTestBase() {
     val argumentCaptor = argumentCaptor<Map<String, String>>()
     authProvider.authenticate()
     verify(ssoLink).execute(argumentCaptor.capture())
-    assert(argumentCaptor.lastValue.containsKey(UriConfig.NONCE_PARAM).not())
+    assert(argumentCaptor.lastValue.containsKey(UriConfig.NONCE_PARAM))
+  }
+
+  // ---- Nonce auto-generation tests ----
+
+  @Test
+  fun `auto-generated nonce is non-empty and forwarded to SSO params`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("authCode")
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val captor = argumentCaptor<Map<String, String>>()
+    authProvider.authenticate()
+    verify(ssoLink).execute(captor.capture())
+    val nonce = captor.lastValue[UriConfig.NONCE_PARAM]
+    assert(!nonce.isNullOrEmpty())
+    assert(nonce == authProvider.effectiveNonce)
+  }
+
+  @Test
+  fun `caller-provided nonce is used verbatim and not replaced`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("authCode")
+    val authContext =
+      AuthContext(
+        AuthDestination.CrossAppSso(listOf(CrossApp.Rider)),
+        AuthType.AuthCode,
+        null,
+        nonce = "caller-nonce-xyz",
+      )
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val captor = argumentCaptor<Map<String, String>>()
+    authProvider.authenticate()
+    verify(ssoLink).execute(captor.capture())
+    assert(captor.lastValue[UriConfig.NONCE_PARAM] == "caller-nonce-xyz")
+    assert(authProvider.effectiveNonce == "caller-nonce-xyz")
+  }
+
+  @Test
+  fun `effectiveNonce is stable — same value on every access`() {
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    assert(authProvider.effectiveNonce == authProvider.effectiveNonce)
+    assert(authProvider.effectiveNonce.isNotEmpty())
+  }
+
+  @Test
+  fun `PKCE flow includes auto-generated nonce in SSO params`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("code")
+    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
+    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken")))
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val captor = argumentCaptor<Map<String, String>>()
+    authProvider.authenticate()
+    verify(ssoLink).execute(captor.capture())
+    assert(captor.lastValue.containsKey(UriConfig.NONCE_PARAM))
+    assert(captor.lastValue[UriConfig.NONCE_PARAM] == authProvider.effectiveNonce)
+  }
+
+  @Test
+  fun `two different AuthProvider instances generate distinct nonces`() {
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.AuthCode, null)
+    val provider1 = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val provider2 = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    assert(provider1.effectiveNonce != provider2.effectiveNonce)
   }
 
   @Test
