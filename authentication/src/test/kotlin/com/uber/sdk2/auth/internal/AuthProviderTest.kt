@@ -84,11 +84,12 @@ class AuthProviderTest : RobolectricTestBase() {
       .thenReturn(Response.success(PARResponse("requestUri", "codeVerifier")))
     whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
     whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
-    whenever(authService.token(any(), any(), any(), any(), any()))
-      .thenReturn(Response.success(UberToken(accessToken = "accessToken")))
     val authContext =
       AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), null)
     val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val idToken = buildJwt("""{"sub":"user","nonce":"${authProvider.effectiveNonce}"}""")
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken", idToken = idToken)))
     val result = authProvider.authenticate()
     verify(ssoLink).execute(any())
     verify(authService, never()).loginParRequest(any(), any(), any(), any())
@@ -104,12 +105,13 @@ class AuthProviderTest : RobolectricTestBase() {
       .thenReturn(Response.success(PARResponse("requestUri", "codeVerifier")))
     whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
     whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
-    whenever(authService.token(any(), any(), any(), any(), any()))
-      .thenReturn(Response.success(UberToken(accessToken = "accessToken")))
     val prefillInfo = PrefillInfo("email", "firstName", "lastName", "phoneNumber")
     val authContext =
       AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), prefillInfo)
     val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val idToken = buildJwt("""{"sub":"user","nonce":"${authProvider.effectiveNonce}"}""")
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken", idToken = idToken)))
     val argumentCaptor = argumentCaptor<Map<String, String>>()
     val result = authProvider.authenticate()
     verify(authService)
@@ -371,8 +373,6 @@ class AuthProviderTest : RobolectricTestBase() {
     whenever(ssoLink.execute(any())).thenReturn("authCode")
     whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
     whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
-    whenever(authService.token(any(), any(), any(), any(), any()))
-      .thenReturn(Response.success(UberToken(accessToken = "accessToken")))
     // Mock PAR request to fail
     val errorResponse: Response<PARResponse> = Response.error(500, mock())
     whenever(authService.loginParRequest(any(), any(), any(), any())).thenReturn(errorResponse)
@@ -380,6 +380,9 @@ class AuthProviderTest : RobolectricTestBase() {
     val authContext =
       AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), prefillInfo)
     val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val idToken = buildJwt("""{"sub":"user","nonce":"${authProvider.effectiveNonce}"}""")
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken", idToken = idToken)))
     val argumentCaptor = argumentCaptor<Map<String, String>>()
     val result = authProvider.authenticate()
     // Verify PAR request was attempted
@@ -578,7 +581,7 @@ class AuthProviderTest : RobolectricTestBase() {
   }
 
   @Test
-  fun `test PKCE without nonce skips id_token validation`() = runTest {
+  fun `test PKCE always validates id_token nonce even when caller provides no nonce`() = runTest {
     whenever(ssoLink.execute(any())).thenReturn("code")
     whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
     whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
@@ -587,6 +590,23 @@ class AuthProviderTest : RobolectricTestBase() {
     val authContext =
       AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), null)
     val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val result = authProvider.authenticate()
+    // Auto-generated nonce always set; missing id_token cannot satisfy validation
+    assert(result is AuthResult.Error)
+    assertEquals(AuthException.INVALID_NONCE, (result as AuthResult.Error).authException.message)
+  }
+
+  @Test
+  fun `test PKCE with auto-generated nonce succeeds when id_token nonce matches`() = runTest {
+    whenever(ssoLink.execute(any())).thenReturn("code")
+    whenever(codeVerifierGenerator.generateCodeVerifier()).thenReturn("verifier")
+    whenever(codeVerifierGenerator.generateCodeChallenge("verifier")).thenReturn("challenge")
+    val authContext =
+      AuthContext(AuthDestination.CrossAppSso(listOf(CrossApp.Rider)), AuthType.PKCE(), null)
+    val authProvider = AuthProvider(activity, authContext, authService, codeVerifierGenerator)
+    val idToken = buildJwt("""{"sub":"user","nonce":"${authProvider.effectiveNonce}"}""")
+    whenever(authService.token(any(), any(), any(), any(), any()))
+      .thenReturn(Response.success(UberToken(accessToken = "accessToken", idToken = idToken)))
     val result = authProvider.authenticate()
     assert(result is AuthResult.Success)
     assert((result as AuthResult.Success).uberToken.accessToken == "accessToken")

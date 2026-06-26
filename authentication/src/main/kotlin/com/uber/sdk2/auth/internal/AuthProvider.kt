@@ -91,12 +91,9 @@ class AuthProvider(
 
     return if (tokenResponse.isSuccessful) {
       tokenResponse.body()?.let { token ->
-        val sentNonce = authContext.nonce
-        if (sentNonce != null) {
-          val claimNonce = token.idToken?.let { NonceUtil.extractNonceFromIdToken(it) }
-          if (claimNonce != sentNonce) {
-            return AuthResult.Error(AuthException.ClientError(AuthException.INVALID_NONCE))
-          }
+        val claimNonce = token.idToken?.let { NonceUtil.extractNonceFromIdToken(it) }
+        if (claimNonce != effectiveNonce) {
+          return AuthResult.Error(AuthException.ClientError(AuthException.INVALID_NONCE))
         }
         AuthResult.Success(token)
       } ?: AuthResult.Error(AuthException.ClientError("Token request failed with empty response"))
