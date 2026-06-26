@@ -22,7 +22,7 @@
 
 package com.uber.sdk.android.rides;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.google.common.io.Files;

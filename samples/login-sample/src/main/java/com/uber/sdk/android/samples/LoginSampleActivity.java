@@ -27,8 +27,8 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,6 +45,7 @@ import com.uber.sdk.android.rides.samples.BuildConfig;
 import com.uber.sdk.android.rides.samples.R;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenStorage;
+import com.uber.sdk.core.auth.ProfileHint;
 import com.uber.sdk.core.auth.Scope;
 import com.uber.sdk.core.client.Session;
 import com.uber.sdk.core.client.SessionConfiguration;
@@ -84,17 +85,23 @@ public class LoginSampleActivity extends AppCompatActivity {
     private Button customButton;
     private AccessTokenStorage accessTokenStorage;
     private LoginManager loginManager;
-    private SessionConfiguration configuration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
 
-        configuration = new SessionConfiguration.Builder()
+        SessionConfiguration configuration = new SessionConfiguration.Builder()
                 .setClientId(CLIENT_ID)
                 .setRedirectUri(REDIRECT_URI)
                 .setScopes(Arrays.asList(Scope.PROFILE, Scope.RIDE_WIDGETS))
+                .setProfileHint(new ProfileHint
+                        .Builder()
+                        .email("john@doe.com")
+                        .firstName("John")
+                        .lastName("Doe")
+                        .phone("1234567890")
+                        .build())
                 .build();
 
         validateConfiguration(configuration);
@@ -140,6 +147,7 @@ public class LoginSampleActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         Log.i(LOG_TAG, String.format("onActivityResult requestCode:[%s] resultCode [%s]",
                 requestCode, resultCode));
 

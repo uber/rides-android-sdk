@@ -24,7 +24,7 @@ package com.uber.sdk.android.rides;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.uber.sdk.android.core.utils.AppProtocol;
 import com.uber.sdk.android.core.utils.CustomTabsHelper;

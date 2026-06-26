@@ -1,4 +1,4 @@
-# Uber Rides Android SDK (beta) [![Build Status](https://travis-ci.org/uber/rides-android-sdk.svg?branch=master)](https://travis-ci.org/uber/rides-android-sdk)
+# Uber Rides Android SDK (beta) ![Build Status](https://github.com/uber/rides-android-sdk/workflows/CI/badge.svg)
 
 Official Android SDK to support:
  - Ride Request Button
@@ -39,11 +39,11 @@ SessionConfiguration config = new SessionConfiguration.Builder()
     .build();
 ```
 ## Ride Request Deeplink
-The Ride Request Deeplink provides an easy to use method to provide ride functionality against 
+The Ride Request Deeplink provides an easy to use method to provide ride functionality against
 the install Uber app or the mobile web experience.
 
 
-Without any extra configuration, the `RideRequestDeeplink` will deeplink to the Uber app. We 
+Without any extra configuration, the `RideRequestDeeplink` will deeplink to the Uber app. We
 suggest passing additional parameters to make the Uber experience even more seamless for your users. For example, dropoff location parameters can be used to automatically pass the user’s destination information over to the driver:
 
 ```java
@@ -68,9 +68,9 @@ RideRequestDeeplink deeplink = new RideRequestDeeplink.Builder(context)
 ```
 
 ### Deeplink Fallbacks
-The Ride Request Deeplink will prefer to use deferred deeplinking by default, where the user is 
-taken to the Play Store to download the app, and then continue the deeplink behavior in the app 
-after installation. However, an alternate fallback may be used to prefer the mobile web 
+The Ride Request Deeplink will prefer to use deferred deeplinking by default, where the user is
+taken to the Play Store to download the app, and then continue the deeplink behavior in the app
+after installation. However, an alternate fallback may be used to prefer the mobile web
 experience instead.
 
 To prefer mobile web over an app installation, set the fallback on the builder:
@@ -128,7 +128,7 @@ For a button with a white background and black text:
       uber:ub__style="white"/>
 ```
 
-To specify the mobile web deeplink fallback over app installation when using the 
+To specify the mobile web deeplink fallback over app installation when using the
 `RideRequestButton`:
 
 ```java
@@ -183,174 +183,8 @@ requestButton.loadRideInformation();
 If you want to provide a more custom experience in your app, there are a few classes to familiarize yourself with. Read the sections below and you'll be requesting rides in no time!
 
 ### Login
-The Uber SDK allows for three login flows: Implicit Grant (local web view), Single Sign On with the Uber App, and Authorization Code Grant (requires a backend to catch the local web view redirect and complete OAuth).
-
-
-#### Dashboard configuration
-To use SDK features, two configuration details must be set on the Uber Developer Dashboard.
-
- 1. Sign into to the [developer dashboard](https://developer.uber.com/dashboard)
-
- 1. Register a redirect URI to be used to communication authentication results. The default used 
- by the SDK is in the format of `applicationId.uberauth://redirect`. ex: `com.example
- .uberauth://redirect`. To configure the SDK to use a different redirect URI, see the steps below. 
- 
- 1. To use Single Sign On you must register a hash of your application's signing certificate in the 
- Application Signature section of the settings page of your application.
-
-To get the hash of your signing certificate, run this command with the alias of your key and path to your keystore:
-
-```sh
-keytool -exportcert -alias <your_key_alias> -keystore <your_keystore_path> | openssl sha1 -binary | openssl base64
-```
-
-
-Before you can request any rides, you need to get an `AccessToken`. The Uber Rides SDK provides the `LoginManager` class for this task. Simply create a new instance and use its login method to present the login screen to the user.
-
-```java
-LoginCallback loginCallback = new LoginCallback() {
-            @Override
-            public void onLoginCancel() {
-                // User canceled login
-            }
-
-            @Override
-            public void onLoginError(@NonNull AuthenticationError error) {
-                // Error occurred during login
-            }
-
-            @Override
-            public void onLoginSuccess(@NonNull AccessToken accessToken) {
-                // Successful login!  The AccessToken will have already been saved.
-            }
-        }
-AccessTokenStorage accessTokenStorage = new AccessTokenManager(context);
-LoginManager loginManager = new LoginManager(accessTokenStorage, loginCallback);
-loginManager.login(activity);
-```
-
-The only required scope for the Ride Request Widget is the `RIDE_WIDGETS` scope, but you can pass in any other (general) scopes that you'd like access to. The call to `loginWithScopes()` presents an activity with a WebView where the user logs into their Uber account, or creates an account, and authorizes the requested scopes. In your `Activity#onActivityResult()`, call `LoginManager#onActivityResult()`:
-
-```java
-@Override
-protected void onActivityResult(int requestCode, int resultCode, Intent data){
-    super.onActivityResult(requestCode, resultCode, data);
-    loginManager.onActivityResult(activity, requestCode, resultCode, data);
-}
-```
-
-#### Authentication Migration and setup (Version 0.8 and above)
-With Version 0.8 and above of the SDK, the redirect URI is more strongly enforced to meet IETF
-standards [IETF RFC](https://tools.ietf.org/html/draft-ietf-oauth-native-apps-12).
-
-The SDK will automatically created a redirect URI to be used in the oauth callbacks with
-the format "applicationId.uberauth://redirect", ex "com.example.app.uberauth://redirect". **This URI must be registered in 
-the [developer dashboard](https://developer.uber.com/dashboard)**
-
-If this differs from the previous specified redirect URI configured in the SessionConfiguration, 
-there are a few options.
-
- 1. Change the redirect URI to match the new scheme in the configuration of the Session. If this 
- is left out entirely, the default will be used. 
-
-```java
-SessionConfiguration config = new SessionConfiguration.Builder()
-    .setRedirectUri("com.example.app.uberauth://redirect")
-    .build();
-```
-
- 2. Override the LoginRedirectReceiverActivity in your main manifest and provide a custom intent
-filter. Register this custom URI in the developer dashboard for your application.
-
-```xml
-<activity
-        android:name="com.uber.sdk.android.core.auth.LoginRedirectReceiverActivity"
-        tools:node="replace">
-    <intent-filter>
-        <action android:name="android.intent.action.VIEW"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-        <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="com.example.app"
-                android:host="redirect" />
-    </intent-filter>
-</activity>
-```
-
-3. If using [Authorization Code Flow](https://developer.uber.com/docs/riders/guides/authentication/user-access-token), you will need to configure your server to redirect to 
-   the Mobile Application with an access token either via the generated URI or a custom URI as defined in steps 1 and 2.
-
-The Session should be configured to redirect to the server to do a code exchange and the login 
-manager should indicate the SDK is operating in the Authorization Code Flow.
-
-```java
-SessionConfiguration config = new SessionConfiguration.Builder()
-    .setRedirectUri("https://example.com/redirect") //Where this is your configured server
-    .build();
-
-loginManager.setAuthCodeFlowEnabled(true);
-loginManager.login(this);
-
-```
- Once the code is exchanged, the server should redirect to a URI in the standard OAUTH format of 
- `com.example.app.uberauth://redirect#access_token=ACCESS_TOKEN&token_type=Bearer&expires_in=TTL&scope=SCOPES&refresh_token=REFRESH_TOKEN`
-  for the SDK to receive the access token and continue operation.``
-
-
-##### Authorization Code Flow
-
-
-The default behavior of calling   `LoginManager.login(activity)` is to activate Single Sign On, 
-and if SSO is unavailable, fallback to Implicit Grant if privileged scopes are not requested, 
-otherwise redirect to the Play Store. If you require Authorization Code Grant, set `LoginManager.setAuthCodeFlowEnabled(true)` 
-to use the Authorization Code Flow as the fallback mechanism instead of Implicit Grant or redirecting to the Play Store (regardless of scope).
-Implicit Grant will allow access to all non-privileged scopes (and will not grant a refresh token), whereas the other options grant access to privileged scopes. [Read more about scopes](https://developer.uber.com/docs/scopes).
-
-##### SSO Product Priority
-
-The default behavior of the SSO Deeplink is to open the original Uber app.  It is now possible to SSO with the Uber Eats app.  To enable SSO with Uber Eats use the LoginManager's `setProductFlowPriority` method.
-You must specify all apps that you want to SSO with.  Only the specified apps will be used.
-
-```java
-List<SupportedAppType> appPriorityList = new ArrayList();
-appPriorityList.add(SupportedAppType.UBER_EATS);
-appPriorityList.add(SupportedAppType.UBER);
-
-loginManager.setProductFlowPriority(appPriorityList).login(this);
-```
-
-
-#### Login Errors
-Upon a failure to login, an `AuthenticationError` will be provided in the `LoginCallback`. This enum provides a series of values that provide more information on the type of error.
-
-### Custom Authorization / TokenManager
-
-If your app allows users to authorize via your own customized logic, you will need to create an `AccessToken` manually and save it in shared preferences using the `AccessTokenManager`.
-
-```java
-AccessTokenStorage accessTokenStorage = new AccessTokenManager(context);
-Date expirationTime = 2592000;
-List<Scope> scopes = Arrays.asList(Scope.RIDE_WIDGETS);
-String token = "obtainedAccessToken";
-String refreshToken = "obtainedRefreshToken";
-String tokenType = "obtainedTokenType";
-AccessToken accessToken = new AccessToken(expirationTime, scopes, token, refreshToken, tokenType);
-accessTokenStorage.setAccessToken(accessToken);
-```
-The `AccessTokenManager` can also be used to get an access token or delete it.
-
-```java
-accessTokenManger.getAccessToken();
-accessTokenStorage.removeAccessToken();
-```
-
-To keep track of multiple users, create an AccessTokenManager for each AccessToken.
-
-```java
-AccessTokenManager user1Manager = new AccessTokenManager(activity, "user1");
-AccessTokenManager user2Manager = new AccessTokenManager(activity, "user2");
-user1Manager.setAccessToken(accessToken);
-user2Manager.setAccessToken(accessToken2);
-```
+[Integration guide](https://github.com/uber/rides-android-sdk/tree/main/authentication) - Integrating a new client using Uber android authentication sdk\
+[Migration guide](https://github.com/uber/rides-android-sdk/blob/2.x/MIGRATION.md) - Upgrading an old integration (using version 0.10.X and below) to the new authentication sdk (version 2.X and above)
 
 ## Making an API Request
 The Android Uber SDK uses a dependency on the Java Uber SDK for API requests.
@@ -430,9 +264,9 @@ For full documentation about our API, visit our Developer Site.
 
 ## Contributing
 
-We :heart: contributions. Found a bug or looking for a new feature? Open an issue and we'll 
-respond as fast as we can. Or, better yet, implement it yourself and open a pull request! We ask 
-that you open an issue to discuss feature development prior to undertaking the work and that you 
+We :heart: contributions. Found a bug or looking for a new feature? Open an issue and we'll
+respond as fast as we can. Or, better yet, implement it yourself and open a pull request! We ask
+that you open an issue to discuss feature development prior to undertaking the work and that you
 include tests to show the bug was fixed or the feature works as expected.
 
 ## MIT Licensed

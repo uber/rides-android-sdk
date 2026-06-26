@@ -41,7 +41,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.res.builder.RobolectricPackageManager;
+import org.robolectric.shadows.ShadowPackageManager;
 import org.robolectric.shadows.ShadowResolveInfo;
 
 import java.util.Arrays;
@@ -56,15 +56,16 @@ import static com.uber.sdk.android.core.auth.SsoDeeplink.MIN_UBER_EATS_VERSION_S
 import static com.uber.sdk.android.core.auth.SsoDeeplink.MIN_UBER_RIDES_VERSION_REDIRECT_FLOW_SUPPORTED;
 import static com.uber.sdk.android.core.auth.SsoDeeplink.MIN_UBER_RIDES_VERSION_SUPPORTED;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
 public class SsoDeeplinkTest extends RobolectricTestBase {
 
@@ -82,7 +83,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
 
     Activity activity;
 
-    RobolectricPackageManager packageManager;
+    protected ShadowPackageManager packageManager;
 
     ResolveInfo resolveInfo;
 
@@ -97,7 +98,7 @@ public class SsoDeeplinkTest extends RobolectricTestBase {
         redirectIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(REDIRECT_URI));
         redirectIntent.setPackage(activity.getPackageName());
         resolveInfo = ShadowResolveInfo.newResolveInfo("", activity.getPackageName());
-        packageManager = RuntimeEnvironment.getRobolectricPackageManager();
+        packageManager = shadowOf(RuntimeEnvironment.application.getPackageManager());
         packageManager.addResolveInfoForIntent(redirectIntent, resolveInfo);
 
         ssoDeeplink = new SsoDeeplink.Builder(activity)

@@ -22,7 +22,7 @@
 
 package com.uber.sdk.android.rides.internal;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.uber.sdk.android.rides.RideRequestButtonCallback;
 import com.uber.sdk.rides.client.model.PriceEstimate;
