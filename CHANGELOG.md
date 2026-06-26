@@ -1,3 +1,15 @@
+v2.0.5 - 06/26/2026
+-------------
+
+### Added
+- [PR #272](https://github.com/uber/rides-android-sdk/pull/272) SDK always generates and validates `state` parameter to protect against CSRF attacks
+- [PR #275](https://github.com/uber/rides-android-sdk/pull/275) Introduce `AuthOptionalConfig` data class grouping optional auth parameters; old 6-parameter `AuthContext` constructor deprecated with `ReplaceWith`
+- [PR #279](https://github.com/uber/rides-android-sdk/pull/279) SDK auto-generates `nonce` when caller does not supply one
+- [PR #277](https://github.com/uber/rides-android-sdk/pull/277) Add `NonceUtil.extractNonceFromIdToken` for extracting nonce claim from JWT `id_token` payload
+
+### Fixed
+- [PR #278](https://github.com/uber/rides-android-sdk/pull/278) PKCE flow always validates the `nonce` claim in the `id_token` response; mismatch returns `INVALID_NONCE` error
+
 v2.0.4 - 06/16/2026
 -------------
 
